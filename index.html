@@ -327,12 +327,6 @@ onAuthStateChanged(auth,async user=>{
 function showSaveIndicator(msg){const el=document.getElementById('saveIndicator');el.textContent=msg;setTimeout(()=>{if(el.textContent===msg)el.textContent='';},2000);}
 function scheduleSave(key,data){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveData(key,data),1000);}
 
-async function saveData(key,data){
-  if(!currentUser)return;
-  try{await setDoc(doc(db,'users',currentUser.uid,key,'data'),{value:JSON.stringify(data),updatedAt:Date.now()});showSaveIndicator('已儲存');}
-  catch(e){console.error(e);showSaveIndicator('儲存失敗');}
-}
-
 async function loadUserData(){
   if(!currentUser)return;
   try{
