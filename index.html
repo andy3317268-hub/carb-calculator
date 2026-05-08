@@ -347,6 +347,7 @@
           <div class="empty-track">請先在「營養計算」頁面完成設定</div>
         </div>
         <div id="tpl-main" style="display:none;">
+          <div id="tpl-summary"></div>
           <div class="card">
             <div class="sec-label">選擇模板類型</div>
             <div class="day-type-grid">
@@ -365,6 +366,7 @@
           <div class="empty-track">請先在「營養計算」頁面完成設定</div>
         </div>
         <div id="diary-main" style="display:none;">
+          <div id="diary-summary"></div>
           <div class="week-setup">
             <div class="sec-label">設定高碳日（點選切換，沿用上週設定）</div>
             <div class="weekday-grid" id="weekdayGrid"></div>
@@ -453,6 +455,13 @@ function updateResultCards(){
 }
 function toggleCalc(){calcCollapsed=!calcCollapsed;document.getElementById('calcBody').style.display=calcCollapsed?'none':'block';document.getElementById('collapseBtn').innerHTML=calcCollapsed?'展開 <i class="ti ti-chevron-down" style="font-size:13px;vertical-align:-1px"></i>':'收合 <i class="ti ti-chevron-up" style="font-size:13px;vertical-align:-1px"></i>';document.getElementById('collapsedSummary').style.display=(calcCollapsed&&calcResult)?'block':'none';}
 
+// ── Shared: result summary card HTML ─────────────────
+function resultSummaryHTML(){
+  if(!calcResult)return'';
+  const h=calcResult.high,l=calcResult.low,m=h.meals;
+  return'<div class="result-cards" style="margin-bottom:1rem;"><div class="result-day-card"><div class="result-day-card-title high">高碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span>'+h.carb+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+h.prot+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+h.fat+'g</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span>'+Math.round(h.carb/m)+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+Math.round(h.prot/m)+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+Math.round(h.fat/m)+'g</span></div></div><div class="result-day-card"><div class="result-day-card-title low">低碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span>'+l.carb+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+l.prot+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+l.fat+'g</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span>'+Math.round(l.carb/m)+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+Math.round(l.prot/m)+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+Math.round(l.fat/m)+'g</span></div></div></div>';
+}
+
 // ── Section 2: Template ───────────────────────────────
 function renderTemplate(){
   if(!calcResult){document.getElementById('tpl-no-calc').style.display='block';document.getElementById('tpl-main').style.display='none';return;}
@@ -460,6 +469,8 @@ function renderTemplate(){
   if(!tplType)tplType='high';
   document.getElementById('tpl-btn-high').className='day-type-btn'+(tplType==='high'?' active-high':'');
   document.getElementById('tpl-btn-low').className='day-type-btn'+(tplType==='low'?' active-low':'');
+  const summaryEl=document.getElementById('tpl-summary');
+  if(summaryEl)summaryEl.innerHTML=resultSummaryHTML();
   renderTplContent();
 }
 function selectTplType(type){tplType=type;renderTemplate();}
@@ -474,7 +485,7 @@ function renderTplContent(){
   // Macro bars
   let tC=0,tP=0,tF=0;
   for(let i=1;i<=meals;i++){const t=getTplTotals(tplType,'m'+i);tC+=t.c;tP+=t.p;tF+=t.f;}
-  function barHTML(used,total,baseColor,label){const over=used>total;const pct=over?100:Math.round(used/total*100);const diff=Math.round(Math.abs(total-used));return'<div class="macro-bar-wrap"><div class="macro-bar-label"><span>'+label+' <span class="badge" style="background:'+(over?'#FCEBEB':'')+'color:'+(over?'#A32D2D':'')+'">'+(over?'超出 '+Math.round(used-total)+'g':pct+'%')+'</span></span><span style="font-size:13px;font-weight:500;color:'+(over?'#E24B4A':'#666')+'">'+(over?'超出 '+diff+'g':'剩 '+diff+'g')+'</span></div><div class="macro-bar-track"><div class="macro-bar-fill '+(over?'bar-over':baseColor)+'" style="width:'+pct+'%"></div></div></div>';}
+  function barHTML(used,total,baseColor,label){const over=used>total;const pct=Math.min(100,Math.round(used/total*100));const diff=Math.round(Math.abs(total-used));return'<div class="macro-bar-wrap"><div class="macro-bar-label"><span>'+label+' <span class="badge badge-carb">'+(over?'超出 '+Math.round(used-total)+'g':pct+'%')+'</span></span><span style="font-size:13px;font-weight:500;color:'+(over?'#E24B4A':'#666')+'">'+(over?'超出 '+diff+'g':'剩 '+diff+'g')+'</span></div><div class="macro-bar-track"><div class="macro-bar-fill '+baseColor+'" style="width:'+pct+'%"></div></div></div>';}
 
   // Meal tabs
   let tabsHTML='';
@@ -518,6 +529,8 @@ function renderFoodSectionHTML(type,label,badgeClass,md,prefix){
 function renderDiary(){
   if(!calcResult){document.getElementById('diary-no-calc').style.display='block';document.getElementById('diary-main').style.display='none';return;}
   document.getElementById('diary-no-calc').style.display='none';document.getElementById('diary-main').style.display='block';
+  const summaryEl=document.getElementById('diary-summary');
+  if(summaryEl)summaryEl.innerHTML=resultSummaryHTML();
   renderWeekdayGrid();
   renderWeekTabs();
   renderDiaryContent();
@@ -565,7 +578,7 @@ function renderDiaryContent(){
   // Day total bars
   let tC=0,tP=0,tF=0;
   Object.values(diaryData[curDiaryDay]||{}).forEach(md=>{['carb','prot','fat'].forEach(type=>{(md[type]||[]).forEach(item=>{tC+=item.grams*(item.food.c/100);tP+=item.grams*(item.food.p/100);tF+=item.grams*(item.food.f/100);});});});
-  function barHTML2(used,total,baseColor,label,barId,pctId,remId){const over=used>total;const pct=over?100:Math.round(used/total*100);return'<div class="macro-bar-wrap"><div class="macro-bar-label"><span>'+label+' <span id="'+pctId+'" class="badge '+(over?'':'')+'badge-carb" style="background:'+(over?'#FCEBEB':'')+'">'+( over?'超出 '+Math.round(used-total)+'g':pct+'%')+'</span></span><span id="'+remId+'" style="font-size:13px;font-weight:500;color:'+(over?'#E24B4A':'#666')+'">'+(over?'超出 '+Math.round(used-total)+'g':'剩 '+Math.round(total-used)+'g')+'</span></div><div class="macro-bar-track"><div id="'+barId+'" class="macro-bar-fill '+(over?'bar-over':baseColor)+'" style="width:'+pct+'%"></div></div></div>';}
+  function barHTML2(used,total,baseColor,label,barId,pctId,remId){const over=used>total;const pct=Math.min(100,Math.round(used/total*100));return'<div class="macro-bar-wrap"><div class="macro-bar-label"><span>'+label+' <span id="'+pctId+'" class="badge badge-carb">'+(over?'超出 '+Math.round(used-total)+'g':pct+'%')+'</span></span><span id="'+remId+'" style="font-size:13px;font-weight:500;color:'+(over?'#E24B4A':'#666')+'">'+(over?'超出 '+Math.round(used-total)+'g':'剩 '+Math.round(total-used)+'g')+'</span></div><div class="macro-bar-track"><div id="'+barId+'" class="macro-bar-fill '+baseColor+'" style="width:'+pct+'%"></div></div></div>';}
 
   // Meal tabs
   let tabsHTML='';
@@ -608,7 +621,7 @@ function updateDiaryFoodLabels(md){['carb','prot','fat'].forEach(type=>{(md[type
 function renderDiaryBarsAndTargets(day,slot){
   let tC=0,tP=0,tF=0;
   Object.values(diaryData[curDiaryDay]||{}).forEach(md=>{['carb','prot','fat'].forEach(type=>{(md[type]||[]).forEach(item=>{tC+=item.grams*(item.food.c/100);tP+=item.grams*(item.food.p/100);tF+=item.grams*(item.food.f/100);});});});
-  function upBar(barId,pctId,remId,used,total,base){const over=used>total;const pct=over?100:Math.round(used/total*100);const b=document.getElementById(barId),p=document.getElementById(pctId),r=document.getElementById(remId);if(b){b.style.width=pct+'%';b.className='macro-bar-fill '+(over?'bar-over':base);}if(p){p.textContent=over?'超出 '+Math.round(used-total)+'g':pct+'%';p.style.background=over?'#FCEBEB':'';p.style.color=over?'#A32D2D':'';}if(r){r.textContent=over?'超出 '+Math.round(used-total)+'g':'剩 '+Math.round(total-used)+'g';r.style.color=over?'#E24B4A':'';}};
+  function upBar(barId,pctId,remId,used,total,base){const over=used>total;const pct=Math.min(100,Math.round(used/total*100));const b=document.getElementById(barId),p=document.getElementById(pctId),r=document.getElementById(remId);if(b){b.style.width=pct+'%';b.className='macro-bar-fill '+base;}if(p){p.textContent=over?'超出 '+Math.round(used-total)+'g':pct+'%';p.style.background='';p.style.color='';}if(r){r.textContent=over?'超出 '+Math.round(used-total)+'g':'剩 '+Math.round(total-used)+'g';r.style.color=over?'#E24B4A':'';}};
   upBar('d-bar-carb','d-pct-carb','d-rem-carb',tC,day.carb,'bar-carb');
   upBar('d-bar-prot','d-pct-prot','d-rem-prot',tP,day.prot,'bar-prot');
   upBar('d-bar-fat','d-pct-fat','d-rem-fat',tF,day.fat,'bar-fat');
