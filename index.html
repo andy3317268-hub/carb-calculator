@@ -395,13 +395,13 @@ window.switchSection=name=>{document.querySelectorAll('.section').forEach(s=>s.c
 
 // ── Section 1 ─────────────────────────────────────────
 window.selectGender=g=>{selGender=g;document.getElementById('btnM').className='gender-btn'+(g==='m'?' active-m':'');document.getElementById('btnF').className='gender-btn'+(g==='f'?' active-f':'');updateMacroHints();updateSliderBounds();recalc();};
-function updateMacroHints(){if(!selGender)return;const tiers=selGender==='f'?tiersF:tiersM;for(let i=1;i<=4;i++){const t=tiers[i];document.getElementById('macro'+i).innerHTML='碳水 '+t.carb+'x・蛋白質 '+t.protein+'x・脂肪 '+t.fat+'x';}}
+window.updateMacroHints=function updateMacroHints(){if(!selGender)return;const tiers=selGender==='f'?tiersF:tiersM;for(let i=1;i<=4;i++){const t=tiers[i];document.getElementById('macro'+i).innerHTML='碳水 '+t.carb+'x・蛋白質 '+t.protein+'x・脂肪 '+t.fat+'x';}}
 window.selectTier=t=>{selTier=t;document.querySelectorAll('.tier-btn').forEach(b=>b.classList.remove('active'));document.querySelector('[data-tier="'+t+'"]').classList.add('active');document.getElementById('customInputs').style.display=t===5?'block':'none';updateSliderBounds();recalc();};
-function getActiveTier(){if(!selGender)return null;if(selTier===5){const c=parseFloat(document.getElementById('customCarb').value),p=parseFloat(document.getElementById('customProtein').value),f=parseFloat(document.getElementById('customFat').value);if(!c||!p||!f)return null;return{carb:c,protein:p,fat:f};}if(!selTier)return null;return selGender==='f'?tiersF[selTier]:tiersM[selTier];}
+window.getActiveTier=function getActiveTier(){if(!selGender)return null;if(selTier===5){const c=parseFloat(document.getElementById('customCarb').value),p=parseFloat(document.getElementById('customProtein').value),f=parseFloat(document.getElementById('customFat').value);if(!c||!p||!f)return null;return{carb:c,protein:p,fat:f};}if(!selTier)return null;return selGender==='f'?tiersF[selTier]:tiersM[selTier];}
 window.adjustDays=d=>{const el=document.getElementById('highDays');el.value=Math.max(1,Math.min(6,parseInt(el.value)+d));clampDays();};
 window.clampDays=()=>{const el=document.getElementById('highDays');el.value=Math.max(1,Math.min(6,parseInt(el.value)||1));document.getElementById('lowDaysDisplay').textContent=(7-parseInt(el.value))+' 天';updateSliderBounds();recalc();};
 window.adjustMeals=d=>{const el=document.getElementById('mealCount');el.value=Math.max(1,Math.min(8,parseInt(el.value)+d));recalc();};
-function updateSliderBounds(){
+window.updateSliderBounds=function updateSliderBounds(){
   const t=getActiveTier();if(!t)return;
   const hd=parseInt(document.getElementById('highDays').value)||2,ld=7-hd;
   const cs=document.getElementById('carbSlider');
@@ -426,8 +426,8 @@ function updateSliderBounds(){
   const fatLowVal=(fs._min+fatPct*(fs._max-fs._min));
   document.getElementById('fatLowVal').textContent=fatLowVal.toFixed(2)+'x';
 }
-function sliderToVal(s){const pct=parseInt(s.value)/100;return s._min+pct*(s._max-s._min);}
-function recalc(){
+window.sliderToVal=function sliderToVal(s){const pct=parseInt(s.value)/100;return s._min+pct*(s._max-s._min);}
+window.recalc=function recalc(){
   const weight=parseFloat(document.getElementById('weight').value);
   const hd=parseInt(document.getElementById('highDays').value)||2,ld=7-hd;
   const meals=parseInt(document.getElementById('mealCount').value)||3;
@@ -443,7 +443,7 @@ function recalc(){
   updateResultCards();
   scheduleSave('calcSettings',getCalcSettingsObj());
 }
-function updateResultCards(){
+window.updateResultCards=function updateResultCards(){
   const rc=document.getElementById('resultCards'),cs=document.getElementById('collapsedSummary');
   if(!calcResult){rc.style.display='none';if(calcCollapsed)cs.style.display='none';return;}
   const h=calcResult.high,l=calcResult.low,m=h.meals;rc.style.display='grid';
