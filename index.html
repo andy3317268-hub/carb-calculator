@@ -758,6 +758,33 @@ function renderDiaryContent(){
   );
 }
 
+window.setDiaryMeal=key=>{curDiaryMeal=key;renderDiaryContent();};
+window.addDiaryExtra=()=>{
+  if(!selDate)return;
+  const entry=getDiaryEntry(selDate);
+  if(!entry.extras)entry.extras=[];
+  entry.extraCount=(entry.extraCount||0)+1;
+  const key='extra_'+entry.extraCount;
+  entry.extras.push({key,label:'額外餐食 '+entry.extraCount,after:1});
+  if(!entry.meals[key])entry.meals[key]={carb:[],prot:[],fat:[]};
+  curDiaryMeal=key;
+  saveDiary(selDate);renderDiaryContent();
+};
+window.removeDiaryExtra=key=>{
+  if(!selDate)return;
+  const entry=getDiaryEntry(selDate);
+  entry.extras=(entry.extras||[]).filter(e=>e.key!==key);
+  delete entry.meals[key];
+  curDiaryMeal=null;
+  saveDiary(selDate);renderDiaryContent();
+};
+window.updateDiaryExtraPos=(key,after)=>{
+  if(!selDate)return;
+  const entry=getDiaryEntry(selDate);
+  const ex=(entry.extras||[]).find(e=>e.key===key);
+  if(ex){ex.after=parseInt(after);saveDiary(selDate);renderDiaryContent();}
+};
+
 function updateDiaryBars(day){
   if(!selDate)return;
   const entry=getDiaryEntry(selDate);
