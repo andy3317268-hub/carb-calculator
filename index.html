@@ -576,7 +576,7 @@ function bindFoodEvents(prefix,getMd,onUpdate,getTargets){
   });
   document.querySelectorAll('[data-'+prefix+'-remove]').forEach(btn=>{btn.onclick=()=>{const[type,idx]=btn.dataset[prefix+'Remove'].split('-');getMd(type).splice(parseInt(idx),1);onUpdate();};});
   document.querySelectorAll('.'+prefix+'-gram-input').forEach(inp=>{
-    inp.addEventListener('input',()=>{const[type,idx]=inp.dataset[prefix+'Gram'].split('-');const v=Math.max(1,Math.min(2000,parseInt(inp.value)||1));getMd(type)[parseInt(idx)].grams=v;onUpdate(true);});
+    inp.addEventListener('input',()=>{const[type,idx]=inp.dataset[prefix+'Gram'].split('-');const v=Math.max(1,Math.min(2000,parseInt(inp.value)||1));const item=getMd(type)[parseInt(idx)];item.grams=v;const fml=document.getElementById(prefix+'-fml-'+type+'-'+idx);if(fml)fml.textContent='碳 '+(v*item.food.c/100).toFixed(1)+'・蛋 '+(v*item.food.p/100).toFixed(1)+'・脂 '+(v*item.food.f/100).toFixed(1);onUpdate(true);});
     inp.addEventListener('blur',()=>{if(!inp.value||parseInt(inp.value)<1)inp.value=1;});
     inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();});
   });
@@ -753,9 +753,25 @@ function renderDiaryContent(){
 
   bindFoodEvents('diary',
     type=>getDiaryItems(selDate,slot.key)[type],
-    ()=>{saveDiary(selDate);updateDiaryBars(day);updateDiaryTargetCards(slot);},
+    (skipRender)=>{saveDiary(selDate);if(!skipRender)renderDiaryContent();else{updateDiaryBars(day);updateDiaryTargetCards(selDate,slot,tgt);}},
     (type)=>{const c=getDiaryTotals(selDate,slot.key);return type==='carb'?tgt.c-c.c:type==='prot'?tgt.p-c.p:tgt.f-c.f;}
   );
+}
+
+function updateDiaryBars(day){
+  if(!selDate)return;
+  const entry=getDiaryEntry(selDate);
+  let tC=0,tP=0,tF=0;
+  Object.values(entry.meals||{}).forEach(md=>['carb','prot','fat'].forEach(t=>(md[t]||[]).forEach(i=>{tC+=i.grams*(i.food.c/100);tP+=i.grams*(i.food.p/100);tF+=i.grams*(i.food.f/100);})));
+  const upd=(bid,pid,rid,used,total)=>{const over=used>total,pct=Math.min(100,total>0?Math.round(used/total*100):0);const b=document.getElementById(bid),p=document.getElementById(pid),r=document.getElementById(rid);if(b)b.style.width=pct+'%';if(p)p.textContent=over?'超出 '+Math.round(used-total)+'g':pct+'%';if(r){r.textContent=over?'超出 '+Math.round(used-total)+'g':'剩 '+Math.round(total-used)+'g';r.style.color=over?'#E24B4A':'#666';}};
+  upd('d-bar-carb','d-pct-carb','d-rem-carb',tC,day.carb);
+  upd('d-bar-prot','d-pct-prot','d-rem-prot',tP,day.prot);
+  upd('d-bar-fat','d-pct-fat','d-rem-fat',tF,day.fat);
+}
+function updateDiaryTargetCards(dk,slot,tgt){
+  const tc=document.getElementById('diary-target-cards');if(!tc)return;
+  const cons=getDiaryTotals(dk,slot.key);const isX=slot.isExtra;
+  tc.innerHTML='<div class="target-card"><div class="target-label">'+(isX?'碳水攝入':'碳水目標')+'</div><div class="target-val">'+(isX?Math.round(cons.c):tgt.c)+'g</div>'+(isX?'':remHTML(tgt.c-cons.c))+'</div><div class="target-card"><div class="target-label">'+(isX?'蛋白質攝入':'蛋白質目標')+'</div><div class="target-val">'+(isX?Math.round(cons.p):tgt.p)+'g</div>'+(isX?'':remHTML(tgt.p-cons.p))+'</div><div class="target-card"><div class="target-label">'+(isX?'脂肪攝入':'脂肪目標')+'</div><div class="target-val">'+(isX?Math.round(cons.f):tgt.f)+'g</div>'+(isX?'':remHTML(tgt.f-cons.f))+'</div>';
 }
 
 function renderFoodLib(){
