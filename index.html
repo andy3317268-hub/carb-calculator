@@ -4,6 +4,13 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>碳水循環計算機</title>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#1a1a18"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="碳循環"/>
+  <link rel="apple-touch-icon" href="icons/icon.svg"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -16,6 +23,8 @@
     .sidebar-btn .tooltip{position:absolute;left:52px;background:#1a1a18;color:#fff;font-size:12px;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.15s;}
     .sidebar-btn:hover .tooltip{opacity:1;}
     .sidebar-spacer{flex:1;}
+    #installBtn{display:none;}
+    #installBtn.visible{display:flex;}
     .main{margin-left:56px;flex:1;padding:2rem 1rem;}
     .content{max-width:640px;margin:0 auto;}
     .section{display:none;}
@@ -259,6 +268,7 @@
     <button class="sidebar-btn" id="nav-template" onclick="switchSection('template')"><i class="ti ti-layout-list"></i><span class="tooltip">飲食模板</span></button>
     <button class="sidebar-btn" id="nav-foods" onclick="switchSection('foods')"><i class="ti ti-salad"></i><span class="tooltip">食物庫</span></button>
     <div class="sidebar-spacer"></div>
+    <button class="sidebar-btn" id="installBtn" onclick="triggerInstall()" title="安裝 App"><i class="ti ti-device-mobile-down"></i><span class="tooltip">安裝 App</span></button>
     <div id="userAvatarWrap" style="position:relative;">
       <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()"></div>
       <div id="userMenu" style="display:none;position:absolute;left:52px;bottom:0;background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:10px;padding:8px;min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:20;">
@@ -782,6 +792,31 @@ window.deleteCustomFood=(cat,idx)=>{
   renderFoodLib();
 };
 updateMacroHints();clampDays();
+</script>
+<script>
+let _installPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  _installPrompt=e;
+  const btn=document.getElementById('installBtn');
+  if(btn)btn.classList.add('visible');
+});
+window.addEventListener('appinstalled',()=>{
+  _installPrompt=null;
+  const btn=document.getElementById('installBtn');
+  if(btn)btn.classList.remove('visible');
+});
+window.triggerInstall=async()=>{
+  if(!_installPrompt)return;
+  _installPrompt.prompt();
+  const{outcome}=await _installPrompt.userChoice;
+  if(outcome==='accepted')_installPrompt=null;
+};
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>

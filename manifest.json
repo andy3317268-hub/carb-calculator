@@ -1,0 +1,27 @@
+{
+  "name": "碳水循環計算機",
+  "short_name": "碳循環",
+  "description": "根據體重與訓練等級計算高碳日／低碳日的碳水、蛋白質、脂肪攝取量",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f5f3",
+  "theme_color": "#1a1a18",
+  "lang": "zh-TW",
+  "orientation": "portrait-primary",
+  "categories": ["health", "fitness", "food"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
