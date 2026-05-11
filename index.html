@@ -16,7 +16,7 @@
     .sidebar-btn .tooltip{position:absolute;left:52px;background:#1a1a18;color:#fff;font-size:12px;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.15s;}
     .sidebar-btn:hover .tooltip{opacity:1;}
     .sidebar-spacer{flex:1;}
-    .main{margin-left:56px;flex:1;padding:2rem 1rem;max-width:696px;}
+    .main{margin-left:56px;flex:1;padding:2rem 1rem;}
     .content{max-width:640px;margin:0 auto;}
     .section{display:none;}
     .section.active{display:block;}
@@ -117,8 +117,14 @@
     .food-macros-inline{font-size:12px;color:#aaa;}
     .add-food-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
     .add-food-row select{flex:1;min-width:120px;}
-    .add-food-row button{white-space:nowrap;padding:8px 14px;background:#1a1a18;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;}
-    .add-food-row button:hover{background:#333;}
+    .add-food-row button,.btn{white-space:nowrap;padding:8px 14px;background:#1a1a18;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;}
+    .add-food-row button:hover,.btn:hover{background:#333;}
+    .btn-outline{background:none;border:0.5px solid rgba(0,0,0,0.2);color:#1a1a18;}
+    .btn-outline:hover{background:#f5f5f3;}
+    .btn-green{background:#1D9E75;color:#fff;}
+    .btn-green:hover{background:#178a64;}
+    .btn-red{background:none;border:0.5px solid #E24B4A;color:#E24B4A;}
+    .btn-red:hover{background:#FCEBEB;}
     .custom-food-box{display:none;margin-top:8px;background:#f5f5f3;border-radius:8px;padding:10px 12px;border:0.5px solid rgba(0,0,0,0.1);}
     .custom-food-box.show{display:block;}
     .custom-food-field{margin-bottom:8px;}
@@ -136,12 +142,10 @@
     .extra-remove-btn:hover{background:#FCEBEB;color:#E24B4A;border-color:#E24B4A;}
     .empty-track{text-align:center;color:#bbb;font-size:14px;padding:2rem 0;}
     .section-title{font-size:18px;font-weight:500;color:#1a1a18;margin-bottom:1.5rem;}
-    /* Week / Diary */
     .week-setup{background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:12px;padding:1.25rem;margin-bottom:1rem;}
     .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px;}
     .weekday-btn{border:0.5px solid rgba(0,0,0,0.15);border-radius:8px;padding:8px 4px;cursor:pointer;text-align:center;font-size:12px;font-weight:500;color:#888;background:#fff;font-family:inherit;}
     .weekday-btn.is-high{border:1.5px solid #1D9E75;background:#E1F5EE;color:#0F6E56;}
-    /* Calendar */
     .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
     .cal-title{font-size:16px;font-weight:500;color:#1a1a18;}
     .cal-nav{background:none;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;}
@@ -158,6 +162,25 @@
     .cal-day.empty{cursor:default;background:none;border:none;}
     .cal-day.has-data::after{content:'';display:block;width:4px;height:4px;border-radius:50%;background:#1D9E75;margin:0 auto;}
     .cal-day-type{font-size:9px;opacity:0.7;}
+    /* Template list */
+    .tpl-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;}
+    .tpl-card{background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:10px;padding:1rem;}
+    .tpl-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+    .tpl-card-name{font-size:14px;font-weight:500;color:#1a1a18;}
+    .tpl-card-meta{font-size:12px;color:#888;}
+    .tpl-card-actions{display:flex;gap:6px;}
+    /* Food library */
+    .food-lib-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid rgba(0,0,0,0.06);}
+    .food-lib-item:last-child{border-bottom:none;}
+    .food-lib-name{font-size:13px;font-weight:500;color:#1a1a18;}
+    .food-lib-macros{font-size:12px;color:#888;margin-top:2px;}
+    .food-lib-badge{font-size:10px;padding:1px 6px;border-radius:4px;background:#f0f0ee;color:#888;}
+    /* Modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;}
+    .modal-overlay.show{display:flex;}
+    .modal{background:#fff;border-radius:14px;padding:1.5rem;width:90%;max-width:400px;max-height:80vh;overflow-y:auto;}
+    .modal-title{font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:1rem;}
+    .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;}
     /* Login */
     .login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f5f5f3;}
     .login-card{background:#fff;border-radius:16px;padding:2.5rem;max-width:360px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08);}
@@ -165,16 +188,13 @@
     .login-sub{font-size:14px;color:#888;margin-bottom:2rem;}
     .google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:#fff;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;color:#1a1a18;font-family:inherit;}
     .google-btn:hover{background:#f5f5f3;}
-    .google-btn svg{width:18px;height:18px;}
-    /* User avatar */
     .user-avatar{width:32px;height:32px;border-radius:50%;overflow:hidden;cursor:pointer;border:0.5px solid rgba(0,0,0,0.1);}
     .user-avatar img{width:100%;height:100%;object-fit:cover;}
     .save-indicator{font-size:11px;color:#aaa;text-align:center;margin-top:4px;height:16px;}
-    /* Loading */
     .loading-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f5f5f3;font-size:14px;color:#888;}
     @media(prefers-color-scheme:dark){
       body{background:#1c1c1a;color:#e8e8e4;}
-      .sidebar,.card,.week-setup,.login-card{background:#2a2a28;border-color:rgba(255,255,255,0.1);}
+      .sidebar,.card,.week-setup,.login-card,.modal,.tpl-card{background:#2a2a28;border-color:rgba(255,255,255,0.1);}
       .gender-btn,.tier-btn,.day-btn,.day-type-btn,.meal-tab,.weekday-btn,.add-extra-btn,.cal-day,.cal-nav,.google-btn{background:#2a2a28;border-color:rgba(255,255,255,0.15);color:#e8e8e4;}
       .gender-btn.active-m{background:#0c2a45;color:#7ab8f5;border-color:#7ab8f5;}
       .gender-btn.active-f{background:#3d1626;color:#e88ab0;border-color:#e88ab0;}
@@ -183,14 +203,13 @@
       input[type=number],input[type=text],select{background:#2a2a28;border-color:rgba(255,255,255,0.15);color:#e8e8e4;}
       .result-day-card,.collapsed-mini-card,.food-item,.target-card{background:#333331;}
       .macro-bar-track{background:#444442;}
-      .tn,.slider-title,.food-name,.target-val,.section-title,.cal-title,.login-title{color:#e8e8e4;}
-      .weekday-btn.is-high{background:#0a2e22;color:#5DCAA5;border-color:#1D9E75;}
-      .cal-day.today{color:#e8e8e4;}
-      .cal-day.selected{background:#1a2e45;}
-      .td,.tmacro,.sec-label,.unit,.slider-focus,.slider-ends span,.food-macros-inline,.remain-ok,.result-macro-row span:first-child,.collapsed-mini-row span:first-child,.result-section-label,.target-label,.cal-day-label,.login-sub,.save-indicator{color:#888;}
+      .tn,.slider-title,.food-name,.target-val,.section-title,.cal-title,.login-title,.tpl-card-name,.modal-title,.food-lib-name{color:#e8e8e4;}
+      .td,.tmacro,.sec-label,.unit,.slider-focus,.slider-ends span,.food-macros-inline,.remain-ok,.result-macro-row span:first-child,.collapsed-mini-row span:first-child,.result-section-label,.target-label,.cal-day-label,.login-sub,.save-indicator,.tpl-card-meta,.food-lib-macros,.food-lib-badge{color:#888;}
       .result-macro-row span:last-child,.collapsed-mini-row span:last-child{color:#e8e8e4;font-weight:500;}
-      .custom-food-box{background:#333331;border-color:rgba(255,255,255,0.1);}
-      .add-food-row button{background:#e8e8e4;color:#1a1a18;}
+      .custom-food-box,.food-item{background:#333331;border-color:rgba(255,255,255,0.1);}
+      .add-food-row button,.btn{background:#e8e8e4;color:#1a1a18;}
+      .btn-outline{background:none;border-color:rgba(255,255,255,0.2);color:#e8e8e4;}
+      .btn-green{background:#1D9E75;color:#fff;}
       .meal-tab.active{background:#2a2a28;}
       .collapse-btn{color:#aaa;}
       .slider-val span{color:#e8e8e4;}
@@ -199,11 +218,15 @@
       .badge-fat{background:#2e1f00;color:#EF9F27;}
       .badge-high{background:#0a2e22;color:#5DCAA5;}
       .badge-low{background:#2a2a28;color:#aaa;}
+      .weekday-btn.is-high{background:#0a2e22;color:#5DCAA5;border-color:#1D9E75;}
+      .cal-day.today{color:#e8e8e4;}
+      .cal-day.selected{background:#1a2e45;}
+      .food-lib-item{border-color:rgba(255,255,255,0.06);}
+      .modal-overlay{background:rgba(0,0,0,0.6);}
     }
   </style>
 </head>
 <body>
-
 <div id="loadingScreen" class="loading-screen">載入中...</div>
 <div id="loginScreen" class="login-screen" style="display:none;">
   <div class="login-card">
@@ -211,20 +234,33 @@
     <div class="login-title">碳水循環計算機</div>
     <div class="login-sub">登入以儲存你的飲食記錄</div>
     <button class="google-btn" onclick="signInWithGoogle()">
-      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       使用 Google 帳號登入
     </button>
+  </div>
+</div>
+
+<!-- Apply Template Modal -->
+<div class="modal-overlay" id="applyTplModal">
+  <div class="modal">
+    <div class="modal-title">套用模板</div>
+    <div class="sec-label">選擇要套用的模板（疊加，不覆蓋現有記錄）</div>
+    <div id="applyTplList" style="margin-top:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeApplyModal()">取消</button>
+    </div>
   </div>
 </div>
 
 <div id="appScreen" class="app" style="display:none;">
   <nav class="sidebar">
     <button class="sidebar-btn active" id="nav-calc" onclick="switchSection('calc')"><i class="ti ti-calculator"></i><span class="tooltip">營養計算</span></button>
-    <button class="sidebar-btn" id="nav-template" onclick="switchSection('template')"><i class="ti ti-layout-list"></i><span class="tooltip">飲食模板</span></button>
     <button class="sidebar-btn" id="nav-diary" onclick="switchSection('diary')"><i class="ti ti-calendar-week"></i><span class="tooltip">飲食日記</span></button>
+    <button class="sidebar-btn" id="nav-template" onclick="switchSection('template')"><i class="ti ti-layout-list"></i><span class="tooltip">飲食模板</span></button>
+    <button class="sidebar-btn" id="nav-foods" onclick="switchSection('foods')"><i class="ti ti-salad"></i><span class="tooltip">食物庫</span></button>
     <div class="sidebar-spacer"></div>
     <div id="userAvatarWrap" style="position:relative;">
-      <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()" title="登出"></div>
+      <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()"></div>
       <div id="userMenu" style="display:none;position:absolute;left:52px;bottom:0;background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:10px;padding:8px;min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:20;">
         <div id="userMenuName" style="font-size:12px;color:#888;padding:4px 8px 8px;border-bottom:0.5px solid rgba(0,0,0,0.08);margin-bottom:4px;"></div>
         <button onclick="signOut()" style="width:100%;text-align:left;background:none;border:none;padding:6px 8px;font-size:13px;color:#E24B4A;cursor:pointer;border-radius:6px;font-family:inherit;">登出</button>
@@ -265,18 +301,7 @@
         </div>
       </div>
 
-      <!-- SECTION 2: Template -->
-      <div class="section" id="section-template">
-        <div class="section-title">飲食模板</div>
-        <div class="card" id="tpl-no-calc" style="display:none;"><div class="empty-track">請先在「營養計算」頁面完成設定</div></div>
-        <div id="tpl-main" style="display:none;">
-          <div id="tpl-summary"></div>
-          <div class="card"><div class="sec-label">選擇模板類型</div><div class="day-type-grid"><button class="day-type-btn" id="tpl-btn-high" onclick="selectTplType('high')">高碳日</button><button class="day-type-btn" id="tpl-btn-low" onclick="selectTplType('low')">低碳日</button></div></div>
-          <div id="tpl-content"></div>
-        </div>
-      </div>
-
-      <!-- SECTION 3: Diary -->
+      <!-- SECTION 2: Diary -->
       <div class="section" id="section-diary">
         <div class="section-title">飲食日記</div>
         <div class="card" id="diary-no-calc" style="display:none;"><div class="empty-track">請先在「營養計算」頁面完成設定</div></div>
@@ -284,11 +309,7 @@
           <div id="diary-summary"></div>
           <div class="week-setup"><div class="sec-label">設定高碳日（點選切換）</div><div class="weekday-grid" id="weekdayGrid"></div></div>
           <div class="card">
-            <div class="cal-header">
-              <button class="cal-nav" onclick="calPrevMonth()"><i class="ti ti-chevron-left" style="font-size:14px"></i></button>
-              <div class="cal-title" id="calTitle"></div>
-              <button class="cal-nav" onclick="calNextMonth()"><i class="ti ti-chevron-right" style="font-size:14px"></i></button>
-            </div>
+            <div class="cal-header"><button class="cal-nav" onclick="calPrevMonth()"><i class="ti ti-chevron-left" style="font-size:14px"></i></button><div class="cal-title" id="calTitle"></div><button class="cal-nav" onclick="calNextMonth()"><i class="ti ti-chevron-right" style="font-size:14px"></i></button></div>
             <div class="cal-grid" id="calDayLabels"></div>
             <div class="cal-grid" id="calGrid"></div>
           </div>
@@ -296,27 +317,85 @@
         </div>
       </div>
 
+      <!-- SECTION 3: Template -->
+      <div class="section" id="section-template">
+        <div class="section-title">飲食模板</div>
+        <div class="card" id="tpl-no-calc" style="display:none;"><div class="empty-track">請先在「營養計算」頁面完成設定</div></div>
+        <div id="tpl-main" style="display:none;">
+          <div id="tpl-summary"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+            <div style="font-size:14px;color:#666;">已建立的模板</div>
+            <button class="btn btn-green" onclick="openNewTplModal()">+ 新增模板</button>
+          </div>
+          <div id="tpl-list"></div>
+          <div id="tpl-editor"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: Foods -->
+      <div class="section" id="section-foods">
+        <div class="section-title">食物庫</div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+            <div class="sec-label" style="margin:0;">所有食物（每 100g）</div>
+            <button class="btn btn-green" onclick="openAddFoodModal()">+ 新增食物</button>
+          </div>
+          <div id="foodLibCarb" style="margin-bottom:1.5rem;"></div>
+          <div id="foodLibProt" style="margin-bottom:1.5rem;"></div>
+          <div id="foodLibFat"></div>
+        </div>
+      </div>
+
     </div>
   </main>
+</div>
+
+<!-- New Template Modal -->
+<div class="modal-overlay" id="newTplModal">
+  <div class="modal">
+    <div class="modal-title">新增模板</div>
+    <div class="custom-food-field"><label>模板名稱</label><input type="text" id="newTplName" placeholder="例如：高碳訓練日"/></div>
+    <div class="custom-food-field" style="margin-top:8px;"><label>類型</label><select id="newTplType"><option value="high">高碳日</option><option value="low">低碳日</option></select></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeNewTplModal()">取消</button>
+      <button class="btn btn-green" onclick="createTemplate()">建立</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Food Modal -->
+<div class="modal-overlay" id="addFoodModal">
+  <div class="modal">
+    <div class="modal-title">新增食物</div>
+    <div class="custom-food-field"><label>食物名稱</label><input type="text" id="af-name" placeholder="例如：雞蛋豆腐"/></div>
+    <div class="custom-food-field" style="margin-top:8px;"><label>分類</label><select id="af-cat"><option value="carb">碳水類</option><option value="protein">蛋白質類</option><option value="fat">脂肪類</option></select></div>
+    <div class="custom-food-row-3" style="margin-top:8px;">
+      <div class="custom-food-field"><label>碳水 (g)</label><input type="number" id="af-c" placeholder="0" min="0" step="0.1"/></div>
+      <div class="custom-food-field"><label>蛋白質 (g)</label><input type="number" id="af-p" placeholder="0" min="0" step="0.1"/></div>
+      <div class="custom-food-field"><label>脂肪 (g)</label><input type="number" id="af-f" placeholder="0" min="0" step="0.1"/></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeAddFoodModal()">取消</button>
+      <button class="btn btn-green" onclick="addCustomFood()">新增</button>
+    </div>
+  </div>
 </div>
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut as fbSignOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,getDoc,setDoc,collection,getDocs,deleteDoc}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,doc,getDoc,setDoc,collection,getDocs}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig={apiKey:"AIzaSyBjyV8PSTBEDjUhF5JyZSSj3CjSLKQxMSA",authDomain:"carb-calculator-71739.firebaseapp.com",projectId:"carb-calculator-71739",storageBucket:"carb-calculator-71739.firebasestorage.app",messagingSenderId:"637184976998",appId:"1:637184976998:web:c2502ddfd152f27a9f25a7"};
 const fbApp=initializeApp(firebaseConfig);
 const auth=getAuth(fbApp);
 const db=getFirestore(fbApp);
-let currentUser=null;
-let saveTimer=null;
+let currentUser=null,saveTimer=null;
 
-// ── Auth ──────────────────────────────────────────────
-window.signInWithGoogle=async()=>{const provider=new GoogleAuthProvider();try{await signInWithPopup(auth,provider);}catch(e){console.error(e);}};
+window.signInWithGoogle=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){console.error(e);}};
 window.signOut=async()=>{await fbSignOut(auth);document.getElementById('userMenu').style.display='none';};
 window.toggleUserMenu=()=>{const m=document.getElementById('userMenu');m.style.display=m.style.display==='none'?'block':'none';};
-document.addEventListener('click',e=>{const wrap=document.getElementById('userAvatarWrap');if(wrap&&!wrap.contains(e.target))document.getElementById('userMenu').style.display='none';});
+document.addEventListener('click',e=>{const w=document.getElementById('userAvatarWrap');if(w&&!w.contains(e.target))document.getElementById('userMenu').style.display='none';});
 
 onAuthStateChanged(auth,async user=>{
   document.getElementById('loadingScreen').style.display='none';
@@ -325,7 +404,7 @@ onAuthStateChanged(auth,async user=>{
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('appScreen').style.display='flex';
     const av=document.getElementById('userAvatar');
-    av.innerHTML=user.photoURL?'<img src="'+user.photoURL+'" alt=""/>':'<div style="width:100%;height:100%;background:#1D9E75;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:500;">'+user.displayName?.[0]+'</div>';
+    av.innerHTML=user.photoURL?'<img src="'+user.photoURL+'" alt=""/>':'<div style="width:100%;height:100%;background:#1D9E75;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:500;">'+(user.displayName?.[0]||'U')+'</div>';
     document.getElementById('userMenuName').textContent=user.displayName||user.email;
     await loadUserData();
   } else {
@@ -335,115 +414,103 @@ onAuthStateChanged(auth,async user=>{
   }
 });
 
-// ── Save / Load ───────────────────────────────────────
-function showSaveIndicator(msg){const el=document.getElementById('saveIndicator');el.textContent=msg;setTimeout(()=>{if(el.textContent===msg)el.textContent='';},2000);}
+function showSave(msg){const el=document.getElementById('saveIndicator');el.textContent=msg;setTimeout(()=>{if(el.textContent===msg)el.textContent='';},2000);}
 function scheduleSave(key,data){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveData(key,data),1000);}
+async function saveData(key,data){
+  if(!currentUser)return;
+  try{
+    if(key.startsWith('diary_')){const dk=key.replace('diary_','');await setDoc(doc(db,'users',currentUser.uid,'diaryEntries',dk),{value:JSON.stringify(data),updatedAt:Date.now()});}
+    else{await setDoc(doc(db,'users',currentUser.uid,key,'data'),{value:JSON.stringify(data),updatedAt:Date.now()});}
+    showSave('已儲存');
+  }catch(e){console.error(e);showSave('儲存失敗');}
+}
 
 async function loadUserData(){
   if(!currentUser)return;
   try{
-    // Load calc settings
     const calcDoc=await getDoc(doc(db,'users',currentUser.uid,'calcSettings','data'));
-    if(calcDoc.exists()){const d=JSON.parse(calcDoc.data().value);applyCalcSettings(d);}
-    // Load template
-    const tplDoc=await getDoc(doc(db,'users',currentUser.uid,'template','data'));
-    if(tplDoc.exists()){tplData=JSON.parse(tplDoc.data().value);}
-    // Load diary index (highDays config)
-    const diaryDoc=await getDoc(doc(db,'users',currentUser.uid,'diaryConfig','data'));
-    if(diaryDoc.exists()){const d=JSON.parse(diaryDoc.data().value);highDays=new Set(d.highDays||[0,3]);}
-    // Load diary entries
-    const entriesSnap=await getDocs(collection(db,'users',currentUser.uid,'diaryEntries'));
-    entriesSnap.forEach(d=>{diaryEntries[d.id]=JSON.parse(d.data().value);});
+    if(calcDoc.exists())applyCalcSettings(JSON.parse(calcDoc.data().value));
+    const tplDoc=await getDoc(doc(db,'users',currentUser.uid,'templates','data'));
+    if(tplDoc.exists())templates=JSON.parse(tplDoc.data().value);
+    const cfgDoc=await getDoc(doc(db,'users',currentUser.uid,'diaryConfig','data'));
+    if(cfgDoc.exists()){const d=JSON.parse(cfgDoc.data().value);highDays=new Set(d.highDays||[0,3]);}
+    const foodDoc=await getDoc(doc(db,'users',currentUser.uid,'customFoods','data'));
+    if(foodDoc.exists())customFoods=JSON.parse(foodDoc.data().value);
+    const snap=await getDocs(collection(db,'users',currentUser.uid,'diaryEntries'));
+    snap.forEach(d=>{diaryEntries[d.id]=JSON.parse(d.data().value);});
   }catch(e){console.error(e);}
-  updateMacroHints();clampDays();
+  updateMacroHints();clampDays();renderFoodLib();
 }
 
-function getCalcSettingsObj(){
-  return{gender:selGender,tier:selTier,weight:document.getElementById('weight').value,highDays:document.getElementById('highDays').value,mealCount:document.getElementById('mealCount').value,carbSlider:document.getElementById('carbSlider').value,fatSlider:document.getElementById('fatSlider').value,customCarb:document.getElementById('customCarb')?.value,customProtein:document.getElementById('customProtein')?.value,customFat:document.getElementById('customFat')?.value};
-}
-
-function applyCalcSettings(d){
-  if(d.gender)selectGender(d.gender);
-  if(d.tier){selTier=d.tier;document.querySelectorAll('.tier-btn').forEach(b=>b.classList.remove('active'));const tb=document.querySelector('[data-tier="'+d.tier+'"]');if(tb)tb.classList.add('active');document.getElementById('customInputs').style.display=d.tier===5?'block':'none';}
-  if(d.weight)document.getElementById('weight').value=d.weight;
-  if(d.highDays)document.getElementById('highDays').value=d.highDays;
-  if(d.mealCount)document.getElementById('mealCount').value=d.mealCount;
-  if(d.customCarb)document.getElementById('customCarb').value=d.customCarb;
-  if(d.customProtein)document.getElementById('customProtein').value=d.customProtein;
-  if(d.customFat)document.getElementById('customFat').value=d.customFat;
-  clampDays();
-  setTimeout(()=>{if(d.carbSlider){document.getElementById('carbSlider').value=d.carbSlider;}if(d.fatSlider){document.getElementById('fatSlider').value=d.fatSlider;}recalc();},100);
-}
-
-// ── Data ──────────────────────────────────────────────
+// ── State ─────────────────────────────────────────────
 const tiersM={1:{carb:1.7,protein:1.4,fat:0.8},2:{carb:2.0,protein:1.6,fat:0.9},3:{carb:2.4,protein:1.7,fat:1.0},4:{carb:2.8,protein:1.8,fat:1.0}};
 const tiersF={1:{carb:1.7,protein:1.4,fat:1.0},2:{carb:2.0,protein:1.6,fat:1.1},3:{carb:2.4,protein:1.7,fat:1.1},4:{carb:2.8,protein:1.8,fat:1.2}};
 const CARB_LOW_MIN=0.5,FAT_HIGH_MIN=0.2;
-const WEEKDAYS=['一','二','三','四','五','六','日'];
-const foods={carb:[{name:'白米（生）',c:78,p:7,f:0.7},{name:'白米（熟）',c:28,p:2.7,f:0.3},{name:'糙米（生）',c:73,p:7.5,f:2.7},{name:'糙米（熟）',c:23,p:2.6,f:0.9},{name:'地瓜',c:20,p:1.6,f:0.1},{name:'燕麥（乾）',c:67,p:13,f:7},{name:'麵條（熟）',c:25,p:3.5,f:0.5},{name:'玉米',c:19,p:3.3,f:1.4},{name:'饅頭',c:47,p:7,f:1},{name:'馬鈴薯',c:17,p:2,f:0.1}],protein:[{name:'雞胸肉（生）',c:0,p:23,f:2},{name:'雞胸肉（熟）',c:0,p:31,f:3.6},{name:'去皮雞腿肉（生）',c:0,p:18,f:5},{name:'去皮雞腿肉（熟）',c:0,p:28,f:6},{name:'雞蛋',c:0.7,p:13,f:11},{name:'板豆腐',c:2,p:8,f:4},{name:'鮭魚',c:0,p:25,f:13},{name:'牛肉（生）',c:0,p:21,f:4},{name:'牛肉（熟）',c:0,p:26,f:5},{name:'豬肉里肌（生）',c:0,p:20,f:6},{name:'豬肉里肌（熟）',c:0,p:22,f:8}],fat:[{name:'橄欖油',c:0,p:0,f:100},{name:'綜合堅果',c:18,p:15,f:50},{name:'酪梨',c:9,p:2,f:15}]};
 
-// ── State ─────────────────────────────────────────────
+// Default foods
+const defaultFoods={
+  carb:[{name:'白米（生）',c:78,p:7,f:0.7},{name:'白米（熟）',c:28,p:2.7,f:0.3},{name:'糙米（生）',c:73,p:7.5,f:2.7},{name:'糙米（熟）',c:23,p:2.6,f:0.9},{name:'地瓜',c:20,p:1.6,f:0.1},{name:'燕麥（乾）',c:67,p:13,f:7},{name:'麵條（熟）',c:25,p:3.5,f:0.5},{name:'玉米',c:19,p:3.3,f:1.4},{name:'饅頭',c:47,p:7,f:1},{name:'馬鈴薯',c:17,p:2,f:0.1}],
+  protein:[{name:'雞胸肉（生）',c:0,p:23,f:2},{name:'雞胸肉（熟）',c:0,p:31,f:3.6},{name:'去皮雞腿肉（生）',c:0,p:18,f:5},{name:'去皮雞腿肉（熟）',c:0,p:28,f:6},{name:'雞蛋',c:0.7,p:13,f:11},{name:'板豆腐',c:2,p:8,f:4},{name:'鮭魚',c:0,p:25,f:13},{name:'牛肉（生）',c:0,p:21,f:4},{name:'牛肉（熟）',c:0,p:26,f:5},{name:'豬肉里肌（生）',c:0,p:20,f:6},{name:'豬肉里肌（熟）',c:0,p:22,f:8}],
+  fat:[{name:'橄欖油',c:0,p:0,f:100},{name:'綜合堅果',c:18,p:15,f:50},{name:'酪梨',c:9,p:2,f:15}]
+};
+let customFoods={carb:[],protein:[],fat:[]};
+function getAllFoods(){return{carb:[...defaultFoods.carb,...customFoods.carb],protein:[...defaultFoods.protein,...customFoods.protein],fat:[...defaultFoods.fat,...customFoods.fat]};}
+
 let selGender=null,selTier=null,calcResult=null,calcCollapsed=false;
-let tplType=null,tplData={high:{},low:{}},tplMeal={high:1,low:1};
+let templates=[];// [{id,name,type,meals:{m1:{carb:[],prot:[],fat:[]},m2:...}}]
+let curTplId=null;
 let highDays=new Set([0,3]);
 let curCalDate=new Date(),selDate=null;
-let diaryEntries={};// key: 'YYYY-MM-DD', val: {meals:{},extras:[],extraCount}
+let diaryEntries={};
 let curDiaryMeal=null;
 
 // ── Section switch ─────────────────────────────────────
-window.switchSection=name=>{document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.sidebar-btn').forEach(b=>b.classList.remove('active'));document.getElementById('section-'+name).classList.add('active');document.getElementById('nav-'+name).classList.add('active');if(name==='template')renderTemplate();if(name==='diary')renderDiary();};
+window.switchSection=name=>{
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='diary')renderDiary();
+  if(name==='template')renderTemplateSection();
+  if(name==='foods')renderFoodLib();
+};
 
-// ── Section 1 ─────────────────────────────────────────
+// ── Calc ──────────────────────────────────────────────
 window.selectGender=g=>{selGender=g;document.getElementById('btnM').className='gender-btn'+(g==='m'?' active-m':'');document.getElementById('btnF').className='gender-btn'+(g==='f'?' active-f':'');updateMacroHints();updateSliderBounds();recalc();};
-window.updateMacroHints=function updateMacroHints(){if(!selGender)return;const tiers=selGender==='f'?tiersF:tiersM;for(let i=1;i<=4;i++){const t=tiers[i];document.getElementById('macro'+i).innerHTML='碳水 '+t.carb+'x・蛋白質 '+t.protein+'x・脂肪 '+t.fat+'x';}}
+window.updateMacroHints=function(){if(!selGender)return;const tiers=selGender==='f'?tiersF:tiersM;for(let i=1;i<=4;i++){const t=tiers[i];document.getElementById('macro'+i).innerHTML='碳水 '+t.carb+'x・蛋白質 '+t.protein+'x・脂肪 '+t.fat+'x';}};
 window.selectTier=t=>{selTier=t;document.querySelectorAll('.tier-btn').forEach(b=>b.classList.remove('active'));document.querySelector('[data-tier="'+t+'"]').classList.add('active');document.getElementById('customInputs').style.display=t===5?'block':'none';updateSliderBounds();recalc();};
-window.getActiveTier=function getActiveTier(){if(!selGender)return null;if(selTier===5){const c=parseFloat(document.getElementById('customCarb').value),p=parseFloat(document.getElementById('customProtein').value),f=parseFloat(document.getElementById('customFat').value);if(!c||!p||!f)return null;return{carb:c,protein:p,fat:f};}if(!selTier)return null;return selGender==='f'?tiersF[selTier]:tiersM[selTier];}
+window.getActiveTier=function(){if(!selGender)return null;if(selTier===5){const c=parseFloat(document.getElementById('customCarb').value),p=parseFloat(document.getElementById('customProtein').value),f=parseFloat(document.getElementById('customFat').value);if(!c||!p||!f)return null;return{carb:c,protein:p,fat:f};}if(!selTier)return null;return selGender==='f'?tiersF[selTier]:tiersM[selTier];};
 window.adjustDays=d=>{const el=document.getElementById('highDays');el.value=Math.max(1,Math.min(6,parseInt(el.value)+d));clampDays();};
-window.clampDays=()=>{const el=document.getElementById('highDays');el.value=Math.max(1,Math.min(6,parseInt(el.value)||1));document.getElementById('lowDaysDisplay').textContent=(7-parseInt(el.value))+' 天';updateSliderBounds();recalc();};
+window.clampDays=function(){const el=document.getElementById('highDays');el.value=Math.max(1,Math.min(6,parseInt(el.value)||1));document.getElementById('lowDaysDisplay').textContent=(7-parseInt(el.value))+' 天';updateSliderBounds();recalc();};
 window.adjustMeals=d=>{const el=document.getElementById('mealCount');el.value=Math.max(1,Math.min(8,parseInt(el.value)+d));recalc();};
-window.updateSliderBounds=function updateSliderBounds(){
+window.updateSliderBounds=function(){
   const t=getActiveTier();if(!t)return;
   const hd=parseInt(document.getElementById('highDays').value)||2,ld=7-hd;
   const cs=document.getElementById('carbSlider');
-  const csMin=t.carb,csMax=(t.carb*7-CARB_LOW_MIN*ld)/hd;
-  // only reset position if bounds changed significantly
-  if(Math.abs((cs._min||0)-csMin)>0.01||Math.abs((cs._max||0)-csMax)>0.01){
-    cs._min=csMin;cs._max=csMax;
-  } else {
-    cs._min=csMin;cs._max=csMax;
-  }
-  cs.disabled=false;
+  cs._min=t.carb;cs._max=(t.carb*7-CARB_LOW_MIN*ld)/hd;cs.disabled=false;
   document.getElementById('carbAvgHint').textContent='控制高碳日碳水倍數・週平均 '+t.carb.toFixed(1)+' 倍';
-  const carbPct=parseInt(cs.value)/100;
-  const carbHighVal=(cs._min+carbPct*(cs._max-cs._min));
-  document.getElementById('carbHighVal').textContent=carbHighVal.toFixed(2)+'x';
+  document.getElementById('carbHighVal').textContent=(cs._min+(parseInt(cs.value)/100)*(cs._max-cs._min)).toFixed(2)+'x';
   const fs=document.getElementById('fatSlider');
-  const fsMin=t.fat,fsMax=(t.fat*7-FAT_HIGH_MIN*hd)/ld;
-  fs._min=fsMin;fs._max=fsMax;
-  fs.disabled=false;
+  fs._min=t.fat;fs._max=(t.fat*7-FAT_HIGH_MIN*hd)/ld;fs.disabled=false;
   document.getElementById('fatAvgHint').textContent='控制低碳日脂肪倍數・週平均 '+t.fat.toFixed(1)+' 倍';
-  const fatPct=parseInt(fs.value)/100;
-  const fatLowVal=(fs._min+fatPct*(fs._max-fs._min));
-  document.getElementById('fatLowVal').textContent=fatLowVal.toFixed(2)+'x';
-}
-window.sliderToVal=function sliderToVal(s){const pct=parseInt(s.value)/100;return s._min+pct*(s._max-s._min);}
-window.recalc=function recalc(){
+  document.getElementById('fatLowVal').textContent=(fs._min+(parseInt(fs.value)/100)*(fs._max-fs._min)).toFixed(2)+'x';
+};
+window.sliderToVal=function(s){const pct=parseInt(s.value)/100;return s._min+pct*(s._max-s._min);};
+window.recalc=function(){
   const weight=parseFloat(document.getElementById('weight').value);
   const hd=parseInt(document.getElementById('highDays').value)||2,ld=7-hd;
   const meals=parseInt(document.getElementById('mealCount').value)||3;
   const t=getActiveTier();
   if(!t||!weight||weight<1){calcResult=null;updateResultCards();return;}
-  const cs=document.getElementById('carbSlider'),fs=document.getElementById('fatSlider');
   updateSliderBounds();
+  const cs=document.getElementById('carbSlider'),fs=document.getElementById('fatSlider');
   const carbHigh=sliderToVal(cs),carbLow=(t.carb*7-carbHigh*hd)/ld;
   const fatLow=sliderToVal(fs),fatHigh=(t.fat*7-fatLow*ld)/hd;
-  document.getElementById('carbHighVal').textContent=carbHigh.toFixed(2)+'x';
-  document.getElementById('fatLowVal').textContent=fatLow.toFixed(2)+'x';
   calcResult={high:{carb:Math.round(weight*carbHigh),prot:Math.round(weight*t.protein),fat:Math.round(weight*fatHigh),meals},low:{carb:Math.round(weight*carbLow),prot:Math.round(weight*t.protein),fat:Math.round(weight*fatLow),meals}};
   updateResultCards();
-  scheduleSave('calcSettings',getCalcSettingsObj());
-}
-window.updateResultCards=function updateResultCards(){
+  scheduleSave('calcSettings',{gender:selGender,tier:selTier,weight:document.getElementById('weight').value,highDays:document.getElementById('highDays').value,mealCount:meals,carbSlider:cs.value,fatSlider:fs.value,customCarb:document.getElementById('customCarb').value,customProtein:document.getElementById('customProtein').value,customFat:document.getElementById('customFat').value});
+};
+window.updateResultCards=function(){
   const rc=document.getElementById('resultCards'),cs=document.getElementById('collapsedSummary');
   if(!calcResult){rc.style.display='none';if(calcCollapsed)cs.style.display='none';return;}
   const h=calcResult.high,l=calcResult.low,m=h.meals;rc.style.display='grid';
@@ -453,49 +520,113 @@ window.updateResultCards=function updateResultCards(){
   set('cs-hdc',h.carb);set('cs-hdp',h.prot);set('cs-hdf',h.fat);set('cs-hmc',Math.round(h.carb/m));set('cs-hmp',Math.round(h.prot/m));set('cs-hmf',Math.round(h.fat/m));
   set('cs-ldc',l.carb);set('cs-ldp',l.prot);set('cs-ldf',l.fat);set('cs-lmc',Math.round(l.carb/m));set('cs-lmp',Math.round(l.prot/m));set('cs-lmf',Math.round(l.fat/m));
   if(calcCollapsed)cs.style.display='block';
-}
+};
 window.toggleCalc=()=>{calcCollapsed=!calcCollapsed;document.getElementById('calcBody').style.display=calcCollapsed?'none':'block';document.getElementById('collapseBtn').innerHTML=calcCollapsed?'展開 <i class="ti ti-chevron-down" style="font-size:13px;vertical-align:-1px"></i>':'收合 <i class="ti ti-chevron-up" style="font-size:13px;vertical-align:-1px"></i>';document.getElementById('collapsedSummary').style.display=(calcCollapsed&&calcResult)?'block':'none';};
+function applyCalcSettings(d){if(d.gender)selectGender(d.gender);if(d.tier){selTier=d.tier;document.querySelectorAll('.tier-btn').forEach(b=>b.classList.remove('active'));const tb=document.querySelector('[data-tier="'+d.tier+'"]');if(tb)tb.classList.add('active');document.getElementById('customInputs').style.display=d.tier===5?'block':'none';}if(d.weight)document.getElementById('weight').value=d.weight;if(d.highDays)document.getElementById('highDays').value=d.highDays;if(d.mealCount)document.getElementById('mealCount').value=d.mealCount;if(d.customCarb)document.getElementById('customCarb').value=d.customCarb;if(d.customProtein)document.getElementById('customProtein').value=d.customProtein;if(d.customFat)document.getElementById('customFat').value=d.customFat;clampDays();setTimeout(()=>{if(d.carbSlider)document.getElementById('carbSlider').value=d.carbSlider;if(d.fatSlider)document.getElementById('fatSlider').value=d.fatSlider;recalc();},100);}
 
 // ── Shared helpers ─────────────────────────────────────
 function resultSummaryHTML(){if(!calcResult)return'';const h=calcResult.high,l=calcResult.low,m=h.meals;return'<div class="result-cards" style="margin-bottom:1rem;"><div class="result-day-card"><div class="result-day-card-title high">高碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span>'+h.carb+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+h.prot+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+h.fat+'g</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span>'+Math.round(h.carb/m)+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+Math.round(h.prot/m)+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+Math.round(h.fat/m)+'g</span></div></div><div class="result-day-card"><div class="result-day-card-title low">低碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span>'+l.carb+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+l.prot+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+l.fat+'g</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span>'+Math.round(l.carb/m)+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+Math.round(l.prot/m)+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+Math.round(l.fat/m)+'g</span></div></div></div>';}
-function barHTML(used,total,baseColor,label,barId,pctId,remId){const over=used>total;const pct=Math.min(100,total>0?Math.round(used/total*100):0);const ids=barId?(' id="'+barId+'"'):'';const pids=pctId?(' id="'+pctId+'"'):'';const rids=remId?(' id="'+remId+'"'):'';return'<div class="macro-bar-wrap"><div class="macro-bar-label"><span>'+label+' <span class="badge badge-carb"'+pids+'>'+(over?'超出 '+Math.round(used-total)+'g':pct+'%')+'</span></span><span style="font-size:13px;font-weight:500;color:'+(over?'#E24B4A':'#666')+'"'+rids+'>'+(over?'超出 '+Math.round(used-total)+'g':'剩 '+Math.round(total-used)+'g')+'</span></div><div class="macro-bar-track"><div class="macro-bar-fill '+baseColor+'"'+ids+' style="width:'+pct+'%"></div></div></div>';}
 function remHTML(rem){if(rem<0)return'<div class="target-remain remain-over">超出 '+Math.round(Math.abs(rem))+'g</div>';return'<div class="target-remain remain-ok">剩 '+Math.round(rem)+'g</div>';}
-function renderFoodSectionHTML(type,label,badgeClass,md,prefix){const foodList=type==='carb'?foods.carb:type==='prot'?foods.protein:foods.fat;const items=md[type]||[];const itemsHTML=items.map((item,idx)=>'<div class="food-item"><div class="food-item-header"><span class="food-name">'+item.food.name+'</span><button class="food-remove" data-'+prefix+'-remove="'+type+'-'+idx+'" aria-label="移除">×</button></div><div class="food-grams"><input type="number" class="'+prefix+'-gram-input" data-'+prefix+'-gram="'+type+'-'+idx+'" value="'+item.grams+'" min="1" max="2000" style="width:70px;text-align:center;"/><span>g</span><span class="food-macros-inline" id="'+prefix+'-fml-'+type+'-'+idx+'">碳 '+(item.grams*item.food.c/100).toFixed(1)+'・蛋 '+(item.grams*item.food.p/100).toFixed(1)+'・脂 '+(item.grams*item.food.f/100).toFixed(1)+'</span></div></div>').join('');const opts=foodList.map(f=>'<option value="'+f.name+'">'+f.name+'</option>').join('')+'<option value="__custom__">自行輸入</option>';return'<div class="food-section"><div class="food-section-title"><span class="badge '+badgeClass+'">'+label+'</span></div><div class="food-list">'+itemsHTML+'</div><div class="add-food-row"><select data-'+prefix+'-add-type="'+type+'">'+opts+'</select><button data-'+prefix+'-add-btn="'+type+'">+ 新增</button></div><div class="custom-food-box" id="'+prefix+'-custom-box-'+type+'"><div class="custom-food-field"><label>食物名稱</label><input type="text" id="'+prefix+'-cf-name-'+type+'" placeholder="例如：茶葉蛋"/></div><div class="custom-food-row-3"><div class="custom-food-field"><label>碳水 (每100g)</label><input type="number" id="'+prefix+'-cf-c-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div><div class="custom-food-field"><label>蛋白質 (每100g)</label><input type="number" id="'+prefix+'-cf-p-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div><div class="custom-food-field"><label>脂肪 (每100g)</label><input type="number" id="'+prefix+'-cf-f-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div></div><div class="custom-food-field"><label>實際克數</label><input type="number" id="'+prefix+'-cf-g-'+type+'" placeholder="例如：100" min="1" max="2000"/></div></div></div>';}
+function barHTML(used,total,base,label,bid,pid,rid){const over=used>total;const pct=Math.min(100,total>0?Math.round(used/total*100):0);const bi=bid?' id="'+bid+'"':'',pi=pid?' id="'+pid+'"':'',ri=rid?' id="'+rid+'"':'';return'<div class="macro-bar-wrap"><div class="macro-bar-label"><span>'+label+' <span class="badge badge-carb"'+pi+'>'+(over?'超出 '+Math.round(used-total)+'g':pct+'%')+'</span></span><span style="font-size:13px;font-weight:500;color:'+(over?'#E24B4A':'#666')+'"'+ri+'>'+(over?'超出 '+Math.round(used-total)+'g':'剩 '+Math.round(total-used)+'g')+'</span></div><div class="macro-bar-track"><div class="macro-bar-fill '+base+'"'+bi+' style="width:'+pct+'%"></div></div></div>';}
 
-// ── Section 2: Template ────────────────────────────────
-function renderTemplate(){if(!calcResult){document.getElementById('tpl-no-calc').style.display='block';document.getElementById('tpl-main').style.display='none';return;}document.getElementById('tpl-no-calc').style.display='none';document.getElementById('tpl-main').style.display='block';if(!tplType)tplType='high';document.getElementById('tpl-btn-high').className='day-type-btn'+(tplType==='high'?' active-high':'');document.getElementById('tpl-btn-low').className='day-type-btn'+(tplType==='low'?' active-low':'');document.getElementById('tpl-summary').innerHTML=resultSummaryHTML();renderTplContent();}
-window.selectTplType=type=>{tplType=type;renderTemplate();};
-function getTplItems(type,mealKey){if(!tplData[type][mealKey])tplData[type][mealKey]={carb:[],prot:[],fat:[]};return tplData[type][mealKey];}
-function getTplTotals(type,mealKey){const md=getTplItems(type,mealKey);const all=[...md.carb,...md.prot,...md.fat];return{c:all.reduce((s,f)=>s+f.grams*(f.food.c/100),0),p:all.reduce((s,f)=>s+f.grams*(f.food.p/100),0),f:all.reduce((s,f)=>s+f.grams*(f.food.f/100),0)};}
-function renderTplContent(){
-  const day=calcResult[tplType];const meals=day.meals;const curMealKey='m'+tplMeal[tplType];const tc=document.getElementById('tpl-content');
-  let tC=0,tP=0,tF=0;for(let i=1;i<=meals;i++){const t=getTplTotals(tplType,'m'+i);tC+=t.c;tP+=t.p;tF+=t.f;}
-  let tabsHTML='';for(let i=1;i<=meals;i++){tabsHTML+='<button class="meal-tab'+(curMealKey==='m'+i?' active':'')+'" onclick="setTplMeal('+i+')">第 '+i+' 餐</button>';}
-  const md=getTplItems(tplType,curMealKey);const mCarb=Math.round(day.carb/meals),mProt=Math.round(day.prot/meals),mFat=Math.round(day.fat/meals);const cons=getTplTotals(tplType,curMealKey);
-  tc.innerHTML='<div class="card">'+barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+'</div><div class="card"><div class="meal-tabs">'+tabsHTML+'</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;"><div class="target-card"><div class="target-label">碳水目標</div><div class="target-val">'+mCarb+'g</div>'+remHTML(mCarb-cons.c)+'</div><div class="target-card"><div class="target-label">蛋白質目標</div><div class="target-val">'+mProt+'g</div>'+remHTML(mProt-cons.p)+'</div><div class="target-card"><div class="target-label">脂肪目標</div><div class="target-val">'+mFat+'g</div>'+remHTML(mFat-cons.f)+'</div></div>'+renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'tpl')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'tpl')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'tpl')+'</div>';
-  bindTplFoodEvents(day,curMealKey);
+function renderFoodSectionHTML(type,label,badgeClass,md,prefix){
+  const all=getAllFoods();const foodList=type==='carb'?all.carb:type==='prot'?all.protein:all.fat;
+  const items=md[type]||[];
+  const itemsHTML=items.map((item,idx)=>'<div class="food-item"><div class="food-item-header"><span class="food-name">'+item.food.name+'</span><button class="food-remove" data-'+prefix+'-remove="'+type+'-'+idx+'">×</button></div><div class="food-grams"><input type="number" class="'+prefix+'-gram-input" data-'+prefix+'-gram="'+type+'-'+idx+'" value="'+item.grams+'" min="1" max="2000" style="width:70px;text-align:center;"/><span>g</span><span class="food-macros-inline" id="'+prefix+'-fml-'+type+'-'+idx+'">碳 '+(item.grams*item.food.c/100).toFixed(1)+'・蛋 '+(item.grams*item.food.p/100).toFixed(1)+'・脂 '+(item.grams*item.food.f/100).toFixed(1)+'</span></div></div>').join('');
+  const opts=foodList.map(f=>'<option value="'+f.name+'">'+f.name+'</option>').join('')+'<option value="__custom__">自行輸入</option>';
+  return'<div class="food-section"><div class="food-section-title"><span class="badge '+badgeClass+'">'+label+'</span></div><div class="food-list">'+itemsHTML+'</div><div class="add-food-row"><select data-'+prefix+'-add-type="'+type+'">'+opts+'</select><button data-'+prefix+'-add-btn="'+type+'">+ 新增</button></div><div class="custom-food-box" id="'+prefix+'-custom-box-'+type+'"><div class="custom-food-field"><label>食物名稱</label><input type="text" id="'+prefix+'-cf-name-'+type+'" placeholder="例如：茶葉蛋"/></div><div class="custom-food-row-3"><div class="custom-food-field"><label>碳水 (每100g)</label><input type="number" id="'+prefix+'-cf-c-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div><div class="custom-food-field"><label>蛋白質 (每100g)</label><input type="number" id="'+prefix+'-cf-p-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div><div class="custom-food-field"><label>脂肪 (每100g)</label><input type="number" id="'+prefix+'-cf-f-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div></div><div class="custom-food-field"><label>實際克數</label><input type="number" id="'+prefix+'-cf-g-'+type+'" placeholder="例如：100" min="1" max="2000"/></div></div></div>';
 }
-window.setTplMeal=n=>{tplMeal[tplType]=n;renderTplContent();};
-function bindTplFoodEvents(day,mealKey){
-  document.querySelectorAll('[data-tpl-add-btn]').forEach(btn=>{btn.onclick=()=>{const type=btn.dataset.tplAddBtn;const sel=document.querySelector('[data-tpl-add-type="'+type+'"]');const md=getTplItems(tplType,mealKey);if(sel.value==='__custom__'){const name=document.getElementById('tpl-cf-name-'+type).value.trim()||'自訂食物';const c=parseFloat(document.getElementById('tpl-cf-c-'+type).value)||0;const p=parseFloat(document.getElementById('tpl-cf-p-'+type).value)||0;const f=parseFloat(document.getElementById('tpl-cf-f-'+type).value)||0;const g=Math.max(1,parseInt(document.getElementById('tpl-cf-g-'+type).value)||100);md[type].push({food:{name,c,p,f},grams:g});}else{const foodList=type==='carb'?foods.carb:type==='prot'?foods.protein:foods.fat;const food=foodList.find(f=>f.name===sel.value);if(!food)return;const mTarget=type==='carb'?Math.round(day.carb/day.meals):type==='prot'?Math.round(day.prot/day.meals):Math.round(day.fat/day.meals);const cons=getTplTotals(tplType,mealKey);const used=type==='carb'?cons.c:type==='prot'?cons.p:cons.f;const rem=Math.max(0,mTarget-used);const macro=type==='carb'?food.c:type==='prot'?food.p:food.f;let dg=macro>0&&rem>0?Math.round(rem/(macro/100)):100;dg=Math.max(1,Math.min(2000,dg||100));md[type].push({food,grams:dg});}scheduleSave('template',tplData);renderTplContent();};});
-  document.querySelectorAll('[data-tpl-remove]').forEach(btn=>{btn.onclick=()=>{getTplItems(tplType,mealKey)[btn.dataset.tplRemove.split('-')[0]].splice(parseInt(btn.dataset.tplRemove.split('-')[1]),1);scheduleSave('template',tplData);renderTplContent();};});
-  document.querySelectorAll('.tpl-gram-input').forEach(inp=>{inp.addEventListener('input',()=>{const[type,idx]=inp.dataset.tplGram.split('-');const v=Math.max(1,Math.min(2000,parseInt(inp.value)||1));getTplItems(tplType,mealKey)[type][parseInt(idx)].grams=v;scheduleSave('template',tplData);const cons=getTplTotals(tplType,mealKey);updateTplCards(day,cons);updateTplBars(day);updateFoodLabels(getTplItems(tplType,mealKey),'tpl');});inp.addEventListener('blur',()=>{if(!inp.value||parseInt(inp.value)<1)inp.value=1;const[type,idx]=inp.dataset.tplGram.split('-');getTplItems(tplType,mealKey)[type][parseInt(idx)].grams=parseInt(inp.value);});inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();});});
-  document.querySelectorAll('[data-tpl-add-type]').forEach(sel=>{sel.onchange=()=>{const box=document.getElementById('tpl-custom-box-'+sel.dataset.tplAddType);if(box)box.className='custom-food-box'+(sel.value==='__custom__'?' show':'');};});
-}
-function updateTplCards(day,cons){const meals=day.meals;const el=document.querySelector('[data-tpl-targets]');if(!el)return;const mC=Math.round(day.carb/meals),mP=Math.round(day.prot/meals),mF=Math.round(day.fat/meals);el.innerHTML='<div class="target-card"><div class="target-label">碳水目標</div><div class="target-val">'+mC+'g</div>'+remHTML(mC-cons.c)+'</div><div class="target-card"><div class="target-label">蛋白質目標</div><div class="target-val">'+mP+'g</div>'+remHTML(mP-cons.p)+'</div><div class="target-card"><div class="target-label">脂肪目標</div><div class="target-val">'+mF+'g</div>'+remHTML(mF-cons.f)+'</div>';}
-function updateTplBars(day){let tC=0,tP=0,tF=0;for(let i=1;i<=day.meals;i++){const t=getTplTotals(tplType,'m'+i);tC+=t.c;tP+=t.p;tF+=t.f;}function upB(id,used,total,base){const el=document.getElementById(id);if(!el)return;el.style.width=Math.min(100,total>0?Math.round(used/total*100):0)+'%';el.className='macro-bar-fill '+base;}upB('tpl-bar-c',tC,day.carb,'bar-carb');upB('tpl-bar-p',tP,day.prot,'bar-prot');upB('tpl-bar-f',tF,day.fat,'bar-fat');}
-function updateFoodLabels(md,prefix){['carb','prot','fat'].forEach(type=>{(md[type]||[]).forEach((item,idx)=>{const el=document.getElementById(prefix+'-fml-'+type+'-'+idx);if(el)el.textContent='碳 '+(item.grams*item.food.c/100).toFixed(1)+'・蛋 '+(item.grams*item.food.p/100).toFixed(1)+'・脂 '+(item.grams*item.food.f/100).toFixed(1);});});}
 
-// ── Section 3: Diary ──────────────────────────────────
-function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function dayOfWeek(d){return(d.getDay()+6)%7;}// Mon=0
+function bindFoodEvents(prefix,getMd,onUpdate,getTargets){
+  document.querySelectorAll('[data-'+prefix+'-add-btn]').forEach(btn=>{
+    btn.onclick=()=>{
+      const type=btn.dataset[prefix+'AddBtn'];
+      const sel=document.querySelector('[data-'+prefix+'-add-type="'+type+'"]');
+      const md=getMd(type);
+      if(sel.value==='__custom__'){
+        const name=document.getElementById(prefix+'-cf-name-'+type).value.trim()||'自訂食物';
+        const c=parseFloat(document.getElementById(prefix+'-cf-c-'+type).value)||0;
+        const p=parseFloat(document.getElementById(prefix+'-cf-p-'+type).value)||0;
+        const f=parseFloat(document.getElementById(prefix+'-cf-f-'+type).value)||0;
+        const g=Math.max(1,parseInt(document.getElementById(prefix+'-cf-g-'+type).value)||100);
+        md.push({food:{name,c,p,f},grams:g});
+      } else {
+        const all=getAllFoods();const foodList=type==='carb'?all.carb:type==='prot'?all.protein:all.fat;
+        const food=foodList.find(f=>f.name===sel.value);if(!food)return;
+        const tgt=getTargets?getTargets(type):null;
+        const used=md.reduce((s,i)=>s+i.grams*(type==='carb'?i.food.c:type==='prot'?i.food.p:i.food.f)/100,0);
+        const rem=tgt!=null?Math.max(0,tgt-used):null;
+        const macro=type==='carb'?food.c:type==='prot'?food.p:food.f;
+        let dg=macro>0&&rem!=null&&rem>0?Math.round(rem/(macro/100)):100;
+        dg=Math.max(1,Math.min(2000,dg||100));
+        md.push({food,grams:dg});
+      }
+      onUpdate();
+    };
+  });
+  document.querySelectorAll('[data-'+prefix+'-remove]').forEach(btn=>{btn.onclick=()=>{const[type,idx]=btn.dataset[prefix+'Remove'].split('-');getMd(type).splice(parseInt(idx),1);onUpdate();};});
+  document.querySelectorAll('.'+prefix+'-gram-input').forEach(inp=>{
+    inp.addEventListener('input',()=>{const[type,idx]=inp.dataset[prefix+'Gram'].split('-');const v=Math.max(1,Math.min(2000,parseInt(inp.value)||1));getMd(type)[parseInt(idx)].grams=v;onUpdate(true);});
+    inp.addEventListener('blur',()=>{if(!inp.value||parseInt(inp.value)<1)inp.value=1;});
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();});
+  });
+  document.querySelectorAll('[data-'+prefix+'-add-type]').forEach(sel=>{sel.onchange=()=>{const box=document.getElementById(prefix+'-custom-box-'+sel.dataset[prefix+'AddType']);if(box)box.className='custom-food-box'+(sel.value==='__custom__'?' show':'');};});
+}
+
+// ── Section 3: Templates ───────────────────────────────
+window.openNewTplModal=()=>{document.getElementById('newTplName').value='';document.getElementById('newTplModal').classList.add('show');};
+window.closeNewTplModal=()=>document.getElementById('newTplModal').classList.remove('show');
+window.createTemplate=()=>{
+  const name=document.getElementById('newTplName').value.trim();
+  if(!name)return alert('請輸入模板名稱');
+  const type=document.getElementById('newTplType').value;
+  const meals=calcResult?calcResult[type].meals:3;
+  const tpl={id:'tpl_'+Date.now(),name,type,meals:{},dayType:type};
+  for(let i=1;i<=meals;i++)tpl.meals['m'+i]={carb:[],prot:[],fat:[]};
+  templates.push(tpl);
+  scheduleSave('templates',templates);
+  closeNewTplModal();
+  curTplId=tpl.id;
+  renderTemplateSection();
+};
+
+function renderTemplateSection(){
+  if(!calcResult){document.getElementById('tpl-no-calc').style.display='block';document.getElementById('tpl-main').style.display='none';return;}
+  document.getElementById('tpl-no-calc').style.display='none';document.getElementById('tpl-main').style.display='block';
+  document.getElementById('tpl-summary').innerHTML=resultSummaryHTML();
+  const listEl=document.getElementById('tpl-list');
+  if(templates.length===0){listEl.innerHTML='<div class="empty-track" style="padding:1rem 0;">還沒有模板，點右上角新增</div>';}
+  else{
+    listEl.innerHTML='<div class="tpl-list">'+templates.map(t=>'<div class="tpl-card"><div class="tpl-card-header"><div><div class="tpl-card-name">'+t.name+'</div><div class="tpl-card-meta">'+(t.dayType==='high'?'高碳日':'低碳日')+'・'+Object.keys(t.meals).length+' 餐</div></div><div class="tpl-card-actions"><button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="editTemplate(\''+t.id+'\')">編輯</button><button class="btn btn-red" style="font-size:12px;padding:5px 10px;" onclick="deleteTemplate(\''+t.id+'\')">刪除</button></div></div></div>').join('')+'</div>';
+  }
+  if(curTplId)renderTplEditor();else document.getElementById('tpl-editor').innerHTML='';
+}
+
+window.editTemplate=id=>{curTplId=id;renderTplEditor();};
+window.deleteTemplate=id=>{if(!confirm('確定要刪除這個模板？'))return;templates=templates.filter(t=>t.id!==id);if(curTplId===id){curTplId=null;document.getElementById('tpl-editor').innerHTML='';}scheduleSave('templates',templates);renderTemplateSection();};
+
+function renderTplEditor(){
+  const tpl=templates.find(t=>t.id===curTplId);if(!tpl)return;
+  const day=calcResult[tpl.dayType];const meals=Object.keys(tpl.meals).length;
+  const curMealKey=tpl._curMeal||'m1';if(!tpl.meals[curMealKey])tpl.meals[curMealKey]={carb:[],prot:[],fat:[]};
+  const md=tpl.meals[curMealKey];
+  let tC=0,tP=0,tF=0;Object.values(tpl.meals).forEach(m=>{const all=[...m.carb,...m.prot,...m.fat];tC+=all.reduce((s,f)=>s+f.grams*(f.food.c/100),0);tP+=all.reduce((s,f)=>s+f.grams*(f.food.p/100),0);tF+=all.reduce((s,f)=>s+f.grams*(f.food.f/100),0);});
+  const mCarb=Math.round(day.carb/meals),mProt=Math.round(day.prot/meals),mFat=Math.round(day.fat/meals);
+  const cons={c:([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(f.food.c/100),0),p:([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(f.food.p/100),0),f:([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(f.food.f/100),0)};
+  let tabs='';for(let i=1;i<=meals;i++)tabs+='<button class="meal-tab'+(curMealKey==='m'+i?' active':'')+'" onclick="setTplEditorMeal(\''+tpl.id+'\',\'m'+i+'\')">第 '+i+' 餐</button>';
+  document.getElementById('tpl-editor').innerHTML='<div class="card" style="border-top:2px solid #1D9E75;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;"><div style="font-size:14px;font-weight:500;">編輯：'+tpl.name+'</div><button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="curTplId=null;document.getElementById(\'tpl-editor\').innerHTML=\'\'">完成</button></div>'+barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+'<div class="meal-tabs" style="margin-top:1rem;">'+tabs+'</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;"><div class="target-card"><div class="target-label">碳水目標</div><div class="target-val">'+mCarb+'g</div>'+remHTML(mCarb-cons.c)+'</div><div class="target-card"><div class="target-label">蛋白質目標</div><div class="target-val">'+mProt+'g</div>'+remHTML(mProt-cons.p)+'</div><div class="target-card"><div class="target-label">脂肪目標</div><div class="target-val">'+mFat+'g</div>'+remHTML(mFat-cons.f)+'</div></div>'+renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'tpl')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'tpl')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'tpl')+'</div>';
+  bindFoodEvents('tpl',type=>{if(!tpl.meals[curMealKey])tpl.meals[curMealKey]={carb:[],prot:[],fat:[]};return tpl.meals[curMealKey][type];},()=>{scheduleSave('templates',templates);renderTplEditor();},(type)=>{const c=([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(type==='carb'?f.food.c:type==='prot'?f.food.p:f.food.f)/100,0);return type==='carb'?mCarb-c:type==='prot'?mProt-c:mFat-c;});
+}
+window.setTplEditorMeal=(id,key)=>{const tpl=templates.find(t=>t.id===id);if(tpl){tpl._curMeal=key;renderTplEditor();}};
+
+// ── Section 2: Diary ──────────────────────────────────
+function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function dayOfWeek(d){return(d.getDay()+6)%7;}
 function isHighDay(d){return highDays.has(dayOfWeek(d));}
-function getDiaryEntry(dateStr){if(!diaryEntries[dateStr])diaryEntries[dateStr]={meals:{},extras:[],extraCount:0};return diaryEntries[dateStr];}
-function getDiaryItems(dateStr,mealKey){const e=getDiaryEntry(dateStr);if(!e.meals[mealKey])e.meals[mealKey]={carb:[],prot:[],fat:[]};return e.meals[mealKey];}
-function getDiaryTotals(dateStr,mealKey){const md=getDiaryItems(dateStr,mealKey);const all=[...md.carb,...md.prot,...md.fat];return{c:all.reduce((s,f)=>s+f.grams*(f.food.c/100),0),p:all.reduce((s,f)=>s+f.grams*(f.food.p/100),0),f:all.reduce((s,f)=>s+f.grams*(f.food.f/100),0)};}
-function saveDiaryEntry(dateStr){scheduleSave('diaryEntries_'+dateStr,diaryEntries[dateStr]);}
-
-async function saveData(key,data){if(!currentUser)return;try{if(key.startsWith('diaryEntries_')){const dateStr=key.replace('diaryEntries_','');await setDoc(doc(db,'users',currentUser.uid,'diaryEntries',dateStr),{value:JSON.stringify(data),updatedAt:Date.now()});}else{await setDoc(doc(db,'users',currentUser.uid,key,'data'),{value:JSON.stringify(data),updatedAt:Date.now()});}showSaveIndicator('已儲存');}catch(e){console.error(e);showSaveIndicator('儲存失敗');}}
+function getDiaryEntry(dk){if(!diaryEntries[dk])diaryEntries[dk]={meals:{},extras:[],extraCount:0};return diaryEntries[dk];}
+function getDiaryItems(dk,mk){const e=getDiaryEntry(dk);if(!e.meals[mk])e.meals[mk]={carb:[],prot:[],fat:[]};return e.meals[mk];}
+function getDiaryTotals(dk,mk){const md=getDiaryItems(dk,mk);const all=[...md.carb,...md.prot,...md.fat];return{c:all.reduce((s,f)=>s+f.grams*(f.food.c/100),0),p:all.reduce((s,f)=>s+f.grams*(f.food.p/100),0),f:all.reduce((s,f)=>s+f.grams*(f.food.f/100),0)};}
+function saveDiary(dk){scheduleSave('diary_'+dk,diaryEntries[dk]);}
 
 function renderDiary(){
   if(!calcResult){document.getElementById('diary-no-calc').style.display='block';document.getElementById('diary-main').style.display='none';return;}
@@ -504,18 +635,19 @@ function renderDiary(){
   renderWeekdayGrid();renderCalendar();renderDiaryContent();
 }
 function renderWeekdayGrid(){
-  const grid=document.getElementById('weekdayGrid');grid.innerHTML='';
-  ['一','二','三','四','五','六','日'].forEach((name,i)=>{const btn=document.createElement('button');btn.className='weekday-btn'+(highDays.has(i)?' is-high':'');btn.textContent='週'+name;btn.onclick=()=>{if(highDays.has(i))highDays.delete(i);else highDays.add(i);scheduleSave('diaryConfig',{highDays:[...highDays]});renderDiary();};grid.appendChild(btn);});
+  const g=document.getElementById('weekdayGrid');g.innerHTML='';
+  ['一','二','三','四','五','六','日'].forEach((n,i)=>{const b=document.createElement('button');b.className='weekday-btn'+(highDays.has(i)?' is-high':'');b.textContent='週'+n;b.onclick=()=>{if(highDays.has(i))highDays.delete(i);else highDays.add(i);scheduleSave('diaryConfig',{highDays:[...highDays]});renderDiary();};g.appendChild(b);});
 }
 function renderCalendar(){
   const y=curCalDate.getFullYear(),m=curCalDate.getMonth();
   document.getElementById('calTitle').textContent=y+'年 '+(m+1)+'月';
-  const labels=document.getElementById('calDayLabels');labels.innerHTML=['一','二','三','四','五','六','日'].map(d=>'<div class="cal-day-label">'+d+'</div>').join('');
+  document.getElementById('calDayLabels').innerHTML=['一','二','三','四','五','六','日'].map(d=>'<div class="cal-day-label">'+d+'</div>').join('');
   const grid=document.getElementById('calGrid');grid.innerHTML='';
-  const firstDay=new Date(y,m,1);const startDow=dayOfWeek(firstDay);const daysInMonth=new Date(y,m+1,0).getDate();const today=dateKey(new Date());
+  const first=new Date(y,m,1),startDow=dayOfWeek(first),days=new Date(y,m+1,0).getDate(),today=dateKey(new Date());
   for(let i=0;i<startDow;i++){const el=document.createElement('div');el.className='cal-day empty';grid.appendChild(el);}
-  for(let d=1;d<=daysInMonth;d++){
-    const date=new Date(y,m,d);const dk=dateKey(date);const isH=isHighDay(date);const hasData=diaryEntries[dk]&&Object.values(diaryEntries[dk].meals||{}).some(md=>['carb','prot','fat'].some(t=>(md[t]||[]).length>0));
+  for(let d=1;d<=days;d++){
+    const date=new Date(y,m,d),dk=dateKey(date),isH=isHighDay(date);
+    const hasData=diaryEntries[dk]&&Object.values(diaryEntries[dk].meals||{}).some(md=>['carb','prot','fat'].some(t=>(md[t]||[]).length>0));
     const btn=document.createElement('button');
     btn.className='cal-day'+(dk===today?' today':'')+(selDate===dk?' selected':'')+(isH?' is-high':' is-low')+(hasData?' has-data':'');
     btn.innerHTML=d+'<div class="cal-day-type">'+(isH?'高碳':'低碳')+'</div>';
@@ -526,61 +658,43 @@ function renderCalendar(){
 window.calPrevMonth=()=>{curCalDate=new Date(curCalDate.getFullYear(),curCalDate.getMonth()-1,1);renderCalendar();};
 window.calNextMonth=()=>{curCalDate=new Date(curCalDate.getFullYear(),curCalDate.getMonth()+1,1);renderCalendar();};
 
-function computeDiaryTargets(dateStr){
-  const date=new Date(dateStr);const dayType=isHighDay(date)?'high':'low';const day=calcResult[dayType];
-  const entry=getDiaryEntry(dateStr);let remC=day.carb,remP=day.prot,remF=day.fat,remMeals=day.meals;
+function computeDiaryTargets(dk){
+  const date=new Date(dk),dayType=isHighDay(date)?'high':'low',day=calcResult[dayType];
+  const entry=getDiaryEntry(dk);let remC=day.carb,remP=day.prot,remF=day.fat,remM=day.meals;
   const allSlots=[];
   for(let i=1;i<=day.meals;i++){allSlots.push({key:'m'+i,label:'第 '+i+' 餐',isExtra:false});(entry.extras||[]).filter(e=>e.after===i).forEach(e=>allSlots.push({key:e.key,label:e.label,isExtra:true}));}
   const targets={};
-  allSlots.forEach(slot=>{if(slot.isExtra){const t=getDiaryTotals(dateStr,slot.key);targets[slot.key]={c:0,p:0,f:0,consumed:t};remC-=t.c;remP-=t.p;remF-=t.f;}else{const share=remMeals>0?1/remMeals:0;targets[slot.key]={c:Math.round(remC*share),p:Math.round(remP*share),f:Math.round(remF*share),consumed:getDiaryTotals(dateStr,slot.key)};const t=getDiaryTotals(dateStr,slot.key);remC-=t.c;remP-=t.p;remF-=t.f;remMeals--;}});
+  allSlots.forEach(slot=>{
+    if(slot.isExtra){const t=getDiaryTotals(dk,slot.key);targets[slot.key]={c:0,p:0,f:0,consumed:t};remC-=t.c;remP-=t.p;remF-=t.f;}
+    else{const s=remM>0?1/remM:0;targets[slot.key]={c:Math.round(remC*s),p:Math.round(remP*s),f:Math.round(remF*s),consumed:getDiaryTotals(dk,slot.key)};const t=getDiaryTotals(dk,slot.key);remC-=t.c;remP-=t.p;remF-=t.f;remM--;}
+  });
   return{targets,allSlots,day};
 }
 
-function initDiaryFromTemplate(dateStr){
-  const entry=getDiaryEntry(dateStr);if(entry._initialized)return;
-  const date=new Date(dateStr);const dayType=isHighDay(date)?'high':'low';const day=calcResult[dayType];
-  for(let i=1;i<=day.meals;i++){const key='m'+i;if(!entry.meals[key]){const tplMd=tplData[dayType][key];entry.meals[key]=tplMd?{carb:JSON.parse(JSON.stringify(tplMd.carb||[])),prot:JSON.parse(JSON.stringify(tplMd.prot||[])),fat:JSON.parse(JSON.stringify(tplMd.fat||[]))}:{carb:[],prot:[],fat:[]};}}
-  entry._initialized=true;
-}
+// Apply template modal
+window.openApplyModal=()=>{
+  if(templates.length===0){alert('還沒有建立任何模板');return;}
+  const date=new Date(selDate),dayType=isHighDay(date)?'high':'low';
+  const matched=templates.filter(t=>t.dayType===dayType);
+  const listEl=document.getElementById('applyTplList');
+  if(matched.length===0){listEl.innerHTML='<div style="color:#888;font-size:13px;padding:8px 0;">沒有符合今天類型（'+(dayType==='high'?'高碳日':'低碳日')+'）的模板</div>';}
+  else{listEl.innerHTML=matched.map(t=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.06);"><div><div style="font-size:13px;font-weight:500;">'+t.name+'</div><div style="font-size:12px;color:#888;">'+Object.keys(t.meals).length+' 餐</div></div><button class="btn btn-green" style="font-size:12px;padding:5px 12px;" onclick="applyTemplate(\''+t.id+'\')">套用</button></div>').join('');}
+  document.getElementById('applyTplModal').classList.add('show');
+};
+window.closeApplyModal=()=>document.getElementById('applyTplModal').classList.remove('show');
+window.applyTemplate=id=>{
+  const tpl=templates.find(t=>t.id===id);if(!tpl||!selDate)return;
+  const entry=getDiaryEntry(selDate);
+  Object.entries(tpl.meals).forEach(([mk,tplMd])=>{
+    if(!entry.meals[mk])entry.meals[mk]={carb:[],prot:[],fat:[]};
+    ['carb','prot','fat'].forEach(type=>{
+      (tplMd[type]||[]).forEach(item=>entry.meals[mk][type].push(JSON.parse(JSON.stringify(item))));
+    });
+  });
+  saveDiary(selDate);closeApplyModal();renderDiaryContent();renderCalendar();
+};
 
 function renderDiaryContent(){
-  const dc=document.getElementById('diary-content');
-  if(!selDate){dc.innerHTML='<div class="card"><div class="empty-track">請選擇日期查看飲食記錄</div></div>';return;}
-  initDiaryFromTemplate(selDate);
-  const{targets,allSlots,day}=computeDiaryTargets(selDate);
-  if(!curDiaryMeal)curDiaryMeal=allSlots[0]?.key||'m1';
-  const slot=allSlots.find(s=>s.key===curDiaryMeal)||allSlots[0];
-  const entry=getDiaryEntry(selDate);
-  // Day totals
-  let tC=0,tP=0,tF=0;Object.values(entry.meals||{}).forEach(md=>{['carb','prot','fat'].forEach(t=>{(md[t]||[]).forEach(item=>{tC+=item.grams*(item.food.c/100);tP+=item.grams*(item.food.p/100);tF+=item.grams*(item.food.f/100);});});});
-  // Meal tabs
-  let tabsHTML='';allSlots.forEach(s=>{tabsHTML+='<button class="meal-tab'+(s.isExtra?' extra-tab':'')+(s.key===curDiaryMeal?' active':'')+'" onclick="setDiaryMeal(\''+s.key+'\')">'+s.label+'</button>';});
-  tabsHTML+='<button class="add-extra-btn" onclick="addDiaryExtra()">+ 額外餐食</button>';
-  const tgt=targets[slot?.key]||{c:0,p:0,f:0,consumed:{c:0,p:0,f:0}};const cons=tgt.consumed;
-  let extraPosHTML='';
-  if(slot?.isExtra){const ex=(entry.extras||[]).find(e=>e.key===slot.key);const posOpts=Array.from({length:day.meals},(_,i)=>'<option value="'+(i+1)+'" '+(ex?.after===i+1?'selected':'')+'>第 '+(i+1)+' 餐後</option>').join('');extraPosHTML='<div class="extra-pos-row"><span class="badge badge-extra">額外餐食</span><label>插入位置</label><select style="flex:1;" onchange="updateDiaryExtraPos(\''+slot.key+'\',this.value)">'+posOpts+'</select><button class="extra-remove-btn" onclick="removeDiaryExtra(\''+slot.key+'\')">刪除</button></div>';}
-  const md=getDiaryItems(selDate,slot?.key||'m1');
-  const dateObj=new Date(selDate);const dayType=isHighDay(dateObj)?'high':'low';const dateLabel=selDate.replace(/-/g,'/')+'（'+(dayType==='high'?'高碳日':'低碳日')+'）';
-  dc.innerHTML='<div style="font-size:14px;font-weight:500;color:#1a1a18;margin-bottom:1rem;">'+dateLabel+'</div><div class="card">'+barHTML(tC,day.carb,'bar-carb','碳水','d-bar-carb','d-pct-carb','d-rem-carb')+barHTML(tP,day.prot,'bar-prot','蛋白質','d-bar-prot','d-pct-prot','d-rem-prot')+barHTML(tF,day.fat,'bar-fat','脂肪','d-bar-fat','d-pct-fat','d-rem-fat')+'</div><div class="card"><div class="meal-tabs">'+tabsHTML+'</div>'+extraPosHTML+'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;" id="diary-target-cards"><div class="target-card"><div class="target-label">'+(slot?.isExtra?'碳水攝入':'碳水目標')+'</div><div class="target-val">'+(slot?.isExtra?Math.round(cons.c):tgt.c)+'g</div>'+(slot?.isExtra?'':remHTML(tgt.c-cons.c))+'</div><div class="target-card"><div class="target-label">'+(slot?.isExtra?'蛋白質攝入':'蛋白質目標')+'</div><div class="target-val">'+(slot?.isExtra?Math.round(cons.p):tgt.p)+'g</div>'+(slot?.isExtra?'':remHTML(tgt.p-cons.p))+'</div><div class="target-card"><div class="target-label">'+(slot?.isExtra?'脂肪攝入':'脂肪目標')+'</div><div class="target-val">'+(slot?.isExtra?Math.round(cons.f):tgt.f)+'g</div>'+(slot?.isExtra?'':remHTML(tgt.f-cons.f))+'</div></div>'+renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'diary')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'diary')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'diary')+'</div>';
-  bindDiaryFoodEvents(day,slot);
-}
-window.setDiaryMeal=key=>{curDiaryMeal=key;renderDiaryContent();};
-window.addDiaryExtra=()=>{const entry=getDiaryEntry(selDate);entry.extraCount=(entry.extraCount||0)+1;const key='de'+entry.extraCount;const day=calcResult[isHighDay(new Date(selDate))?'high':'low'];(entry.extras=entry.extras||[]).push({key,label:'額外 '+entry.extraCount,after:day.meals});curDiaryMeal=key;saveDiaryEntry(selDate);renderDiaryContent();};
-window.removeDiaryExtra=key=>{const entry=getDiaryEntry(selDate);entry.extras=(entry.extras||[]).filter(e=>e.key!==key);delete entry.meals[key];curDiaryMeal=null;saveDiaryEntry(selDate);renderDiaryContent();};
-window.updateDiaryExtraPos=(key,after)=>{const entry=getDiaryEntry(selDate);const ex=(entry.extras||[]).find(e=>e.key===key);if(ex)ex.after=parseInt(after);saveDiaryEntry(selDate);renderDiaryContent();};
-
-function bindDiaryFoodEvents(day,slot){
-  if(!slot)return;
-  document.querySelectorAll('[data-diary-add-btn]').forEach(btn=>{btn.onclick=()=>{const type=btn.dataset.diaryAddBtn;const sel=document.querySelector('[data-diary-add-type="'+type+'"]');const md=getDiaryItems(selDate,slot.key);if(sel.value==='__custom__'){const name=document.getElementById('diary-cf-name-'+type).value.trim()||'自訂食物';const c=parseFloat(document.getElementById('diary-cf-c-'+type).value)||0;const p=parseFloat(document.getElementById('diary-cf-p-'+type).value)||0;const f=parseFloat(document.getElementById('diary-cf-f-'+type).value)||0;const g=Math.max(1,parseInt(document.getElementById('diary-cf-g-'+type).value)||100);md[type].push({food:{name,c,p,f},grams:g});}else{const foodList=type==='carb'?foods.carb:type==='prot'?foods.protein:foods.fat;const food=foodList.find(f=>f.name===sel.value);if(!food)return;const{targets}=computeDiaryTargets(selDate);const tgt=targets[slot.key]||{c:0,p:0,f:0};const fullTarget=type==='carb'?tgt.c:type==='prot'?tgt.p:tgt.f;const cons=getDiaryTotals(selDate,slot.key);const used=type==='carb'?cons.c:type==='prot'?cons.p:cons.f;const rem=Math.max(0,fullTarget-used);const macro=type==='carb'?food.c:type==='prot'?food.p:food.f;let dg=macro>0&&rem>0?Math.round(rem/(macro/100)):100;dg=Math.max(1,Math.min(2000,dg||100));md[type].push({food,grams:dg});}saveDiaryEntry(selDate);renderDiaryContent();};});
-  document.querySelectorAll('[data-diary-remove]').forEach(btn=>{btn.onclick=()=>{const[type,idx]=btn.dataset.diaryRemove.split('-');getDiaryItems(selDate,slot.key)[type].splice(parseInt(idx),1);saveDiaryEntry(selDate);renderDiaryContent();};});
-  document.querySelectorAll('.diary-gram-input').forEach(inp=>{
-    inp.addEventListener('input',()=>{const[type,idx]=inp.dataset.diaryGram.split('-');const v=Math.max(1,Math.min(2000,parseInt(inp.value)||1));getDiaryItems(selDate,slot.key)[type][parseInt(idx)].grams=v;saveDiaryEntry(selDate);updateDiaryBarsAndTargets(day,slot);updateFoodLabels(getDiaryItems(selDate,slot.key),'diary');});
-    inp.addEventListener('blur',()=>{if(!inp.value||parseInt(inp.value)<1)inp.value=1;const[type,idx]=inp.dataset.diaryGram.split('-');getDiaryItems(selDate,slot.key)[type][parseInt(idx)].grams=parseInt(inp.value);});
-    inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();});
-  });
-  document.querySelectorAll('[data-diary-add-type]').forEach(sel=>{sel.onchange=()=>{const box=document.getElementById('diary-custom-box-'+sel.dataset.diaryAddType);if(box)box.className='custom-food-box'+(sel.value==='__custom__'?' show':'');};});
-}
-function updateDiaryBarsAndTargets(day,slot){
   if(!selDate)return;
   const entry=getDiaryEntry(selDate);let tC=0,tP=0,tF=0;Object.values(entry.meals||{}).forEach(md=>{['carb','prot','fat'].forEach(t=>{(md[t]||[]).forEach(item=>{tC+=item.grams*(item.food.c/100);tP+=item.grams*(item.food.p/100);tF+=item.grams*(item.food.f/100);});});});
   function upB(barId,pctId,remId,used,total,base){const over=used>total;const pct=Math.min(100,total>0?Math.round(used/total*100):0);const b=document.getElementById(barId),p=document.getElementById(pctId),r=document.getElementById(remId);if(b){b.style.width=pct+'%';b.className='macro-bar-fill '+base;}if(p)p.textContent=over?'超出 '+Math.round(used-total)+'g':pct+'%';if(r){r.textContent=over?'超出 '+Math.round(used-total)+'g':'剩 '+Math.round(total-used)+'g';r.style.color=over?'#E24B4A':'';}};
