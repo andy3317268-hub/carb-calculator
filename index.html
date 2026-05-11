@@ -695,11 +695,57 @@ window.applyTemplate=id=>{
 };
 
 function renderDiaryContent(){
-  if(!selDate)return;
-  const entry=getDiaryEntry(selDate);let tC=0,tP=0,tF=0;Object.values(entry.meals||{}).forEach(md=>{['carb','prot','fat'].forEach(t=>{(md[t]||[]).forEach(item=>{tC+=item.grams*(item.food.c/100);tP+=item.grams*(item.food.p/100);tF+=item.grams*(item.food.f/100);});});});
-  function upB(barId,pctId,remId,used,total,base){const over=used>total;const pct=Math.min(100,total>0?Math.round(used/total*100):0);const b=document.getElementById(barId),p=document.getElementById(pctId),r=document.getElementById(remId);if(b){b.style.width=pct+'%';b.className='macro-bar-fill '+base;}if(p)p.textContent=over?'超出 '+Math.round(used-total)+'g':pct+'%';if(r){r.textContent=over?'超出 '+Math.round(used-total)+'g':'剩 '+Math.round(total-used)+'g';r.style.color=over?'#E24B4A':'';}};
-  upB('d-bar-carb','d-pct-carb','d-rem-carb',tC,day.carb,'bar-carb');upB('d-bar-prot','d-pct-prot','d-rem-prot',tP,day.prot,'bar-prot');upB('d-bar-fat','d-pct-fat','d-rem-fat',tF,day.fat,'bar-fat');
-  if(!slot?.isExtra){const{targets}=computeDiaryTargets(selDate);const tgt=targets[slot.key]||{c:0,p:0,f:0,consumed:{c:0,p:0,f:0}};const cons=tgt.consumed;const el=document.getElementById('diary-target-cards');if(el)el.innerHTML='<div class="target-card"><div class="target-label">碳水目標</div><div class="target-val">'+tgt.c+'g</div>'+remHTML(tgt.c-cons.c)+'</div><div class="target-card"><div class="target-label">蛋白質目標</div><div class="target-val">'+tgt.p+'g</div>'+remHTML(tgt.p-cons.p)+'</div><div class="target-card"><div class="target-label">脂肪目標</div><div class="target-val">'+tgt.f+'g</div>'+remHTML(tgt.f-cons.f)+'</div>';}
+  const dc=document.getElementById('diary-content');
+  if(!selDate){dc.innerHTML='<div class="card"><div class="empty-track">請選擇日期查看飲食記錄</div></div>';return;}
+  const{targets,allSlots,day}=computeDiaryTargets(selDate);
+  if(!curDiaryMeal)curDiaryMeal=allSlots[0]?.key||'m1';
+  const slot=allSlots.find(s=>s.key===curDiaryMeal)||allSlots[0];
+  const entry=getDiaryEntry(selDate);
+  let tC=0,tP=0,tF=0;
+  Object.values(entry.meals||{}).forEach(md=>{
+    ['carb','prot','fat'].forEach(t=>{(md[t]||[]).forEach(item=>{tC+=item.grams*(item.food.c/100);tP+=item.grams*(item.food.p/100);tF+=item.grams*(item.food.f/100);});});
+  });
+  const tgt=targets[slot?.key]||{c:0,p:0,f:0,consumed:{c:0,p:0,f:0}};
+  const cons=tgt.consumed;
+  const dateObj=new Date(selDate),dayType=isHighDay(dateObj)?'high':'low';
+
+  // Build tabs
+  let tabsHTML='';
+  allSlots.forEach(s=>{
+    const cls='meal-tab'+(s.isExtra?' extra-tab':'')+(s.key===curDiaryMeal?' active':'');
+    tabsHTML+=`<button class="${cls}" onclick="setDiaryMeal('${s.key}')">${s.label}</button>`;
+  });
+  tabsHTML+='<button class="add-extra-btn" onclick="addDiaryExtra()">+ 額外餐食</button>';
+
+  // Extra position row
+  let extraPos='';
+  if(slot?.isExtra){
+    const ex=(entry.extras||[]).find(e=>e.key===slot.key);
+    let opts='';
+    for(let i=1;i<=day.meals;i++){opts+=`<option value="${i}" ${ex?.after===i?'selected':''}>第 ${i} 餐後</option>`;}
+    extraPos=`<div class="extra-pos-row"><span class="badge badge-extra">額外餐食</span><label>插入位置</label><select style="flex:1;" onchange="updateDiaryExtraPos('${slot.key}',this.value)">${opts}</select><button class="extra-remove-btn" onclick="removeDiaryExtra('${slot.key}')">刪除</button></div>`;
+  }
+
+  // Target cards
+  const tcHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;" id="diary-target-cards">
+    <div class="target-card"><div class="target-label">${slot?.isExtra?'碳水攝入':'碳水目標'}</div><div class="target-val">${slot?.isExtra?Math.round(cons.c):tgt.c}g</div>${slot?.isExtra?'':remHTML(tgt.c-cons.c)}</div>
+    <div class="target-card"><div class="target-label">${slot?.isExtra?'蛋白質攝入':'蛋白質目標'}</div><div class="target-val">${slot?.isExtra?Math.round(cons.p):tgt.p}g</div>${slot?.isExtra?'':remHTML(tgt.p-cons.p)}</div>
+    <div class="target-card"><div class="target-label">${slot?.isExtra?'脂肪攝入':'脂肪目標'}</div><div class="target-val">${slot?.isExtra?Math.round(cons.f):tgt.f}g</div>${slot?.isExtra?'':remHTML(tgt.f-cons.f)}</div>
+  </div>`;
+
+  const md=getDiaryItems(selDate,slot?.key||'m1');
+  dc.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+    <div style="font-size:14px;font-weight:500;">${selDate.replace(/-/g,'/')}（${dayType==='high'?'高碳日':'低碳日'}）</div>
+    <button class="btn btn-outline" style="font-size:12px;padding:6px 12px;" onclick="openApplyModal()"><i class="ti ti-template" style="font-size:13px;margin-right:4px;"></i>套用模板</button>
+  </div>
+  <div class="card">${barHTML(tC,day.carb,'bar-carb','碳水','d-bar-carb','d-pct-carb','d-rem-carb')+barHTML(tP,day.prot,'bar-prot','蛋白質','d-bar-prot','d-pct-prot','d-rem-prot')+barHTML(tF,day.fat,'bar-fat','脂肪','d-bar-fat','d-pct-fat','d-rem-fat')}</div>
+  <div class="card"><div class="meal-tabs">${tabsHTML}</div>${extraPos}${tcHTML}${renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'diary')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'diary')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'diary')}</div>`;
+
+  bindFoodEvents('diary',
+    type=>getDiaryItems(selDate,slot.key)[type],
+    ()=>{saveDiary(selDate);updateDiaryBars(day);updateDiaryTargetCards(slot);},
+    (type)=>{const c=getDiaryTotals(selDate,slot.key);return type==='carb'?tgt.c-c.c:type==='prot'?tgt.p-c.p:tgt.f-c.f;}
+  );
 }
 
 updateMacroHints();clampDays();
