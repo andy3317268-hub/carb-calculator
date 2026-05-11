@@ -748,6 +748,39 @@ function renderDiaryContent(){
   );
 }
 
+function renderFoodLib(){
+  const cats=[
+    {id:'foodLibCarb',label:'碳水類',badge:'badge-carb',key:'carb'},
+    {id:'foodLibProt',label:'蛋白質類',badge:'badge-prot',key:'protein'},
+    {id:'foodLibFat',label:'脂肪類',badge:'badge-fat',key:'fat'}
+  ];
+  cats.forEach(({id,label,badge,key})=>{
+    const el=document.getElementById(id);if(!el)return;
+    const df=defaultFoods[key].map(f=>'<div class="food-lib-item"><div><div class="food-lib-name">'+f.name+'</div><div class="food-lib-macros">碳水 '+f.c+'g・蛋白質 '+f.p+'g・脂肪 '+f.f+'g</div></div><span class="food-lib-badge">系統</span></div>').join('');
+    const cu=customFoods[key].map((f,i)=>'<div class="food-lib-item"><div><div class="food-lib-name">'+f.name+'</div><div class="food-lib-macros">碳水 '+f.c+'g・蛋白質 '+f.p+'g・脂肪 '+f.f+'g</div></div><button onclick="deleteCustomFood(\''+key+'\','+i+')" style="background:none;border:none;cursor:pointer;color:#bbb;font-size:18px;line-height:1;" title="刪除">×</button></div>').join('');
+    el.innerHTML='<div style="font-size:12px;font-weight:500;margin-bottom:10px;"><span class="badge '+badge+'">'+label+'</span></div>'+df+cu+(df===''&&cu===''?'<div style="color:#aaa;font-size:13px;padding:8px 0;">尚無食物</div>':'');
+  });
+}
+window.openAddFoodModal=()=>{document.getElementById('af-name').value='';document.getElementById('af-c').value='';document.getElementById('af-p').value='';document.getElementById('af-f').value='';document.getElementById('addFoodModal').classList.add('show');};
+window.closeAddFoodModal=()=>document.getElementById('addFoodModal').classList.remove('show');
+window.addCustomFood=()=>{
+  const name=document.getElementById('af-name').value.trim();
+  if(!name)return alert('請輸入食物名稱');
+  const cat=document.getElementById('af-cat').value;
+  const c=parseFloat(document.getElementById('af-c').value)||0;
+  const p=parseFloat(document.getElementById('af-p').value)||0;
+  const f=parseFloat(document.getElementById('af-f').value)||0;
+  customFoods[cat].push({name,c,p,f});
+  scheduleSave('customFoods',customFoods);
+  closeAddFoodModal();
+  renderFoodLib();
+};
+window.deleteCustomFood=(cat,idx)=>{
+  if(!confirm('確定要刪除這個食物？'))return;
+  customFoods[cat].splice(idx,1);
+  scheduleSave('customFoods',customFoods);
+  renderFoodLib();
+};
 updateMacroHints();clampDays();
 </script>
 </body>
