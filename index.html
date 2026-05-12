@@ -183,6 +183,7 @@
     .food-lib-item:last-child{border-bottom:none;}
     .food-lib-name{font-size:13px;font-weight:500;color:#1a1a18;}
     .food-lib-macros{font-size:12px;color:#888;margin-top:2px;}
+    .food-lib-cooked{font-size:11px;color:#1D9E75;margin-top:2px;}
     .food-lib-badge{font-size:10px;padding:1px 6px;border-radius:4px;background:#f0f0ee;color:#888;}
     /* Modal */
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;}
@@ -231,6 +232,7 @@
       .cal-day.today{color:#e8e8e4;}
       .cal-day.selected{background:#1a2e45;}
       .food-lib-item{border-color:rgba(255,255,255,0.06);}
+      .food-lib-cooked{color:#1D9E75;}
       .modal-overlay{background:rgba(0,0,0,0.6);}
     }
   </style>
@@ -459,8 +461,25 @@ const CARB_LOW_MIN=0.5,FAT_HIGH_MIN=0.2;
 
 // Default foods
 const defaultFoods={
-  carb:[{name:'白米（生）',c:78,p:7,f:0.7},{name:'白米（熟）',c:28,p:2.7,f:0.3},{name:'糙米（生）',c:73,p:7.5,f:2.7},{name:'糙米（熟）',c:23,p:2.6,f:0.9},{name:'地瓜',c:20,p:1.6,f:0.1},{name:'燕麥（乾）',c:67,p:13,f:7},{name:'麵條（熟）',c:25,p:3.5,f:0.5},{name:'玉米',c:19,p:3.3,f:1.4},{name:'饅頭',c:47,p:7,f:1},{name:'馬鈴薯',c:17,p:2,f:0.1}],
-  protein:[{name:'雞胸肉（生）',c:0,p:23,f:2},{name:'雞胸肉（熟）',c:0,p:31,f:3.6},{name:'去皮雞腿肉（生）',c:0,p:18,f:5},{name:'去皮雞腿肉（熟）',c:0,p:28,f:6},{name:'雞蛋',c:0.7,p:13,f:11},{name:'板豆腐',c:2,p:8,f:4},{name:'鮭魚',c:0,p:25,f:13},{name:'牛肉（生）',c:0,p:21,f:4},{name:'牛肉（熟）',c:0,p:26,f:5},{name:'豬肉里肌（生）',c:0,p:20,f:6},{name:'豬肉里肌（熟）',c:0,p:22,f:8}],
+  carb:[
+    {name:'白米',c:78,p:7,f:0.7,cookedG:279},
+    {name:'糙米',c:73,p:7.5,f:2.7,cookedG:317},
+    {name:'地瓜',c:20,p:1.6,f:0.1},
+    {name:'燕麥（乾）',c:67,p:13,f:7},
+    {name:'麵條（熟）',c:25,p:3.5,f:0.5},
+    {name:'玉米',c:19,p:3.3,f:1.4},
+    {name:'饅頭',c:47,p:7,f:1},
+    {name:'馬鈴薯',c:17,p:2,f:0.1}
+  ],
+  protein:[
+    {name:'雞胸肉',c:0,p:23,f:2,cookedG:74},
+    {name:'去皮雞腿肉',c:0,p:18,f:5,cookedG:64},
+    {name:'雞蛋',c:0.7,p:13,f:11},
+    {name:'板豆腐',c:2,p:8,f:4},
+    {name:'鮭魚',c:0,p:25,f:13},
+    {name:'牛肉',c:0,p:21,f:4,cookedG:81},
+    {name:'豬肉里肌',c:0,p:20,f:6,cookedG:91}
+  ],
   fat:[{name:'橄欖油',c:0,p:0,f:100},{name:'綜合堅果',c:18,p:15,f:50},{name:'酪梨',c:9,p:2,f:15}]
 };
 let customFoods={carb:[],protein:[],fat:[]};
@@ -542,7 +561,7 @@ function barHTML(used,total,base,label,bid,pid,rid){const over=used>total;const 
 function renderFoodSectionHTML(type,label,badgeClass,md,prefix){
   const all=getAllFoods();const foodList=type==='carb'?all.carb:type==='prot'?all.protein:all.fat;
   const items=md[type]||[];
-  const itemsHTML=items.map((item,idx)=>'<div class="food-item"><div class="food-item-header"><span class="food-name">'+item.food.name+'</span><button class="food-remove" data-'+prefix+'-remove="'+type+'-'+idx+'">×</button></div><div class="food-grams"><input type="number" class="'+prefix+'-gram-input" data-'+prefix+'-gram="'+type+'-'+idx+'" value="'+item.grams+'" min="1" max="2000" style="width:70px;text-align:center;"/><span>g</span><span class="food-macros-inline" id="'+prefix+'-fml-'+type+'-'+idx+'">碳 '+(item.grams*item.food.c/100).toFixed(1)+'・蛋 '+(item.grams*item.food.p/100).toFixed(1)+'・脂 '+(item.grams*item.food.f/100).toFixed(1)+'</span></div></div>').join('');
+  const itemsHTML=items.map((item,idx)=>'<div class="food-item"><div class="food-item-header"><span class="food-name">'+item.food.name+'</span><button class="food-remove" data-'+prefix+'-remove="'+type+'-'+idx+'">×</button></div><div class="food-grams"><input type="number" class="'+prefix+'-gram-input" data-'+prefix+'-gram="'+type+'-'+idx+'" value="'+item.grams+'" min="1" max="2000" style="width:70px;text-align:center;"/><span>g 生</span><span class="food-macros-inline" id="'+prefix+'-fml-'+type+'-'+idx+'">碳 '+(item.grams*item.food.c/100).toFixed(1)+'・蛋 '+(item.grams*item.food.p/100).toFixed(1)+'・脂 '+(item.grams*item.food.f/100).toFixed(1)+(item.food.cookedG?' ≈ '+Math.round(item.grams*item.food.cookedG/100)+'g 熟':'')+'</span></div></div>').join('');
   const opts=foodList.map(f=>'<option value="'+f.name+'">'+f.name+'</option>').join('')+'<option value="__custom__">自行輸入</option>';
   return'<div class="food-section"><div class="food-section-title"><span class="badge '+badgeClass+'">'+label+'</span></div><div class="food-list">'+itemsHTML+'</div><div class="add-food-row"><select data-'+prefix+'-add-type="'+type+'">'+opts+'</select><button data-'+prefix+'-add-btn="'+type+'">+ 新增</button></div><div class="custom-food-box" id="'+prefix+'-custom-box-'+type+'"><div class="custom-food-field"><label>食物名稱</label><input type="text" id="'+prefix+'-cf-name-'+type+'" placeholder="例如：茶葉蛋"/></div><div class="custom-food-row-3"><div class="custom-food-field"><label>碳水 (每100g)</label><input type="number" id="'+prefix+'-cf-c-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div><div class="custom-food-field"><label>蛋白質 (每100g)</label><input type="number" id="'+prefix+'-cf-p-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div><div class="custom-food-field"><label>脂肪 (每100g)</label><input type="number" id="'+prefix+'-cf-f-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div></div><div class="custom-food-field"><label>實際克數</label><input type="number" id="'+prefix+'-cf-g-'+type+'" placeholder="例如：100" min="1" max="2000"/></div></div></div>';
 }
@@ -576,7 +595,7 @@ function bindFoodEvents(prefix,getMd,onUpdate,getTargets){
   });
   document.querySelectorAll('[data-'+prefix+'-remove]').forEach(btn=>{btn.onclick=()=>{const[type,idx]=btn.dataset[prefix+'Remove'].split('-');getMd(type).splice(parseInt(idx),1);onUpdate();};});
   document.querySelectorAll('.'+prefix+'-gram-input').forEach(inp=>{
-    inp.addEventListener('input',()=>{const[type,idx]=inp.dataset[prefix+'Gram'].split('-');const v=Math.max(1,Math.min(2000,parseInt(inp.value)||1));const item=getMd(type)[parseInt(idx)];item.grams=v;const fml=document.getElementById(prefix+'-fml-'+type+'-'+idx);if(fml)fml.textContent='碳 '+(v*item.food.c/100).toFixed(1)+'・蛋 '+(v*item.food.p/100).toFixed(1)+'・脂 '+(v*item.food.f/100).toFixed(1);onUpdate(true);});
+    inp.addEventListener('input',()=>{const[type,idx]=inp.dataset[prefix+'Gram'].split('-');const v=Math.max(1,Math.min(2000,parseInt(inp.value)||1));const item=getMd(type)[parseInt(idx)];item.grams=v;const fml=document.getElementById(prefix+'-fml-'+type+'-'+idx);if(fml)fml.textContent='碳 '+(v*item.food.c/100).toFixed(1)+'・蛋 '+(v*item.food.p/100).toFixed(1)+'・脂 '+(v*item.food.f/100).toFixed(1)+(item.food.cookedG?' ≈ '+Math.round(v*item.food.cookedG/100)+'g 熟':'');onUpdate(true);});
     inp.addEventListener('blur',()=>{if(!inp.value||parseInt(inp.value)<1)inp.value=1;});
     inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();});
   });
@@ -809,7 +828,7 @@ function renderFoodLib(){
   ];
   cats.forEach(({id,label,badge,key})=>{
     const el=document.getElementById(id);if(!el)return;
-    const df=defaultFoods[key].map(f=>'<div class="food-lib-item"><div><div class="food-lib-name">'+f.name+'</div><div class="food-lib-macros">碳水 '+f.c+'g・蛋白質 '+f.p+'g・脂肪 '+f.f+'g</div></div><span class="food-lib-badge">系統</span></div>').join('');
+    const df=defaultFoods[key].map(f=>'<div class="food-lib-item"><div><div class="food-lib-name">'+f.name+'</div>'+(f.cookedG?'<div class="food-lib-cooked">100g 生 → '+f.cookedG+'g 熟</div>':'')+'<div class="food-lib-macros">每 100g 生：碳水 '+f.c+'g・蛋白質 '+f.p+'g・脂肪 '+f.f+'g</div></div><span class="food-lib-badge">系統</span></div>').join('');
     const cu=customFoods[key].map((f,i)=>'<div class="food-lib-item"><div><div class="food-lib-name">'+f.name+'</div><div class="food-lib-macros">碳水 '+f.c+'g・蛋白質 '+f.p+'g・脂肪 '+f.f+'g</div></div><button onclick="deleteCustomFood(\''+key+'\','+i+')" style="background:none;border:none;cursor:pointer;color:#bbb;font-size:18px;line-height:1;" title="刪除">×</button></div>').join('');
     el.innerHTML='<div style="font-size:12px;font-weight:500;margin-bottom:10px;"><span class="badge '+badge+'">'+label+'</span></div>'+df+cu+(df===''&&cu===''?'<div style="color:#aaa;font-size:13px;padding:8px 0;">尚無食物</div>':'');
   });
