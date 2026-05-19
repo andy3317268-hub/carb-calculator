@@ -2,7 +2,9 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
   <title>碳水循環計算機</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
   <style>
@@ -13,7 +15,7 @@
     .sidebar-btn{width:40px;height:40px;border-radius:10px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#888;font-size:18px;transition:all 0.15s;position:relative;}
     .sidebar-btn:hover{background:#f5f5f3;color:#1a1a18;}
     .sidebar-btn.active{background:#1a1a18;color:#fff;}
-    .sidebar-btn .tooltip{position:absolute;left:52px;background:#1a1a18;color:#fff;font-size:12px;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.15s;}
+    .sidebar-btn .tooltip{position:absolute;left:52px;background:#1a1a18;color:#fff;font-size:12px;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.15s;z-index:30;}
     .sidebar-btn:hover .tooltip{opacity:1;}
     .sidebar-spacer{flex:1;}
     .main{margin-left:56px;flex:1;padding:2rem 1rem;}
@@ -38,8 +40,8 @@
     .tmacro{font-size:11px;color:#aaa;margin-top:5px;line-height:1.6;}
     .custom-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
     .custom-field label{font-size:12px;color:#888;display:block;margin-bottom:4px;}
-    input[type=number],input[type=text],select{font-family:inherit;font-size:14px;width:100%;padding:8px 10px;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;outline:none;color:#1a1a18;background:#fff;box-sizing:border-box;}
-    input[type=number]:focus,input[type=text]:focus,select:focus{border-color:rgba(0,0,0,0.4);}
+    input[type=number],input[type=text],input[type=search],select{font-family:inherit;font-size:14px;width:100%;padding:8px 10px;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;outline:none;color:#1a1a18;background:#fff;box-sizing:border-box;}
+    input[type=number]:focus,input[type=text]:focus,input[type=search]:focus,select:focus{border-color:rgba(0,0,0,0.4);}
     input[type=range]{width:100%;accent-color:#1D9E75;}
     .input-row{display:flex;align-items:center;gap:12px;}
     .input-row input{flex:1;width:auto;}
@@ -55,6 +57,7 @@
     .badge-carb{background:#E6F1FB;color:#185FA5;}
     .badge-prot{background:#E1F5EE;color:#0F6E56;}
     .badge-fat{background:#FAEEDA;color:#854F0B;}
+    .badge-kcal{background:#FDECEC;color:#A93434;}
     .badge-extra{background:#EEEDFE;color:#534AB7;}
     .slider-block{margin-bottom:1.25rem;}
     .slider-block:last-child{margin-bottom:0;}
@@ -74,6 +77,9 @@
     .result-macro-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px;}
     .result-macro-row span:first-child{color:#888;}
     .result-macro-row span:last-child{color:#1a1a18;font-weight:500;}
+    .result-macro-row.kcal-row{margin-top:4px;padding-top:4px;border-top:0.5px dashed rgba(0,0,0,0.08);}
+    .result-macro-row.kcal-row span:first-child{color:#A93434;font-weight:500;}
+    .result-macro-row.kcal-row span:last-child{color:#A93434;font-weight:500;}
     .result-divider{border-top:0.5px solid rgba(0,0,0,0.1);margin:8px 0;}
     .collapsed-summary{display:none;margin-top:10px;}
     .collapsed-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -84,6 +90,8 @@
     .collapsed-mini-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;}
     .collapsed-mini-row span:first-child{color:#888;}
     .collapsed-mini-row span:last-child{color:#1a1a18;font-weight:500;}
+    .collapsed-mini-row.kcal-row{margin-top:3px;padding-top:3px;border-top:0.5px dashed rgba(0,0,0,0.08);}
+    .collapsed-mini-row.kcal-row span{color:#A93434!important;font-weight:500;}
     .collapsed-mini-divider{border-top:0.5px solid rgba(0,0,0,0.1);margin:5px 0;}
     .macro-bar-wrap{margin-bottom:1rem;}
     .macro-bar-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;}
@@ -93,6 +101,7 @@
     .bar-carb{background:#378ADD;}
     .bar-prot{background:#1D9E75;}
     .bar-fat{background:#EF9F27;}
+    .bar-kcal{background:#D24747;}
     .day-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
     .day-type-btn{background:#fff;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;padding:10px;cursor:pointer;text-align:center;font-size:14px;font-weight:500;color:#1a1a18;font-family:inherit;}
     .day-type-btn:hover{background:#f5f5f3;}
@@ -115,6 +124,19 @@
     .food-grams{display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap;}
     .food-grams input{width:70px;}
     .food-macros-inline{font-size:12px;color:#aaa;}
+    /* Search-based food picker */
+    .food-search-row{display:flex;gap:8px;margin-bottom:8px;}
+    .food-search-row input{flex:1;}
+    .food-add-custom-btn{background:#f0f0ee;border:0.5px dashed rgba(0,0,0,0.25);border-radius:8px;padding:8px 12px;width:100%;text-align:left;cursor:pointer;font-family:inherit;font-size:13px;color:#666;margin-bottom:8px;}
+    .food-add-custom-btn:hover{background:#e9e9e6;color:#1a1a18;}
+    .food-search-results{max-height:180px;overflow-y:auto;border:0.5px solid rgba(0,0,0,0.1);border-radius:8px;background:#fff;}
+    .food-search-results:empty{display:none;}
+    .food-search-item{padding:8px 12px;cursor:pointer;border-bottom:0.5px solid rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center;gap:8px;}
+    .food-search-item:last-child{border-bottom:none;}
+    .food-search-item:hover{background:#f5f5f3;}
+    .food-search-item-name{font-size:13px;color:#1a1a18;font-weight:500;}
+    .food-search-item-macros{font-size:11px;color:#888;margin-top:2px;}
+    .food-search-empty{padding:12px;text-align:center;color:#aaa;font-size:12px;}
     .add-food-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
     .add-food-row select{flex:1;min-width:120px;}
     .add-food-row button,.btn{white-space:nowrap;padding:8px 14px;background:#1a1a18;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;}
@@ -134,6 +156,7 @@
     .target-card{background:#f5f5f3;border-radius:8px;padding:10px;text-align:center;}
     .target-label{font-size:11px;color:#888;margin-bottom:2px;}
     .target-val{font-size:18px;font-weight:500;color:#1a1a18;}
+    .target-val.kcal{color:#A93434;}
     .target-remain{font-size:11px;margin-top:2px;}
     .remain-ok{color:#aaa;}
     .remain-over{color:#E24B4A;font-weight:500;}
@@ -162,49 +185,61 @@
     .cal-day.empty{cursor:default;background:none;border:none;}
     .cal-day.has-data::after{content:'';display:block;width:4px;height:4px;border-radius:50%;background:#1D9E75;margin:0 auto;}
     .cal-day-type{font-size:9px;opacity:0.7;}
-    /* Template list */
     .tpl-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;}
     .tpl-card{background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:10px;padding:1rem;}
     .tpl-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
     .tpl-card-name{font-size:14px;font-weight:500;color:#1a1a18;}
     .tpl-card-meta{font-size:12px;color:#888;}
     .tpl-card-actions{display:flex;gap:6px;}
-    /* Food library */
     .food-lib-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid rgba(0,0,0,0.06);}
     .food-lib-item:last-child{border-bottom:none;}
     .food-lib-name{font-size:13px;font-weight:500;color:#1a1a18;}
     .food-lib-macros{font-size:12px;color:#888;margin-top:2px;}
     .food-lib-badge{font-size:10px;padding:1px 6px;border-radius:4px;background:#f0f0ee;color:#888;}
-    /* Modal */
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;}
+    .food-lib-search{margin-bottom:1rem;}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;padding:1rem;}
     .modal-overlay.show{display:flex;}
-    .modal{background:#fff;border-radius:14px;padding:1.5rem;width:90%;max-width:400px;max-height:80vh;overflow-y:auto;}
+    .modal{background:#fff;border-radius:14px;padding:1.5rem;width:100%;max-width:400px;max-height:85vh;overflow-y:auto;}
+    .modal.wide{max-width:480px;}
     .modal-title{font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:1rem;}
     .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;}
-    /* Login */
-    .login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f5f5f3;}
-    .login-card{background:#fff;border-radius:16px;padding:2.5rem;max-width:360px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08);}
-    .login-title{font-size:22px;font-weight:500;margin-bottom:8px;}
-    .login-sub{font-size:14px;color:#888;margin-bottom:2rem;}
-    .google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:#fff;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;color:#1a1a18;font-family:inherit;}
-    .google-btn:hover{background:#f5f5f3;}
-    .user-avatar{width:32px;height:32px;border-radius:50%;overflow:hidden;cursor:pointer;border:0.5px solid rgba(0,0,0,0.1);}
+    /* Onboarding modal */
+    .onboard-step{display:none;}
+    .onboard-step.active{display:block;}
+    .onboard-icon{font-size:40px;text-align:center;margin-bottom:1rem;}
+    .onboard-title{font-size:18px;font-weight:500;text-align:center;margin-bottom:0.75rem;color:#1a1a18;}
+    .onboard-body{font-size:14px;color:#666;line-height:1.7;text-align:left;}
+    .onboard-body ul{padding-left:1.2rem;margin-top:0.5rem;}
+    .onboard-body li{margin-bottom:4px;}
+    .onboard-dots{display:flex;justify-content:center;gap:6px;margin:1.25rem 0 1rem;}
+    .onboard-dot{width:6px;height:6px;border-radius:50%;background:#d8d8d4;transition:all 0.2s;}
+    .onboard-dot.active{background:#1a1a18;width:18px;border-radius:3px;}
+    .onboard-actions{display:flex;gap:8px;justify-content:space-between;align-items:center;}
+    .onboard-skip{background:none;border:none;color:#aaa;font-size:13px;cursor:pointer;font-family:inherit;}
+    /* Login banner (when not logged in) */
+    .login-banner{background:#FFF8E1;border:0.5px solid #F0E0A0;border-radius:10px;padding:10px 14px;margin-bottom:1rem;display:flex;align-items:center;gap:10px;font-size:13px;color:#7A5C00;}
+    .login-banner i{font-size:18px;}
+    .login-banner-action{margin-left:auto;background:#1a1a18;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap;}
+    .user-avatar{width:32px;height:32px;border-radius:50%;overflow:hidden;cursor:pointer;border:0.5px solid rgba(0,0,0,0.1);display:flex;align-items:center;justify-content:center;background:#f0f0ee;color:#888;font-size:16px;}
     .user-avatar img{width:100%;height:100%;object-fit:cover;}
     .save-indicator{font-size:11px;color:#aaa;text-align:center;margin-top:4px;height:16px;}
     .loading-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f5f5f3;font-size:14px;color:#888;}
+    .google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:#fff;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;color:#1a1a18;font-family:inherit;}
+    .google-btn:hover{background:#f5f5f3;}
     @media(prefers-color-scheme:dark){
       body{background:#1c1c1a;color:#e8e8e4;}
-      .sidebar,.card,.week-setup,.login-card,.modal,.tpl-card{background:#2a2a28;border-color:rgba(255,255,255,0.1);}
-      .gender-btn,.tier-btn,.day-btn,.day-type-btn,.meal-tab,.weekday-btn,.add-extra-btn,.cal-day,.cal-nav,.google-btn{background:#2a2a28;border-color:rgba(255,255,255,0.15);color:#e8e8e4;}
+      .sidebar,.card,.week-setup,.login-card,.modal,.tpl-card,.food-search-results{background:#2a2a28;border-color:rgba(255,255,255,0.1);}
+      .gender-btn,.tier-btn,.day-btn,.day-type-btn,.meal-tab,.weekday-btn,.add-extra-btn,.cal-day,.cal-nav,.google-btn,.food-add-custom-btn{background:#2a2a28;border-color:rgba(255,255,255,0.15);color:#e8e8e4;}
       .gender-btn.active-m{background:#0c2a45;color:#7ab8f5;border-color:#7ab8f5;}
       .gender-btn.active-f{background:#3d1626;color:#e88ab0;border-color:#e88ab0;}
       .tier-btn.active{background:#0a2e22;border-color:#1D9E75;}
       .tier-btn.active .tn{color:#5DCAA5;}
-      input[type=number],input[type=text],select{background:#2a2a28;border-color:rgba(255,255,255,0.15);color:#e8e8e4;}
+      input[type=number],input[type=text],input[type=search],select{background:#2a2a28;border-color:rgba(255,255,255,0.15);color:#e8e8e4;}
       .result-day-card,.collapsed-mini-card,.food-item,.target-card{background:#333331;}
       .macro-bar-track{background:#444442;}
-      .tn,.slider-title,.food-name,.target-val,.section-title,.cal-title,.login-title,.tpl-card-name,.modal-title,.food-lib-name{color:#e8e8e4;}
-      .td,.tmacro,.sec-label,.unit,.slider-focus,.slider-ends span,.food-macros-inline,.remain-ok,.result-macro-row span:first-child,.collapsed-mini-row span:first-child,.result-section-label,.target-label,.cal-day-label,.login-sub,.save-indicator,.tpl-card-meta,.food-lib-macros,.food-lib-badge{color:#888;}
+      .tn,.slider-title,.food-name,.target-val,.section-title,.cal-title,.tpl-card-name,.modal-title,.food-lib-name,.onboard-title,.food-search-item-name{color:#e8e8e4;}
+      .target-val.kcal{color:#FF8888;}
+      .td,.tmacro,.sec-label,.unit,.slider-focus,.slider-ends span,.food-macros-inline,.remain-ok,.result-macro-row span:first-child,.collapsed-mini-row span:first-child,.result-section-label,.target-label,.cal-day-label,.save-indicator,.tpl-card-meta,.food-lib-macros,.food-lib-badge,.onboard-body,.food-search-item-macros,.food-search-empty{color:#888;}
       .result-macro-row span:last-child,.collapsed-mini-row span:last-child{color:#e8e8e4;font-weight:500;}
       .custom-food-box,.food-item{background:#333331;border-color:rgba(255,255,255,0.1);}
       .add-food-row button,.btn{background:#e8e8e4;color:#1a1a18;}
@@ -216,27 +251,106 @@
       .badge-carb{background:#0c2a45;color:#7ab8f5;}
       .badge-prot{background:#0a2e22;color:#5DCAA5;}
       .badge-fat{background:#2e1f00;color:#EF9F27;}
+      .badge-kcal{background:#3d1a1a;color:#FF8888;}
       .badge-high{background:#0a2e22;color:#5DCAA5;}
       .badge-low{background:#2a2a28;color:#aaa;}
       .weekday-btn.is-high{background:#0a2e22;color:#5DCAA5;border-color:#1D9E75;}
       .cal-day.today{color:#e8e8e4;}
       .cal-day.selected{background:#1a2e45;}
-      .food-lib-item{border-color:rgba(255,255,255,0.06);}
+      .food-lib-item,.food-search-item{border-color:rgba(255,255,255,0.06);}
+      .food-search-item:hover{background:#333331;}
       .modal-overlay{background:rgba(0,0,0,0.6);}
+      .onboard-dot{background:#444;}
+      .onboard-dot.active{background:#e8e8e4;}
+      .result-macro-row.kcal-row span:first-child,.result-macro-row.kcal-row span:last-child{color:#FF8888;}
+      .collapsed-mini-row.kcal-row span{color:#FF8888!important;}
+      .login-banner{background:#3d2e0a;border-color:#5a4a1a;color:#F0D060;}
+      .user-avatar{background:#333331;color:#aaa;}
     }
   </style>
 </head>
 <body>
 <div id="loadingScreen" class="loading-screen">載入中...</div>
-<div id="loginScreen" class="login-screen" style="display:none;">
-  <div class="login-card">
-    <div style="font-size:36px;margin-bottom:1rem;">🥗</div>
-    <div class="login-title">碳水循環計算機</div>
-    <div class="login-sub">登入以儲存你的飲食記錄</div>
+
+<!-- Onboarding (first-time use) -->
+<div class="modal-overlay" id="onboardModal">
+  <div class="modal wide">
+    <div class="onboard-step active" data-step="1">
+      <div class="onboard-icon">🥗</div>
+      <div class="onboard-title">歡迎使用碳水循環計算機</div>
+      <div class="onboard-body" style="text-align:center;">
+        這是一個專為碳水循環飲食法設計的工具,幫你計算每天該吃多少、追蹤每一餐的攝取。<br><br>
+        花一分鐘看完介紹,馬上開始。
+      </div>
+    </div>
+    <div class="onboard-step" data-step="2">
+      <div class="onboard-icon">📊</div>
+      <div class="onboard-title">第一步:設定參數</div>
+      <div class="onboard-body">
+        進到「<strong>營養計算</strong>」頁面,輸入這些:
+        <ul>
+          <li>性別、體重</li>
+          <li>運動量級距(每週運動時數)</li>
+          <li>一週幾天高碳日</li>
+          <li>每天幾餐</li>
+        </ul>
+        系統會自動算出高碳日、低碳日要吃多少碳水/蛋白質/脂肪/熱量。
+      </div>
+    </div>
+    <div class="onboard-step" data-step="3">
+      <div class="onboard-icon">📅</div>
+      <div class="onboard-title">第二步:記錄每一餐</div>
+      <div class="onboard-body">
+        進到「<strong>飲食日記</strong>」頁面:
+        <ul>
+          <li>設定一週哪幾天是高碳日</li>
+          <li>點選日期 → 選擇餐次 → 加入食物</li>
+          <li>輸入克數,系統自動算營養素和剩餘量</li>
+          <li>進度條讓你一眼看完成度</li>
+        </ul>
+      </div>
+    </div>
+    <div class="onboard-step" data-step="4">
+      <div class="onboard-icon">📋</div>
+      <div class="onboard-title">第三步:建立常用模板</div>
+      <div class="onboard-body">
+        如果你常吃類似的菜單,到「<strong>飲食模板</strong>」頁面建立模板,之後在日記裡一鍵套用,不用每天重複輸入。<br><br>
+        高碳日、低碳日可以各做幾組模板輪流用。
+      </div>
+    </div>
+    <div class="onboard-step" data-step="5">
+      <div class="onboard-icon">☁️</div>
+      <div class="onboard-title">登入可雲端同步</div>
+      <div class="onboard-body">
+        不登入也能用,資料會存在這台裝置。<br><br>
+        如果你想換手機/電腦也能看到資料,可以用 Google 帳號登入,資料自動雲端同步。<br><br>
+        側邊欄最下方的頭像可以隨時登入。
+      </div>
+    </div>
+    <div class="onboard-dots" id="onboardDots"></div>
+    <div class="onboard-actions">
+      <button class="onboard-skip" onclick="skipOnboard()">略過</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline" id="onboardBack" onclick="onboardBack()" style="display:none;">上一步</button>
+        <button class="btn btn-green" id="onboardNext" onclick="onboardNext()">下一步</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <div style="text-align:center;font-size:36px;margin-bottom:1rem;">☁️</div>
+    <div class="modal-title" style="text-align:center;">雲端同步登入</div>
+    <div style="font-size:13px;color:#888;text-align:center;margin-bottom:1.25rem;line-height:1.6;">登入後資料會自動同步到雲端,換裝置也能看到。<br>目前在這台裝置的資料會保留。</div>
     <button class="google-btn" onclick="signInWithGoogle()">
       <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       使用 Google 帳號登入
     </button>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeLoginModal()">稍後再說</button>
+    </div>
   </div>
 </div>
 
@@ -244,7 +358,7 @@
 <div class="modal-overlay" id="applyTplModal">
   <div class="modal">
     <div class="modal-title">套用模板</div>
-    <div class="sec-label">選擇要套用的模板（疊加，不覆蓋現有記錄）</div>
+    <div class="sec-label">選擇要套用的模板(疊加,不覆蓋現有記錄)</div>
     <div id="applyTplList" style="margin-top:8px;"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeApplyModal()">取消</button>
@@ -258,10 +372,11 @@
     <button class="sidebar-btn" id="nav-diary" onclick="switchSection('diary')"><i class="ti ti-calendar-week"></i><span class="tooltip">飲食日記</span></button>
     <button class="sidebar-btn" id="nav-template" onclick="switchSection('template')"><i class="ti ti-layout-list"></i><span class="tooltip">飲食模板</span></button>
     <button class="sidebar-btn" id="nav-foods" onclick="switchSection('foods')"><i class="ti ti-salad"></i><span class="tooltip">食物庫</span></button>
+    <button class="sidebar-btn" onclick="openOnboard()"><i class="ti ti-help-circle"></i><span class="tooltip">使用說明</span></button>
     <div class="sidebar-spacer"></div>
     <div id="userAvatarWrap" style="position:relative;">
-      <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()"></div>
-      <div id="userMenu" style="display:none;position:absolute;left:52px;bottom:0;background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:10px;padding:8px;min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:20;">
+      <div class="user-avatar" id="userAvatar" onclick="onAvatarClick()"><i class="ti ti-user"></i></div>
+      <div id="userMenu" style="display:none;position:absolute;left:52px;bottom:0;background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:10px;padding:8px;min-width:160px;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:20;">
         <div id="userMenuName" style="font-size:12px;color:#888;padding:4px 8px 8px;border-bottom:0.5px solid rgba(0,0,0,0.08);margin-bottom:4px;"></div>
         <button onclick="signOut()" style="width:100%;text-align:left;background:none;border:none;padding:6px 8px;font-size:13px;color:#E24B4A;cursor:pointer;border-radius:6px;font-family:inherit;">登出</button>
       </div>
@@ -271,6 +386,12 @@
 
   <main class="main">
     <div class="content">
+
+      <div id="loginBanner" class="login-banner" style="display:none;">
+        <i class="ti ti-cloud-off"></i>
+        <span>目前未登入,資料只存在這台裝置</span>
+        <button class="login-banner-action" onclick="openLoginModal()">登入</button>
+      </div>
 
       <!-- SECTION 1: Calculator -->
       <div class="section active" id="section-calc">
@@ -282,8 +403,8 @@
           </div>
           <div class="collapsed-summary" id="collapsedSummary">
             <div class="collapsed-summary-grid">
-              <div class="collapsed-mini-card"><div class="collapsed-mini-title high">高碳日</div><div class="collapsed-mini-row"><span>一天 碳水</span><span id="cs-hdc">—</span></div><div class="collapsed-mini-row"><span>一天 蛋白質</span><span id="cs-hdp">—</span></div><div class="collapsed-mini-row"><span>一天 脂肪</span><span id="cs-hdf">—</span></div><div class="collapsed-mini-divider"></div><div class="collapsed-mini-row"><span>一餐 碳水</span><span id="cs-hmc">—</span></div><div class="collapsed-mini-row"><span>一餐 蛋白質</span><span id="cs-hmp">—</span></div><div class="collapsed-mini-row"><span>一餐 脂肪</span><span id="cs-hmf">—</span></div></div>
-              <div class="collapsed-mini-card"><div class="collapsed-mini-title low">低碳日</div><div class="collapsed-mini-row"><span>一天 碳水</span><span id="cs-ldc">—</span></div><div class="collapsed-mini-row"><span>一天 蛋白質</span><span id="cs-ldp">—</span></div><div class="collapsed-mini-row"><span>一天 脂肪</span><span id="cs-ldf">—</span></div><div class="collapsed-mini-divider"></div><div class="collapsed-mini-row"><span>一餐 碳水</span><span id="cs-lmc">—</span></div><div class="collapsed-mini-row"><span>一餐 蛋白質</span><span id="cs-lmp">—</span></div><div class="collapsed-mini-row"><span>一餐 脂肪</span><span id="cs-lmf">—</span></div></div>
+              <div class="collapsed-mini-card"><div class="collapsed-mini-title high">高碳日</div><div class="collapsed-mini-row"><span>一天 碳水</span><span id="cs-hdc">—</span></div><div class="collapsed-mini-row"><span>一天 蛋白質</span><span id="cs-hdp">—</span></div><div class="collapsed-mini-row"><span>一天 脂肪</span><span id="cs-hdf">—</span></div><div class="collapsed-mini-row kcal-row"><span>一天 熱量</span><span id="cs-hdk">—</span></div><div class="collapsed-mini-divider"></div><div class="collapsed-mini-row"><span>一餐 碳水</span><span id="cs-hmc">—</span></div><div class="collapsed-mini-row"><span>一餐 蛋白質</span><span id="cs-hmp">—</span></div><div class="collapsed-mini-row"><span>一餐 脂肪</span><span id="cs-hmf">—</span></div><div class="collapsed-mini-row kcal-row"><span>一餐 熱量</span><span id="cs-hmk">—</span></div></div>
+              <div class="collapsed-mini-card"><div class="collapsed-mini-title low">低碳日</div><div class="collapsed-mini-row"><span>一天 碳水</span><span id="cs-ldc">—</span></div><div class="collapsed-mini-row"><span>一天 蛋白質</span><span id="cs-ldp">—</span></div><div class="collapsed-mini-row"><span>一天 脂肪</span><span id="cs-ldf">—</span></div><div class="collapsed-mini-row kcal-row"><span>一天 熱量</span><span id="cs-ldk">—</span></div><div class="collapsed-mini-divider"></div><div class="collapsed-mini-row"><span>一餐 碳水</span><span id="cs-lmc">—</span></div><div class="collapsed-mini-row"><span>一餐 蛋白質</span><span id="cs-lmp">—</span></div><div class="collapsed-mini-row"><span>一餐 脂肪</span><span id="cs-lmf">—</span></div><div class="collapsed-mini-row kcal-row"><span>一餐 熱量</span><span id="cs-lmk">—</span></div></div>
             </div>
           </div>
           <div id="calcBody">
@@ -291,11 +412,11 @@
             <div style="margin-top:1rem;"><div class="sec-label">運動級距</div><div class="tier-grid"><button class="tier-btn" data-tier="1" onclick="selectTier(1)"><div class="tn">第一級</div><div class="td">每週 2–3 小時</div><div class="tmacro" id="macro1"></div></button><button class="tier-btn" data-tier="2" onclick="selectTier(2)"><div class="tn">第二級</div><div class="td">每週 4–5 小時</div><div class="tmacro" id="macro2"></div></button><button class="tier-btn" data-tier="3" onclick="selectTier(3)"><div class="tn">第三級</div><div class="td">每週 6–7 小時</div><div class="tmacro" id="macro3"></div></button><button class="tier-btn" data-tier="4" onclick="selectTier(4)"><div class="tn">第四級</div><div class="td">每週 8–9 小時</div><div class="tmacro" id="macro4"></div></button><button class="tier-btn" data-tier="5" onclick="selectTier(5)" style="grid-column:span 2;"><div class="tn">自定義</div><div class="td">自行輸入三大營養素倍數</div></button></div><div id="customInputs" style="display:none;"><div class="custom-grid"><div class="custom-field"><label>碳水倍數</label><input type="number" id="customCarb" placeholder="2.2" min="0.1" max="10" step="0.1" oninput="updateSliderBounds();recalc();"/></div><div class="custom-field"><label>蛋白質倍數</label><input type="number" id="customProtein" placeholder="1.4" min="0.1" max="10" step="0.1" oninput="recalc();"/></div><div class="custom-field"><label>脂肪倍數</label><input type="number" id="customFat" placeholder="0.8" min="0.1" max="10" step="0.1" oninput="updateSliderBounds();recalc();"/></div></div></div></div>
             <div style="margin-top:1rem;"><div class="sec-label">體重</div><div class="input-row"><input type="number" id="weight" placeholder="例如 75" min="30" max="200" oninput="recalc()"/><span class="unit">公斤</span></div></div>
             <div style="margin-top:1rem;"><div class="sec-label">高低碳日天數</div><div class="day-row"><span class="badge badge-high">高碳日</span><div class="day-controls"><button class="day-btn" onclick="adjustDays(-1)"><i class="ti ti-minus" style="font-size:14px"></i></button><input type="number" id="highDays" value="2" min="1" max="6" oninput="clampDays()" style="width:48px;text-align:center;"/><button class="day-btn" onclick="adjustDays(1)"><i class="ti ti-plus" style="font-size:14px"></i></button></div></div><div class="day-row" style="margin-bottom:0;"><span class="badge badge-low">低碳日</span><span id="lowDaysDisplay" style="font-size:14px;font-weight:500;">5 天</span></div></div>
-            <div style="margin-top:1rem;"><div class="sec-label">高低碳落差設定（週總量鎖定）</div><div class="slider-block"><div class="slider-header"><div><div class="slider-title">碳水化合物</div><div class="slider-focus" id="carbAvgHint">控制高碳日碳水倍數・週平均 — 倍</div></div><div class="slider-val">高碳日 <span id="carbHighVal">—</span> 倍</div></div><input type="range" id="carbSlider" min="0" max="100" value="50" step="1" oninput="updateSliderBounds();recalc();" disabled/><div class="slider-ends"><span>← 無落差</span><span>最大落差 →</span></div></div><div class="slider-block"><div class="slider-header"><div><div class="slider-title">脂肪</div><div class="slider-focus" id="fatAvgHint">控制低碳日脂肪倍數・週平均 — 倍</div></div><div class="slider-val">低碳日 <span id="fatLowVal">—</span> 倍</div></div><input type="range" id="fatSlider" min="0" max="100" value="50" step="1" oninput="updateSliderBounds();recalc();" disabled/><div class="slider-ends"><span>← 無落差</span><span>最大落差 →</span></div></div></div>
+            <div style="margin-top:1rem;"><div class="sec-label">高低碳落差設定(週總量鎖定)</div><div class="slider-block"><div class="slider-header"><div><div class="slider-title">碳水化合物</div><div class="slider-focus" id="carbAvgHint">控制高碳日碳水倍數・週平均 — 倍</div></div><div class="slider-val">高碳日 <span id="carbHighVal">—</span> 倍</div></div><input type="range" id="carbSlider" min="0" max="100" value="50" step="1" oninput="updateSliderBounds();recalc();" disabled/><div class="slider-ends"><span>← 無落差</span><span>最大落差 →</span></div></div><div class="slider-block"><div class="slider-header"><div><div class="slider-title">脂肪</div><div class="slider-focus" id="fatAvgHint">控制低碳日脂肪倍數・週平均 — 倍</div></div><div class="slider-val">低碳日 <span id="fatLowVal">—</span> 倍</div></div><input type="range" id="fatSlider" min="0" max="100" value="50" step="1" oninput="updateSliderBounds();recalc();" disabled/><div class="slider-ends"><span>← 無落差</span><span>最大落差 →</span></div></div></div>
             <div style="margin-top:1rem;"><div class="sec-label">每日餐數</div><div class="input-row"><button class="day-btn" onclick="adjustMeals(-1)"><i class="ti ti-minus" style="font-size:14px"></i></button><input type="number" id="mealCount" value="3" min="1" max="8" style="width:60px;text-align:center;" oninput="recalc()"/><button class="day-btn" onclick="adjustMeals(1)"><i class="ti ti-plus" style="font-size:14px"></i></button><span class="unit">餐</span></div></div>
             <div class="result-cards" id="resultCards" style="display:none;">
-              <div class="result-day-card"><div class="result-day-card-title high">高碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span id="r-hdc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-hdp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-hdf">—</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span id="r-hmc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-hmp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-hmf">—</span></div></div>
-              <div class="result-day-card"><div class="result-day-card-title low">低碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span id="r-ldc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-ldp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-ldf">—</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span id="r-lmc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-lmp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-lmf">—</span></div></div>
+              <div class="result-day-card"><div class="result-day-card-title high">高碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span id="r-hdc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-hdp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-hdf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-hdk">—</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span id="r-hmc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-hmp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-hmf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-hmk">—</span></div></div>
+              <div class="result-day-card"><div class="result-day-card-title low">低碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span id="r-ldc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-ldp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-ldf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-ldk">—</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span id="r-lmc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-lmp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-lmf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-lmk">—</span></div></div>
             </div>
           </div>
         </div>
@@ -307,7 +428,7 @@
         <div class="card" id="diary-no-calc" style="display:none;"><div class="empty-track">請先在「營養計算」頁面完成設定</div></div>
         <div id="diary-main" style="display:none;">
           <div id="diary-summary"></div>
-          <div class="week-setup"><div class="sec-label">設定高碳日（點選切換）</div><div class="weekday-grid" id="weekdayGrid"></div></div>
+          <div class="week-setup"><div class="sec-label">設定高碳日(點選切換)</div><div class="weekday-grid" id="weekdayGrid"></div></div>
           <div class="card">
             <div class="cal-header"><button class="cal-nav" onclick="calPrevMonth()"><i class="ti ti-chevron-left" style="font-size:14px"></i></button><div class="cal-title" id="calTitle"></div><button class="cal-nav" onclick="calNextMonth()"><i class="ti ti-chevron-right" style="font-size:14px"></i></button></div>
             <div class="cal-grid" id="calDayLabels"></div>
@@ -336,9 +457,12 @@
       <div class="section" id="section-foods">
         <div class="section-title">食物庫</div>
         <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-            <div class="sec-label" style="margin:0;">所有食物（每 100g）</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:8px;">
+            <div class="sec-label" style="margin:0;">所有食物(每 100g)</div>
             <button class="btn btn-green" onclick="openAddFoodModal()">+ 新增食物</button>
+          </div>
+          <div class="food-lib-search">
+            <input type="search" id="foodLibSearch" placeholder="搜尋食物..." oninput="renderFoodLib()"/>
           </div>
           <div id="foodLibCarb" style="margin-bottom:1.5rem;"></div>
           <div id="foodLibProt" style="margin-bottom:1.5rem;"></div>
@@ -354,7 +478,7 @@
 <div class="modal-overlay" id="newTplModal">
   <div class="modal">
     <div class="modal-title">新增模板</div>
-    <div class="custom-food-field"><label>模板名稱</label><input type="text" id="newTplName" placeholder="例如：高碳訓練日"/></div>
+    <div class="custom-food-field"><label>模板名稱</label><input type="text" id="newTplName" placeholder="例如:高碳訓練日"/></div>
     <div class="custom-food-field" style="margin-top:8px;"><label>類型</label><select id="newTplType"><option value="high">高碳日</option><option value="low">低碳日</option></select></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeNewTplModal()">取消</button>
@@ -367,13 +491,14 @@
 <div class="modal-overlay" id="addFoodModal">
   <div class="modal">
     <div class="modal-title">新增食物</div>
-    <div class="custom-food-field"><label>食物名稱</label><input type="text" id="af-name" placeholder="例如：雞蛋豆腐"/></div>
+    <div class="custom-food-field"><label>食物名稱</label><input type="text" id="af-name" placeholder="例如:雞蛋豆腐"/></div>
     <div class="custom-food-field" style="margin-top:8px;"><label>分類</label><select id="af-cat"><option value="carb">碳水類</option><option value="protein">蛋白質類</option><option value="fat">脂肪類</option></select></div>
     <div class="custom-food-row-3" style="margin-top:8px;">
       <div class="custom-food-field"><label>碳水 (g)</label><input type="number" id="af-c" placeholder="0" min="0" step="0.1"/></div>
       <div class="custom-food-field"><label>蛋白質 (g)</label><input type="number" id="af-p" placeholder="0" min="0" step="0.1"/></div>
       <div class="custom-food-field"><label>脂肪 (g)</label><input type="number" id="af-f" placeholder="0" min="0" step="0.1"/></div>
     </div>
+    <div style="font-size:11px;color:#888;margin-top:-4px;margin-bottom:8px;">熱量會自動計算(碳水×4 + 蛋白質×4 + 脂肪×9)</div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeAddFoodModal()">取消</button>
       <button class="btn btn-green" onclick="addCustomFood()">新增</button>
@@ -383,7 +508,7 @@
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut as fbSignOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut as fbSignOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import{getFirestore,doc,getDoc,setDoc,collection,getDocs}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig={apiKey:"AIzaSyBjyV8PSTBEDjUhF5JyZSSj3CjSLKQxMSA",authDomain:"carb-calculator-71739.firebaseapp.com",projectId:"carb-calculator-71739",storageBucket:"carb-calculator-71739.firebasestorage.app",messagingSenderId:"637184976998",appId:"1:637184976998:web:c2502ddfd152f27a9f25a7"};
@@ -392,41 +517,117 @@ const auth=getAuth(fbApp);
 const db=getFirestore(fbApp);
 let currentUser=null,saveTimer=null;
 
-window.signInWithGoogle=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){console.error(e);}};
-window.signOut=async()=>{await fbSignOut(auth);document.getElementById('userMenu').style.display='none';};
+// ── iOS detection: use redirect on iOS Safari, popup elsewhere ─
+function isIOS(){return /iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;}
+function isInStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;}
+
+window.signInWithGoogle=async()=>{
+  try{
+    const provider=new GoogleAuthProvider();
+    if(isIOS()||isInStandalone()){
+      await signInWithRedirect(auth,provider);
+    } else {
+      await signInWithPopup(auth,provider);
+    }
+    closeLoginModal();
+  }catch(e){console.error('signin error',e);alert('登入失敗:'+e.message);}
+};
+window.signOut=async()=>{
+  if(!confirm('登出後雲端資料會保留,但這台裝置看到的是本機資料。確定要登出?'))return;
+  await fbSignOut(auth);
+  currentUser=null;
+  document.getElementById('userMenu').style.display='none';
+  updateUserUI();
+};
 window.toggleUserMenu=()=>{const m=document.getElementById('userMenu');m.style.display=m.style.display==='none'?'block':'none';};
+window.onAvatarClick=()=>{
+  if(currentUser)window.toggleUserMenu();
+  else openLoginModal();
+};
+window.openLoginModal=()=>document.getElementById('loginModal').classList.add('show');
+window.closeLoginModal=()=>document.getElementById('loginModal').classList.remove('show');
+
 document.addEventListener('click',e=>{const w=document.getElementById('userAvatarWrap');if(w&&!w.contains(e.target))document.getElementById('userMenu').style.display='none';});
+
+// Handle redirect result (after iOS redirect login)
+getRedirectResult(auth).catch(e=>console.error('redirect result error',e));
+
+function updateUserUI(){
+  const av=document.getElementById('userAvatar');
+  const banner=document.getElementById('loginBanner');
+  if(currentUser){
+    av.innerHTML=currentUser.photoURL?'<img src="'+currentUser.photoURL+'" alt=""/>':'<div style="width:100%;height:100%;background:#1D9E75;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:500;">'+(currentUser.displayName?.[0]||'U')+'</div>';
+    document.getElementById('userMenuName').textContent=currentUser.displayName||currentUser.email;
+    banner.style.display='none';
+  } else {
+    av.innerHTML='<i class="ti ti-user"></i>';
+    banner.style.display='flex';
+  }
+}
 
 onAuthStateChanged(auth,async user=>{
   document.getElementById('loadingScreen').style.display='none';
+  document.getElementById('appScreen').style.display='flex';
   if(user){
     currentUser=user;
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('appScreen').style.display='flex';
-    const av=document.getElementById('userAvatar');
-    av.innerHTML=user.photoURL?'<img src="'+user.photoURL+'" alt=""/>':'<div style="width:100%;height:100%;background:#1D9E75;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:500;">'+(user.displayName?.[0]||'U')+'</div>';
-    document.getElementById('userMenuName').textContent=user.displayName||user.email;
-    await loadUserData();
+    updateUserUI();
+    await loadCloudData();
   } else {
     currentUser=null;
-    document.getElementById('loginScreen').style.display='flex';
-    document.getElementById('appScreen').style.display='none';
+    updateUserUI();
+    loadLocalData();
+  }
+  // First time visitors see onboarding
+  if(!localStorage.getItem('onboardDone')){
+    setTimeout(()=>openOnboard(),300);
   }
 });
 
 function showSave(msg){const el=document.getElementById('saveIndicator');el.textContent=msg;setTimeout(()=>{if(el.textContent===msg)el.textContent='';},2000);}
-function scheduleSave(key,data){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveData(key,data),1000);}
+function scheduleSave(key,data){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveData(key,data),800);}
+
 async function saveData(key,data){
-  if(!currentUser)return;
+  // Always save locally
   try{
-    if(key.startsWith('diary_')){const dk=key.replace('diary_','');await setDoc(doc(db,'users',currentUser.uid,'diaryEntries',dk),{value:JSON.stringify(data),updatedAt:Date.now()});}
-    else{await setDoc(doc(db,'users',currentUser.uid,key,'data'),{value:JSON.stringify(data),updatedAt:Date.now()});}
-    showSave('已儲存');
-  }catch(e){console.error(e);showSave('儲存失敗');}
+    if(key.startsWith('diary_')){
+      const all=JSON.parse(localStorage.getItem('diaryEntries')||'{}');
+      all[key.replace('diary_','')]=data;
+      localStorage.setItem('diaryEntries',JSON.stringify(all));
+    } else {
+      localStorage.setItem('local_'+key,JSON.stringify(data));
+    }
+  }catch(e){console.error('local save',e);}
+  // If logged in, also save to cloud
+  if(currentUser){
+    try{
+      if(key.startsWith('diary_')){
+        const dk=key.replace('diary_','');
+        await setDoc(doc(db,'users',currentUser.uid,'diaryEntries',dk),{value:JSON.stringify(data),updatedAt:Date.now()});
+      } else {
+        await setDoc(doc(db,'users',currentUser.uid,key,'data'),{value:JSON.stringify(data),updatedAt:Date.now()});
+      }
+      showSave('已同步');
+    }catch(e){console.error('cloud save',e);showSave('已存本機');}
+  } else {
+    showSave('已存本機');
+  }
 }
 
-async function loadUserData(){
-  if(!currentUser)return;
+function loadLocalData(){
+  try{
+    const calc=localStorage.getItem('local_calcSettings');if(calc)applyCalcSettings(JSON.parse(calc));
+    const tpl=localStorage.getItem('local_templates');if(tpl)templates=JSON.parse(tpl);
+    const cfg=localStorage.getItem('local_diaryConfig');if(cfg){const d=JSON.parse(cfg);highDays=new Set(d.highDays||[0,3]);}
+    const cf=localStorage.getItem('local_customFoods');if(cf)customFoods=JSON.parse(cf);
+    const de=localStorage.getItem('diaryEntries');if(de)diaryEntries=JSON.parse(de);
+  }catch(e){console.error('local load',e);}
+  updateMacroHints();clampDays();renderFoodLib();
+}
+
+async function loadCloudData(){
+  if(!currentUser){loadLocalData();return;}
+  // First load local as fallback
+  loadLocalData();
   try{
     const calcDoc=await getDoc(doc(db,'users',currentUser.uid,'calcSettings','data'));
     if(calcDoc.exists())applyCalcSettings(JSON.parse(calcDoc.data().value));
@@ -438,44 +639,71 @@ async function loadUserData(){
     if(foodDoc.exists())customFoods=JSON.parse(foodDoc.data().value);
     const snap=await getDocs(collection(db,'users',currentUser.uid,'diaryEntries'));
     snap.forEach(d=>{diaryEntries[d.id]=JSON.parse(d.data().value);});
-  }catch(e){console.error(e);}
+  }catch(e){console.error('cloud load',e);}
   updateMacroHints();clampDays();renderFoodLib();
 }
+
+// ── Onboarding ─────────────────────────────────────────
+let onboardStep=1;
+const TOTAL_ONBOARD_STEPS=5;
+window.openOnboard=()=>{
+  onboardStep=1;
+  renderOnboardStep();
+  document.getElementById('onboardModal').classList.add('show');
+};
+function renderOnboardStep(){
+  document.querySelectorAll('.onboard-step').forEach(s=>s.classList.remove('active'));
+  const cur=document.querySelector('.onboard-step[data-step="'+onboardStep+'"]');
+  if(cur)cur.classList.add('active');
+  const dots=document.getElementById('onboardDots');
+  let dh='';for(let i=1;i<=TOTAL_ONBOARD_STEPS;i++)dh+='<div class="onboard-dot'+(i===onboardStep?' active':'')+'"></div>';
+  dots.innerHTML=dh;
+  document.getElementById('onboardBack').style.display=onboardStep>1?'block':'none';
+  document.getElementById('onboardNext').textContent=onboardStep===TOTAL_ONBOARD_STEPS?'開始使用':'下一步';
+}
+window.onboardNext=()=>{
+  if(onboardStep<TOTAL_ONBOARD_STEPS){onboardStep++;renderOnboardStep();}
+  else{localStorage.setItem('onboardDone','1');document.getElementById('onboardModal').classList.remove('show');}
+};
+window.onboardBack=()=>{if(onboardStep>1){onboardStep--;renderOnboardStep();}};
+window.skipOnboard=()=>{localStorage.setItem('onboardDone','1');document.getElementById('onboardModal').classList.remove('show');};
 
 // ── State ─────────────────────────────────────────────
 const tiersM={1:{carb:1.7,protein:1.4,fat:0.8},2:{carb:2.0,protein:1.6,fat:0.9},3:{carb:2.4,protein:1.7,fat:1.0},4:{carb:2.8,protein:1.8,fat:1.0}};
 const tiersF={1:{carb:1.7,protein:1.4,fat:1.0},2:{carb:2.0,protein:1.6,fat:1.1},3:{carb:2.4,protein:1.7,fat:1.1},4:{carb:2.8,protein:1.8,fat:1.2}};
 const CARB_LOW_MIN=0.5,FAT_HIGH_MIN=0.2;
 
-// Default foods
+// Helpers: calorie calc (per 100g or per item)
+function kcalFromMacros(c,p,f){return Math.round(c*4+p*4+f*9);}
+
 const defaultFoods={
-  carb:[{name:'白米（生）',c:78,p:7,f:0.7},{name:'白米（熟）',c:28,p:2.7,f:0.3},{name:'糙米（生）',c:73,p:7.5,f:2.7},{name:'糙米（熟）',c:23,p:2.6,f:0.9},{name:'地瓜',c:20,p:1.6,f:0.1},{name:'燕麥（乾）',c:67,p:13,f:7},{name:'麵條（熟）',c:25,p:3.5,f:0.5},{name:'玉米',c:19,p:3.3,f:1.4},{name:'饅頭',c:47,p:7,f:1},{name:'馬鈴薯',c:17,p:2,f:0.1}],
-  protein:[{name:'雞胸肉（生）',c:0,p:23,f:2},{name:'雞胸肉（熟）',c:0,p:31,f:3.6},{name:'去皮雞腿肉（生）',c:0,p:18,f:5},{name:'去皮雞腿肉（熟）',c:0,p:28,f:6},{name:'雞蛋',c:0.7,p:13,f:11},{name:'板豆腐',c:2,p:8,f:4},{name:'鮭魚',c:0,p:25,f:13},{name:'牛肉（生）',c:0,p:21,f:4},{name:'牛肉（熟）',c:0,p:26,f:5},{name:'豬肉里肌（生）',c:0,p:20,f:6},{name:'豬肉里肌（熟）',c:0,p:22,f:8}],
+  carb:[{name:'白米(生)',c:78,p:7,f:0.7},{name:'白米(熟)',c:28,p:2.7,f:0.3},{name:'糙米(生)',c:73,p:7.5,f:2.7},{name:'糙米(熟)',c:23,p:2.6,f:0.9},{name:'地瓜',c:20,p:1.6,f:0.1},{name:'燕麥(乾)',c:67,p:13,f:7},{name:'麵條(熟)',c:25,p:3.5,f:0.5},{name:'玉米',c:19,p:3.3,f:1.4},{name:'饅頭',c:47,p:7,f:1},{name:'馬鈴薯',c:17,p:2,f:0.1}],
+  protein:[{name:'雞胸肉(生)',c:0,p:23,f:2},{name:'雞胸肉(熟)',c:0,p:31,f:3.6},{name:'去皮雞腿肉(生)',c:0,p:18,f:5},{name:'去皮雞腿肉(熟)',c:0,p:28,f:6},{name:'雞蛋',c:0.7,p:13,f:11},{name:'板豆腐',c:2,p:8,f:4},{name:'鮭魚',c:0,p:25,f:13},{name:'牛肉(生)',c:0,p:21,f:4},{name:'牛肉(熟)',c:0,p:26,f:5},{name:'豬肉里肌(生)',c:0,p:20,f:6},{name:'豬肉里肌(熟)',c:0,p:22,f:8}],
   fat:[{name:'橄欖油',c:0,p:0,f:100},{name:'綜合堅果',c:18,p:15,f:50},{name:'酪梨',c:9,p:2,f:15}]
 };
 let customFoods={carb:[],protein:[],fat:[]};
 function getAllFoods(){return{carb:[...defaultFoods.carb,...customFoods.carb],protein:[...defaultFoods.protein,...customFoods.protein],fat:[...defaultFoods.fat,...customFoods.fat]};}
 
 let selGender=null,selTier=null,calcResult=null,calcCollapsed=false;
-let templates=[];// [{id,name,type,meals:{m1:{carb:[],prot:[],fat:[]},m2:...}}]
+let templates=[];
 let curTplId=null;
 let highDays=new Set([0,3]);
 let curCalDate=new Date(),selDate=null;
 let diaryEntries={};
 let curDiaryMeal=null;
+// Search state for food pickers
+let foodSearchState={};// keyed by `${prefix}-${type}`
 
-// ── Section switch ─────────────────────────────────────
 window.switchSection=name=>{
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sidebar-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('section-'+name).classList.add('active');
-  document.getElementById('nav-'+name).classList.add('active');
+  const navBtn=document.getElementById('nav-'+name);if(navBtn)navBtn.classList.add('active');
   if(name==='diary')renderDiary();
   if(name==='template')renderTemplateSection();
   if(name==='foods')renderFoodLib();
 };
 
-// ── Calc ──────────────────────────────────────────────
 window.selectGender=g=>{selGender=g;document.getElementById('btnM').className='gender-btn'+(g==='m'?' active-m':'');document.getElementById('btnF').className='gender-btn'+(g==='f'?' active-f':'');updateMacroHints();updateSliderBounds();recalc();};
 window.updateMacroHints=function(){if(!selGender)return;const tiers=selGender==='f'?tiersF:tiersM;for(let i=1;i<=4;i++){const t=tiers[i];document.getElementById('macro'+i).innerHTML='碳水 '+t.carb+'x・蛋白質 '+t.protein+'x・脂肪 '+t.fat+'x';}};
 window.selectTier=t=>{selTier=t;document.querySelectorAll('.tier-btn').forEach(b=>b.classList.remove('active'));document.querySelector('[data-tier="'+t+'"]').classList.add('active');document.getElementById('customInputs').style.display=t===5?'block':'none';updateSliderBounds();recalc();};
@@ -507,6 +735,8 @@ window.recalc=function(){
   const carbHigh=sliderToVal(cs),carbLow=(t.carb*7-carbHigh*hd)/ld;
   const fatLow=sliderToVal(fs),fatHigh=(t.fat*7-fatLow*ld)/hd;
   calcResult={high:{carb:Math.round(weight*carbHigh),prot:Math.round(weight*t.protein),fat:Math.round(weight*fatHigh),meals},low:{carb:Math.round(weight*carbLow),prot:Math.round(weight*t.protein),fat:Math.round(weight*fatLow),meals}};
+  calcResult.high.kcal=kcalFromMacros(calcResult.high.carb,calcResult.high.prot,calcResult.high.fat);
+  calcResult.low.kcal=kcalFromMacros(calcResult.low.carb,calcResult.low.prot,calcResult.low.fat);
   updateResultCards();
   scheduleSave('calcSettings',{gender:selGender,tier:selTier,weight:document.getElementById('weight').value,highDays:document.getElementById('highDays').value,mealCount:meals,carbSlider:cs.value,fatSlider:fs.value,customCarb:document.getElementById('customCarb').value,customProtein:document.getElementById('customProtein').value,customFat:document.getElementById('customFat').value});
 };
@@ -514,66 +744,135 @@ window.updateResultCards=function(){
   const rc=document.getElementById('resultCards'),cs=document.getElementById('collapsedSummary');
   if(!calcResult){rc.style.display='none';if(calcCollapsed)cs.style.display='none';return;}
   const h=calcResult.high,l=calcResult.low,m=h.meals;rc.style.display='grid';
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v+'g';};
-  set('r-hdc',h.carb);set('r-hdp',h.prot);set('r-hdf',h.fat);set('r-hmc',Math.round(h.carb/m));set('r-hmp',Math.round(h.prot/m));set('r-hmf',Math.round(h.fat/m));
-  set('r-ldc',l.carb);set('r-ldp',l.prot);set('r-ldf',l.fat);set('r-lmc',Math.round(l.carb/m));set('r-lmp',Math.round(l.prot/m));set('r-lmf',Math.round(l.fat/m));
-  set('cs-hdc',h.carb);set('cs-hdp',h.prot);set('cs-hdf',h.fat);set('cs-hmc',Math.round(h.carb/m));set('cs-hmp',Math.round(h.prot/m));set('cs-hmf',Math.round(h.fat/m));
-  set('cs-ldc',l.carb);set('cs-ldp',l.prot);set('cs-ldf',l.fat);set('cs-lmc',Math.round(l.carb/m));set('cs-lmp',Math.round(l.prot/m));set('cs-lmf',Math.round(l.fat/m));
+  const set=(id,v,unit)=>{const el=document.getElementById(id);if(el)el.textContent=v+(unit||'g');};
+  set('r-hdc',h.carb);set('r-hdp',h.prot);set('r-hdf',h.fat);set('r-hdk',h.kcal,' kcal');
+  set('r-hmc',Math.round(h.carb/m));set('r-hmp',Math.round(h.prot/m));set('r-hmf',Math.round(h.fat/m));set('r-hmk',Math.round(h.kcal/m),' kcal');
+  set('r-ldc',l.carb);set('r-ldp',l.prot);set('r-ldf',l.fat);set('r-ldk',l.kcal,' kcal');
+  set('r-lmc',Math.round(l.carb/m));set('r-lmp',Math.round(l.prot/m));set('r-lmf',Math.round(l.fat/m));set('r-lmk',Math.round(l.kcal/m),' kcal');
+  set('cs-hdc',h.carb);set('cs-hdp',h.prot);set('cs-hdf',h.fat);set('cs-hdk',h.kcal,' kcal');
+  set('cs-hmc',Math.round(h.carb/m));set('cs-hmp',Math.round(h.prot/m));set('cs-hmf',Math.round(h.fat/m));set('cs-hmk',Math.round(h.kcal/m),' kcal');
+  set('cs-ldc',l.carb);set('cs-ldp',l.prot);set('cs-ldf',l.fat);set('cs-ldk',l.kcal,' kcal');
+  set('cs-lmc',Math.round(l.carb/m));set('cs-lmp',Math.round(l.prot/m));set('cs-lmf',Math.round(l.fat/m));set('cs-lmk',Math.round(l.kcal/m),' kcal');
   if(calcCollapsed)cs.style.display='block';
 };
 window.toggleCalc=()=>{calcCollapsed=!calcCollapsed;document.getElementById('calcBody').style.display=calcCollapsed?'none':'block';document.getElementById('collapseBtn').innerHTML=calcCollapsed?'展開 <i class="ti ti-chevron-down" style="font-size:13px;vertical-align:-1px"></i>':'收合 <i class="ti ti-chevron-up" style="font-size:13px;vertical-align:-1px"></i>';document.getElementById('collapsedSummary').style.display=(calcCollapsed&&calcResult)?'block':'none';};
 function applyCalcSettings(d){if(d.gender)selectGender(d.gender);if(d.tier){selTier=d.tier;document.querySelectorAll('.tier-btn').forEach(b=>b.classList.remove('active'));const tb=document.querySelector('[data-tier="'+d.tier+'"]');if(tb)tb.classList.add('active');document.getElementById('customInputs').style.display=d.tier===5?'block':'none';}if(d.weight)document.getElementById('weight').value=d.weight;if(d.highDays)document.getElementById('highDays').value=d.highDays;if(d.mealCount)document.getElementById('mealCount').value=d.mealCount;if(d.customCarb)document.getElementById('customCarb').value=d.customCarb;if(d.customProtein)document.getElementById('customProtein').value=d.customProtein;if(d.customFat)document.getElementById('customFat').value=d.customFat;clampDays();setTimeout(()=>{if(d.carbSlider)document.getElementById('carbSlider').value=d.carbSlider;if(d.fatSlider)document.getElementById('fatSlider').value=d.fatSlider;recalc();},100);}
 
-// ── Shared helpers ─────────────────────────────────────
-function resultSummaryHTML(){if(!calcResult)return'';const h=calcResult.high,l=calcResult.low,m=h.meals;return'<div class="result-cards" style="margin-bottom:1rem;"><div class="result-day-card"><div class="result-day-card-title high">高碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span>'+h.carb+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+h.prot+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+h.fat+'g</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span>'+Math.round(h.carb/m)+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+Math.round(h.prot/m)+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+Math.round(h.fat/m)+'g</span></div></div><div class="result-day-card"><div class="result-day-card-title low">低碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span>'+l.carb+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+l.prot+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+l.fat+'g</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span>'+Math.round(l.carb/m)+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+Math.round(l.prot/m)+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+Math.round(l.fat/m)+'g</span></div></div></div>';}
-function remHTML(rem){if(rem<0)return'<div class="target-remain remain-over">超出 '+Math.round(Math.abs(rem))+'g</div>';return'<div class="target-remain remain-ok">剩 '+Math.round(rem)+'g</div>';}
-function barHTML(used,total,base,label,bid,pid,rid){const over=used>total;const pct=Math.min(100,total>0?Math.round(used/total*100):0);const bi=bid?' id="'+bid+'"':'',pi=pid?' id="'+pid+'"':'',ri=rid?' id="'+rid+'"':'';return'<div class="macro-bar-wrap"><div class="macro-bar-label"><span>'+label+' <span class="badge badge-carb"'+pi+'>'+(over?'超出 '+Math.round(used-total)+'g':pct+'%')+'</span></span><span style="font-size:13px;font-weight:500;color:'+(over?'#E24B4A':'#666')+'"'+ri+'>'+(over?'超出 '+Math.round(used-total)+'g':'剩 '+Math.round(total-used)+'g')+'</span></div><div class="macro-bar-track"><div class="macro-bar-fill '+base+'"'+bi+' style="width:'+pct+'%"></div></div></div>';}
+function resultSummaryHTML(){if(!calcResult)return'';const h=calcResult.high,l=calcResult.low,m=h.meals;return'<div class="result-cards" style="margin-bottom:1rem;"><div class="result-day-card"><div class="result-day-card-title high">高碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span>'+h.carb+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+h.prot+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+h.fat+'g</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span>'+h.kcal+' kcal</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span>'+Math.round(h.carb/m)+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+Math.round(h.prot/m)+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+Math.round(h.fat/m)+'g</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span>'+Math.round(h.kcal/m)+' kcal</span></div></div><div class="result-day-card"><div class="result-day-card-title low">低碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span>'+l.carb+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+l.prot+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+l.fat+'g</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span>'+l.kcal+' kcal</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span>'+Math.round(l.carb/m)+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+Math.round(l.prot/m)+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+Math.round(l.fat/m)+'g</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span>'+Math.round(l.kcal/m)+' kcal</span></div></div></div>';}
+
+function remHTML(rem,unit){const u=unit||'g';if(rem<0)return'<div class="target-remain remain-over">超出 '+Math.round(Math.abs(rem))+u+'</div>';return'<div class="target-remain remain-ok">剩 '+Math.round(rem)+u+'</div>';}
+
+function barHTML(used,total,base,label,unit){
+  const u=unit||'g';
+  const over=used>total;
+  const pct=Math.min(100,total>0?Math.round(used/total*100):0);
+  return'<div class="macro-bar-wrap"><div class="macro-bar-label"><span>'+label+' <span class="badge badge-carb">'+(over?'超出 '+Math.round(used-total)+u:pct+'%')+'</span></span><span style="font-size:13px;font-weight:500;color:'+(over?'#E24B4A':'#666')+'">'+(over?'超出 '+Math.round(used-total)+u:'剩 '+Math.round(total-used)+u)+'</span></div><div class="macro-bar-track"><div class="macro-bar-fill '+base+'" style="width:'+pct+'%"></div></div></div>';
+}
+
+// ── Food picker (with search) ─────────────────────────
+function getFoodListForType(type){const all=getAllFoods();return type==='carb'?all.carb:type==='prot'?all.protein:all.fat;}
 
 function renderFoodSectionHTML(type,label,badgeClass,md,prefix){
-  const all=getAllFoods();const foodList=type==='carb'?all.carb:type==='prot'?all.protein:all.fat;
   const items=md[type]||[];
-  const itemsHTML=items.map((item,idx)=>'<div class="food-item"><div class="food-item-header"><span class="food-name">'+item.food.name+'</span><button class="food-remove" data-'+prefix+'-remove="'+type+'-'+idx+'">×</button></div><div class="food-grams"><input type="number" class="'+prefix+'-gram-input" data-'+prefix+'-gram="'+type+'-'+idx+'" value="'+item.grams+'" min="1" max="2000" style="width:70px;text-align:center;"/><span>g</span><span class="food-macros-inline" id="'+prefix+'-fml-'+type+'-'+idx+'">碳 '+(item.grams*item.food.c/100).toFixed(1)+'・蛋 '+(item.grams*item.food.p/100).toFixed(1)+'・脂 '+(item.grams*item.food.f/100).toFixed(1)+'</span></div></div>').join('');
-  const opts=foodList.map(f=>'<option value="'+f.name+'">'+f.name+'</option>').join('')+'<option value="__custom__">自行輸入</option>';
-  return'<div class="food-section"><div class="food-section-title"><span class="badge '+badgeClass+'">'+label+'</span></div><div class="food-list">'+itemsHTML+'</div><div class="add-food-row"><select data-'+prefix+'-add-type="'+type+'">'+opts+'</select><button data-'+prefix+'-add-btn="'+type+'">+ 新增</button></div><div class="custom-food-box" id="'+prefix+'-custom-box-'+type+'"><div class="custom-food-field"><label>食物名稱</label><input type="text" id="'+prefix+'-cf-name-'+type+'" placeholder="例如：茶葉蛋"/></div><div class="custom-food-row-3"><div class="custom-food-field"><label>碳水 (每100g)</label><input type="number" id="'+prefix+'-cf-c-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div><div class="custom-food-field"><label>蛋白質 (每100g)</label><input type="number" id="'+prefix+'-cf-p-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div><div class="custom-food-field"><label>脂肪 (每100g)</label><input type="number" id="'+prefix+'-cf-f-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div></div><div class="custom-food-field"><label>實際克數</label><input type="number" id="'+prefix+'-cf-g-'+type+'" placeholder="例如：100" min="1" max="2000"/></div></div></div>';
+  const itemsHTML=items.map((item,idx)=>{
+    const kcal=Math.round(item.grams*kcalFromMacros(item.food.c,item.food.p,item.food.f)/100);
+    return'<div class="food-item"><div class="food-item-header"><span class="food-name">'+item.food.name+'</span><button class="food-remove" data-'+prefix+'-remove="'+type+'-'+idx+'">×</button></div><div class="food-grams"><input type="number" class="'+prefix+'-gram-input" data-'+prefix+'-gram="'+type+'-'+idx+'" value="'+item.grams+'" min="1" max="2000" style="width:70px;text-align:center;"/><span>g</span><span class="food-macros-inline" id="'+prefix+'-fml-'+type+'-'+idx+'">碳 '+(item.grams*item.food.c/100).toFixed(1)+'・蛋 '+(item.grams*item.food.p/100).toFixed(1)+'・脂 '+(item.grams*item.food.f/100).toFixed(1)+'・'+kcal+' kcal</span></div></div>';
+  }).join('');
+  const stateKey=prefix+'-'+type;
+  const searchVal=foodSearchState[stateKey]||'';
+  return'<div class="food-section"><div class="food-section-title"><span class="badge '+badgeClass+'">'+label+'</span></div><div class="food-list">'+itemsHTML+'</div><div style="margin-top:10px;"><div class="food-search-row"><input type="search" data-'+prefix+'-search="'+type+'" placeholder="搜尋食物名稱..." value="'+searchVal+'"/></div><button class="food-add-custom-btn" data-'+prefix+'-toggle-custom="'+type+'"><i class="ti ti-plus" style="vertical-align:-2px;margin-right:4px;"></i>自行新增食物</button><div class="food-search-results" data-'+prefix+'-results="'+type+'"></div></div><div class="custom-food-box" id="'+prefix+'-custom-box-'+type+'"><div class="custom-food-field"><label>食物名稱</label><input type="text" id="'+prefix+'-cf-name-'+type+'" placeholder="例如:茶葉蛋"/></div><div class="custom-food-row-3"><div class="custom-food-field"><label>碳水 (每100g)</label><input type="number" id="'+prefix+'-cf-c-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div><div class="custom-food-field"><label>蛋白質 (每100g)</label><input type="number" id="'+prefix+'-cf-p-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div><div class="custom-food-field"><label>脂肪 (每100g)</label><input type="number" id="'+prefix+'-cf-f-'+type+'" placeholder="0" min="0" max="999" step="0.1"/></div></div><div class="custom-food-field"><label>實際克數</label><input type="number" id="'+prefix+'-cf-g-'+type+'" placeholder="例如:100" min="1" max="2000"/></div><div class="modal-actions"><button class="btn btn-green" data-'+prefix+'-confirm-custom="'+type+'">新增到清單</button></div></div></div>';
+}
+
+function renderFoodSearchResults(prefix,type,query,onPick){
+  const container=document.querySelector('[data-'+prefix+'-results="'+type+'"]');
+  if(!container)return;
+  const q=(query||'').trim().toLowerCase();
+  const all=getFoodListForType(type);
+  let list;
+  if(q===''){list=[];} // empty query = hide results
+  else{list=all.filter(f=>f.name.toLowerCase().includes(q));}
+  if(q!==''&&list.length===0){
+    container.innerHTML='<div class="food-search-empty">找不到「'+query+'」,可以點上方「自行新增食物」</div>';
+    return;
+  }
+  if(list.length===0){container.innerHTML='';return;}
+  container.innerHTML=list.map(f=>{
+    const k=kcalFromMacros(f.c,f.p,f.f);
+    return'<div class="food-search-item" data-pick-name="'+encodeURIComponent(f.name)+'"><div><div class="food-search-item-name">'+f.name+'</div><div class="food-search-item-macros">每100g・碳 '+f.c+'・蛋 '+f.p+'・脂 '+f.f+'・'+k+' kcal</div></div><i class="ti ti-plus" style="color:#888;font-size:16px;"></i></div>';
+  }).join('');
+  container.querySelectorAll('.food-search-item').forEach(el=>{
+    el.onclick=()=>{
+      const name=decodeURIComponent(el.dataset.pickName);
+      const food=all.find(f=>f.name===name);
+      if(food)onPick(food);
+    };
+  });
 }
 
 function bindFoodEvents(prefix,getMd,onUpdate,getTargets){
-  document.querySelectorAll('[data-'+prefix+'-add-btn]').forEach(btn=>{
+  // Search inputs
+  document.querySelectorAll('[data-'+prefix+'-search]').forEach(inp=>{
+    const type=inp.dataset[prefix+'Search'];
+    inp.addEventListener('input',()=>{
+      foodSearchState[prefix+'-'+type]=inp.value;
+      renderFoodSearchResults(prefix,type,inp.value,food=>handlePick(type,food));
+    });
+    // Initial render if there's a saved query
+    if(inp.value)renderFoodSearchResults(prefix,type,inp.value,food=>handlePick(type,food));
+  });
+
+  function handlePick(type,food){
+    const md=getMd(type);
+    const tgt=getTargets?getTargets(type):null;
+    const used=md.reduce((s,i)=>s+i.grams*(type==='carb'?i.food.c:type==='prot'?i.food.p:i.food.f)/100,0);
+    const rem=tgt!=null?Math.max(0,tgt-used):null;
+    const macro=type==='carb'?food.c:type==='prot'?food.p:food.f;
+    let dg=macro>0&&rem!=null&&rem>0?Math.round(rem/(macro/100)):100;
+    dg=Math.max(1,Math.min(2000,dg||100));
+    md.push({food,grams:dg});
+    // Clear search after pick
+    foodSearchState[prefix+'-'+type]='';
+    onUpdate();
+  }
+
+  // Toggle custom food box
+  document.querySelectorAll('[data-'+prefix+'-toggle-custom]').forEach(btn=>{
     btn.onclick=()=>{
-      const type=btn.dataset[prefix+'AddBtn'];
-      const sel=document.querySelector('[data-'+prefix+'-add-type="'+type+'"]');
+      const type=btn.dataset[prefix+'ToggleCustom'];
+      const box=document.getElementById(prefix+'-custom-box-'+type);
+      if(box)box.classList.toggle('show');
+    };
+  });
+
+  // Confirm custom add
+  document.querySelectorAll('[data-'+prefix+'-confirm-custom]').forEach(btn=>{
+    btn.onclick=()=>{
+      const type=btn.dataset[prefix+'ConfirmCustom'];
       const md=getMd(type);
-      if(sel.value==='__custom__'){
-        const name=document.getElementById(prefix+'-cf-name-'+type).value.trim()||'自訂食物';
-        const c=parseFloat(document.getElementById(prefix+'-cf-c-'+type).value)||0;
-        const p=parseFloat(document.getElementById(prefix+'-cf-p-'+type).value)||0;
-        const f=parseFloat(document.getElementById(prefix+'-cf-f-'+type).value)||0;
-        const g=Math.max(1,parseInt(document.getElementById(prefix+'-cf-g-'+type).value)||100);
-        md.push({food:{name,c,p,f},grams:g});
-      } else {
-        const all=getAllFoods();const foodList=type==='carb'?all.carb:type==='prot'?all.protein:all.fat;
-        const food=foodList.find(f=>f.name===sel.value);if(!food)return;
-        const tgt=getTargets?getTargets(type):null;
-        const used=md.reduce((s,i)=>s+i.grams*(type==='carb'?i.food.c:type==='prot'?i.food.p:i.food.f)/100,0);
-        const rem=tgt!=null?Math.max(0,tgt-used):null;
-        const macro=type==='carb'?food.c:type==='prot'?food.p:food.f;
-        let dg=macro>0&&rem!=null&&rem>0?Math.round(rem/(macro/100)):100;
-        dg=Math.max(1,Math.min(2000,dg||100));
-        md.push({food,grams:dg});
-      }
+      const name=document.getElementById(prefix+'-cf-name-'+type).value.trim()||'自訂食物';
+      const c=parseFloat(document.getElementById(prefix+'-cf-c-'+type).value)||0;
+      const p=parseFloat(document.getElementById(prefix+'-cf-p-'+type).value)||0;
+      const f=parseFloat(document.getElementById(prefix+'-cf-f-'+type).value)||0;
+      const g=Math.max(1,parseInt(document.getElementById(prefix+'-cf-g-'+type).value)||100);
+      md.push({food:{name,c,p,f},grams:g});
       onUpdate();
     };
   });
-  document.querySelectorAll('[data-'+prefix+'-remove]').forEach(btn=>{btn.onclick=()=>{const[type,idx]=btn.dataset[prefix+'Remove'].split('-');getMd(type).splice(parseInt(idx),1);onUpdate();};});
+
+  // Remove
+  document.querySelectorAll('[data-'+prefix+'-remove]').forEach(btn=>{
+    btn.onclick=()=>{const[type,idx]=btn.dataset[prefix+'Remove'].split('-');getMd(type).splice(parseInt(idx),1);onUpdate();};
+  });
+
+  // Gram input
   document.querySelectorAll('.'+prefix+'-gram-input').forEach(inp=>{
     inp.addEventListener('input',()=>{const[type,idx]=inp.dataset[prefix+'Gram'].split('-');const v=Math.max(1,Math.min(2000,parseInt(inp.value)||1));getMd(type)[parseInt(idx)].grams=v;onUpdate(true);});
     inp.addEventListener('blur',()=>{if(!inp.value||parseInt(inp.value)<1)inp.value=1;});
     inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();});
   });
-  document.querySelectorAll('[data-'+prefix+'-add-type]').forEach(sel=>{sel.onchange=()=>{const box=document.getElementById(prefix+'-custom-box-'+sel.dataset[prefix+'AddType']);if(box)box.className='custom-food-box'+(sel.value==='__custom__'?' show':'');};});
 }
 
-// ── Section 3: Templates ───────────────────────────────
+// ── Templates ──────────────────────────────────────────
 window.openNewTplModal=()=>{document.getElementById('newTplName').value='';document.getElementById('newTplModal').classList.add('show');};
 window.closeNewTplModal=()=>document.getElementById('newTplModal').classList.remove('show');
 window.createTemplate=()=>{
@@ -595,7 +894,7 @@ function renderTemplateSection(){
   document.getElementById('tpl-no-calc').style.display='none';document.getElementById('tpl-main').style.display='block';
   document.getElementById('tpl-summary').innerHTML=resultSummaryHTML();
   const listEl=document.getElementById('tpl-list');
-  if(templates.length===0){listEl.innerHTML='<div class="empty-track" style="padding:1rem 0;">還沒有模板，點右上角新增</div>';}
+  if(templates.length===0){listEl.innerHTML='<div class="empty-track" style="padding:1rem 0;">還沒有模板,點右上角新增</div>';}
   else{
     listEl.innerHTML='<div class="tpl-list">'+templates.map(t=>'<div class="tpl-card"><div class="tpl-card-header"><div><div class="tpl-card-name">'+t.name+'</div><div class="tpl-card-meta">'+(t.dayType==='high'?'高碳日':'低碳日')+'・'+Object.keys(t.meals).length+' 餐</div></div><div class="tpl-card-actions"><button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="editTemplate(\''+t.id+'\')">編輯</button><button class="btn btn-red" style="font-size:12px;padding:5px 10px;" onclick="deleteTemplate(\''+t.id+'\')">刪除</button></div></div></div>').join('')+'</div>';
   }
@@ -603,7 +902,7 @@ function renderTemplateSection(){
 }
 
 window.editTemplate=id=>{curTplId=id;renderTplEditor();};
-window.deleteTemplate=id=>{if(!confirm('確定要刪除這個模板？'))return;templates=templates.filter(t=>t.id!==id);if(curTplId===id){curTplId=null;document.getElementById('tpl-editor').innerHTML='';}scheduleSave('templates',templates);renderTemplateSection();};
+window.deleteTemplate=id=>{if(!confirm('確定要刪除這個模板?'))return;templates=templates.filter(t=>t.id!==id);if(curTplId===id){curTplId=null;document.getElementById('tpl-editor').innerHTML='';}scheduleSave('templates',templates);renderTemplateSection();};
 
 function renderTplEditor(){
   const tpl=templates.find(t=>t.id===curTplId);if(!tpl)return;
@@ -611,15 +910,17 @@ function renderTplEditor(){
   const curMealKey=tpl._curMeal||'m1';if(!tpl.meals[curMealKey])tpl.meals[curMealKey]={carb:[],prot:[],fat:[]};
   const md=tpl.meals[curMealKey];
   let tC=0,tP=0,tF=0;Object.values(tpl.meals).forEach(m=>{const all=[...m.carb,...m.prot,...m.fat];tC+=all.reduce((s,f)=>s+f.grams*(f.food.c/100),0);tP+=all.reduce((s,f)=>s+f.grams*(f.food.p/100),0);tF+=all.reduce((s,f)=>s+f.grams*(f.food.f/100),0);});
-  const mCarb=Math.round(day.carb/meals),mProt=Math.round(day.prot/meals),mFat=Math.round(day.fat/meals);
+  const tK=kcalFromMacros(tC,tP,tF);
+  const mCarb=Math.round(day.carb/meals),mProt=Math.round(day.prot/meals),mFat=Math.round(day.fat/meals),mKcal=Math.round(day.kcal/meals);
   const cons={c:([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(f.food.c/100),0),p:([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(f.food.p/100),0),f:([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(f.food.f/100),0)};
+  const consK=kcalFromMacros(cons.c,cons.p,cons.f);
   let tabs='';for(let i=1;i<=meals;i++)tabs+='<button class="meal-tab'+(curMealKey==='m'+i?' active':'')+'" onclick="setTplEditorMeal(\''+tpl.id+'\',\'m'+i+'\')">第 '+i+' 餐</button>';
-  document.getElementById('tpl-editor').innerHTML='<div class="card" style="border-top:2px solid #1D9E75;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;"><div style="font-size:14px;font-weight:500;">編輯：'+tpl.name+'</div><button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="curTplId=null;document.getElementById(\'tpl-editor\').innerHTML=\'\'">完成</button></div>'+barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+'<div class="meal-tabs" style="margin-top:1rem;">'+tabs+'</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;"><div class="target-card"><div class="target-label">碳水目標</div><div class="target-val">'+mCarb+'g</div>'+remHTML(mCarb-cons.c)+'</div><div class="target-card"><div class="target-label">蛋白質目標</div><div class="target-val">'+mProt+'g</div>'+remHTML(mProt-cons.p)+'</div><div class="target-card"><div class="target-label">脂肪目標</div><div class="target-val">'+mFat+'g</div>'+remHTML(mFat-cons.f)+'</div></div>'+renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'tpl')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'tpl')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'tpl')+'</div>';
+  document.getElementById('tpl-editor').innerHTML='<div class="card" style="border-top:2px solid #1D9E75;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;"><div style="font-size:14px;font-weight:500;">編輯:'+tpl.name+'</div><button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="curTplId=null;document.getElementById(\'tpl-editor\').innerHTML=\'\'">完成</button></div>'+barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal')+'<div class="meal-tabs" style="margin-top:1rem;">'+tabs+'</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem;"><div class="target-card"><div class="target-label">碳水目標</div><div class="target-val">'+mCarb+'g</div>'+remHTML(mCarb-cons.c)+'</div><div class="target-card"><div class="target-label">蛋白質目標</div><div class="target-val">'+mProt+'g</div>'+remHTML(mProt-cons.p)+'</div><div class="target-card"><div class="target-label">脂肪目標</div><div class="target-val">'+mFat+'g</div>'+remHTML(mFat-cons.f)+'</div><div class="target-card"><div class="target-label">熱量目標</div><div class="target-val kcal">'+mKcal+'</div>'+remHTML(mKcal-consK,' kcal')+'</div></div>'+renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'tpl')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'tpl')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'tpl')+'</div>';
   bindFoodEvents('tpl',type=>{if(!tpl.meals[curMealKey])tpl.meals[curMealKey]={carb:[],prot:[],fat:[]};return tpl.meals[curMealKey][type];},()=>{scheduleSave('templates',templates);renderTplEditor();},(type)=>{const c=([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(type==='carb'?f.food.c:type==='prot'?f.food.p:f.food.f)/100,0);return type==='carb'?mCarb-c:type==='prot'?mProt-c:mFat-c;});
 }
 window.setTplEditorMeal=(id,key)=>{const tpl=templates.find(t=>t.id===id);if(tpl){tpl._curMeal=key;renderTplEditor();}};
 
-// ── Section 2: Diary ──────────────────────────────────
+// ── Diary ─────────────────────────────────────────────
 function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function dayOfWeek(d){return(d.getDay()+6)%7;}
 function isHighDay(d){return highDays.has(dayOfWeek(d));}
@@ -671,13 +972,12 @@ function computeDiaryTargets(dk){
   return{targets,allSlots,day};
 }
 
-// Apply template modal
 window.openApplyModal=()=>{
   if(templates.length===0){alert('還沒有建立任何模板');return;}
   const date=new Date(selDate),dayType=isHighDay(date)?'high':'low';
   const matched=templates.filter(t=>t.dayType===dayType);
   const listEl=document.getElementById('applyTplList');
-  if(matched.length===0){listEl.innerHTML='<div style="color:#888;font-size:13px;padding:8px 0;">沒有符合今天類型（'+(dayType==='high'?'高碳日':'低碳日')+'）的模板</div>';}
+  if(matched.length===0){listEl.innerHTML='<div style="color:#888;font-size:13px;padding:8px 0;">沒有符合今天類型('+(dayType==='high'?'高碳日':'低碳日')+')的模板</div>';}
   else{listEl.innerHTML=matched.map(t=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.06);"><div><div style="font-size:13px;font-weight:500;">'+t.name+'</div><div style="font-size:12px;color:#888;">'+Object.keys(t.meals).length+' 餐</div></div><button class="btn btn-green" style="font-size:12px;padding:5px 12px;" onclick="applyTemplate(\''+t.id+'\')">套用</button></div>').join('');}
   document.getElementById('applyTplModal').classList.add('show');
 };
@@ -694,6 +994,35 @@ window.applyTemplate=id=>{
   saveDiary(selDate);closeApplyModal();renderDiaryContent();renderCalendar();
 };
 
+// Extras
+window.setDiaryMeal=key=>{curDiaryMeal=key;renderDiaryContent();};
+window.addDiaryExtra=()=>{
+  if(!selDate)return;
+  const entry=getDiaryEntry(selDate);
+  if(!entry.extras)entry.extras=[];
+  if(typeof entry.extraCount!=='number')entry.extraCount=0;
+  entry.extraCount++;
+  const key='extra_'+Date.now();
+  entry.extras.push({key,label:'額外餐 '+entry.extraCount,after:1});
+  if(!entry.meals)entry.meals={};
+  entry.meals[key]={carb:[],prot:[],fat:[]};
+  curDiaryMeal=key;
+  saveDiary(selDate);renderDiaryContent();
+};
+window.updateDiaryExtraPos=(key,val)=>{
+  const entry=getDiaryEntry(selDate);
+  const ex=(entry.extras||[]).find(e=>e.key===key);
+  if(ex){ex.after=parseInt(val);saveDiary(selDate);renderDiaryContent();}
+};
+window.removeDiaryExtra=key=>{
+  if(!confirm('確定刪除這份額外餐食?'))return;
+  const entry=getDiaryEntry(selDate);
+  entry.extras=(entry.extras||[]).filter(e=>e.key!==key);
+  delete entry.meals[key];
+  curDiaryMeal=null;
+  saveDiary(selDate);renderDiaryContent();
+};
+
 function renderDiaryContent(){
   const dc=document.getElementById('diary-content');
   if(!selDate){dc.innerHTML='<div class="card"><div class="empty-track">請選擇日期查看飲食記錄</div></div>';return;}
@@ -705,11 +1034,13 @@ function renderDiaryContent(){
   Object.values(entry.meals||{}).forEach(md=>{
     ['carb','prot','fat'].forEach(t=>{(md[t]||[]).forEach(item=>{tC+=item.grams*(item.food.c/100);tP+=item.grams*(item.food.p/100);tF+=item.grams*(item.food.f/100);});});
   });
+  const tK=kcalFromMacros(tC,tP,tF);
   const tgt=targets[slot?.key]||{c:0,p:0,f:0,consumed:{c:0,p:0,f:0}};
   const cons=tgt.consumed;
+  const consK=kcalFromMacros(cons.c,cons.p,cons.f);
+  const tgtK=kcalFromMacros(tgt.c,tgt.p,tgt.f);
   const dateObj=new Date(selDate),dayType=isHighDay(dateObj)?'high':'low';
 
-  // Build tabs
   let tabsHTML='';
   allSlots.forEach(s=>{
     const cls='meal-tab'+(s.isExtra?' extra-tab':'')+(s.key===curDiaryMeal?' active':'');
@@ -717,7 +1048,6 @@ function renderDiaryContent(){
   });
   tabsHTML+='<button class="add-extra-btn" onclick="addDiaryExtra()">+ 額外餐食</button>';
 
-  // Extra position row
   let extraPos='';
   if(slot?.isExtra){
     const ex=(entry.extras||[]).find(e=>e.key===slot.key);
@@ -726,29 +1056,30 @@ function renderDiaryContent(){
     extraPos=`<div class="extra-pos-row"><span class="badge badge-extra">額外餐食</span><label>插入位置</label><select style="flex:1;" onchange="updateDiaryExtraPos('${slot.key}',this.value)">${opts}</select><button class="extra-remove-btn" onclick="removeDiaryExtra('${slot.key}')">刪除</button></div>`;
   }
 
-  // Target cards
-  const tcHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;" id="diary-target-cards">
+  const tcHTML=`<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem;">
     <div class="target-card"><div class="target-label">${slot?.isExtra?'碳水攝入':'碳水目標'}</div><div class="target-val">${slot?.isExtra?Math.round(cons.c):tgt.c}g</div>${slot?.isExtra?'':remHTML(tgt.c-cons.c)}</div>
     <div class="target-card"><div class="target-label">${slot?.isExtra?'蛋白質攝入':'蛋白質目標'}</div><div class="target-val">${slot?.isExtra?Math.round(cons.p):tgt.p}g</div>${slot?.isExtra?'':remHTML(tgt.p-cons.p)}</div>
     <div class="target-card"><div class="target-label">${slot?.isExtra?'脂肪攝入':'脂肪目標'}</div><div class="target-val">${slot?.isExtra?Math.round(cons.f):tgt.f}g</div>${slot?.isExtra?'':remHTML(tgt.f-cons.f)}</div>
+    <div class="target-card"><div class="target-label">${slot?.isExtra?'熱量攝入':'熱量目標'}</div><div class="target-val kcal">${slot?.isExtra?consK:tgtK}</div>${slot?.isExtra?'<div class="target-remain remain-ok">kcal</div>':remHTML(tgtK-consK,' kcal')}</div>
   </div>`;
 
   const md=getDiaryItems(selDate,slot?.key||'m1');
   dc.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-    <div style="font-size:14px;font-weight:500;">${selDate.replace(/-/g,'/')}（${dayType==='high'?'高碳日':'低碳日'}）</div>
+    <div style="font-size:14px;font-weight:500;">${selDate.replace(/-/g,'/')}(${dayType==='high'?'高碳日':'低碳日'})</div>
     <button class="btn btn-outline" style="font-size:12px;padding:6px 12px;" onclick="openApplyModal()"><i class="ti ti-template" style="font-size:13px;margin-right:4px;"></i>套用模板</button>
   </div>
-  <div class="card">${barHTML(tC,day.carb,'bar-carb','碳水','d-bar-carb','d-pct-carb','d-rem-carb')+barHTML(tP,day.prot,'bar-prot','蛋白質','d-bar-prot','d-pct-prot','d-rem-prot')+barHTML(tF,day.fat,'bar-fat','脂肪','d-bar-fat','d-pct-fat','d-rem-fat')}</div>
+  <div class="card">${barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal')}</div>
   <div class="card"><div class="meal-tabs">${tabsHTML}</div>${extraPos}${tcHTML}${renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'diary')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'diary')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'diary')}</div>`;
 
   bindFoodEvents('diary',
     type=>getDiaryItems(selDate,slot.key)[type],
-    ()=>{saveDiary(selDate);updateDiaryBars(day);updateDiaryTargetCards(slot);},
+    ()=>{saveDiary(selDate);renderDiaryContent();},
     (type)=>{const c=getDiaryTotals(selDate,slot.key);return type==='carb'?tgt.c-c.c:type==='prot'?tgt.p-c.p:tgt.f-c.f;}
   );
 }
 
 function renderFoodLib(){
+  const sq=(document.getElementById('foodLibSearch')?.value||'').trim().toLowerCase();
   const cats=[
     {id:'foodLibCarb',label:'碳水類',badge:'badge-carb',key:'carb'},
     {id:'foodLibProt',label:'蛋白質類',badge:'badge-prot',key:'protein'},
@@ -756,11 +1087,21 @@ function renderFoodLib(){
   ];
   cats.forEach(({id,label,badge,key})=>{
     const el=document.getElementById(id);if(!el)return;
-    const df=defaultFoods[key].map(f=>'<div class="food-lib-item"><div><div class="food-lib-name">'+f.name+'</div><div class="food-lib-macros">碳水 '+f.c+'g・蛋白質 '+f.p+'g・脂肪 '+f.f+'g</div></div><span class="food-lib-badge">系統</span></div>').join('');
-    const cu=customFoods[key].map((f,i)=>'<div class="food-lib-item"><div><div class="food-lib-name">'+f.name+'</div><div class="food-lib-macros">碳水 '+f.c+'g・蛋白質 '+f.p+'g・脂肪 '+f.f+'g</div></div><button onclick="deleteCustomFood(\''+key+'\','+i+')" style="background:none;border:none;cursor:pointer;color:#bbb;font-size:18px;line-height:1;" title="刪除">×</button></div>').join('');
-    el.innerHTML='<div style="font-size:12px;font-weight:500;margin-bottom:10px;"><span class="badge '+badge+'">'+label+'</span></div>'+df+cu+(df===''&&cu===''?'<div style="color:#aaa;font-size:13px;padding:8px 0;">尚無食物</div>':'');
+    const dfArr=defaultFoods[key].filter(f=>!sq||f.name.toLowerCase().includes(sq));
+    const cuArr=customFoods[key].map((f,i)=>({f,i})).filter(o=>!sq||o.f.name.toLowerCase().includes(sq));
+    const df=dfArr.map(f=>{
+      const k=kcalFromMacros(f.c,f.p,f.f);
+      return'<div class="food-lib-item"><div><div class="food-lib-name">'+f.name+'</div><div class="food-lib-macros">碳 '+f.c+'g・蛋 '+f.p+'g・脂 '+f.f+'g・'+k+' kcal</div></div><span class="food-lib-badge">系統</span></div>';
+    }).join('');
+    const cu=cuArr.map(({f,i})=>{
+      const k=kcalFromMacros(f.c,f.p,f.f);
+      return'<div class="food-lib-item"><div><div class="food-lib-name">'+f.name+'</div><div class="food-lib-macros">碳 '+f.c+'g・蛋 '+f.p+'g・脂 '+f.f+'g・'+k+' kcal</div></div><button onclick="deleteCustomFood(\''+key+'\','+i+')" style="background:none;border:none;cursor:pointer;color:#bbb;font-size:18px;line-height:1;" title="刪除">×</button></div>';
+    }).join('');
+    const empty=df===''&&cu===''?'<div style="color:#aaa;font-size:13px;padding:8px 0;">'+(sq?'此分類無符合搜尋的食物':'尚無食物')+'</div>':'';
+    el.innerHTML='<div style="font-size:12px;font-weight:500;margin-bottom:10px;"><span class="badge '+badge+'">'+label+'</span></div>'+df+cu+empty;
   });
 }
+
 window.openAddFoodModal=()=>{document.getElementById('af-name').value='';document.getElementById('af-c').value='';document.getElementById('af-p').value='';document.getElementById('af-f').value='';document.getElementById('addFoodModal').classList.add('show');};
 window.closeAddFoodModal=()=>document.getElementById('addFoodModal').classList.remove('show');
 window.addCustomFood=()=>{
@@ -776,7 +1117,7 @@ window.addCustomFood=()=>{
   renderFoodLib();
 };
 window.deleteCustomFood=(cat,idx)=>{
-  if(!confirm('確定要刪除這個食物？'))return;
+  if(!confirm('確定要刪除這個食物?'))return;
   customFoods[cat].splice(idx,1);
   scheduleSave('customFoods',customFoods);
   renderFoodLib();
