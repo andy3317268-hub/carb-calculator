@@ -1,0 +1,40 @@
+{
+  "name": "碳循環計算機",
+  "short_name": "碳循環",
+  "description": "專為碳水循環飲食法設計的營養計算與飲食記錄工具。計算每日高低碳日的碳水、蛋白質、脂肪與熱量,記錄每一餐,管理常用模板。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF2EC",
+  "theme_color": "#B58A78",
+  "lang": "zh-TW",
+  "dir": "ltr",
+  "categories": ["health", "fitness", "lifestyle"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
