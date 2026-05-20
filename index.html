@@ -1311,7 +1311,7 @@ function renderDiaryContent(){
   );
 }
 
-function renderFoodLib(){
+window.renderFoodLib=function renderFoodLib(){
   const sq=(document.getElementById('foodLibSearch')?.value||'').trim().toLowerCase();
   const cats=[
     {id:'foodLibCarb',label:'碳水類',badge:'badge-carb',key:'carb'},
