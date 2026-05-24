@@ -859,8 +859,8 @@ function kcalFromMacros(c,p,f){return Math.round(c*4+p*4+f*9);}
 const defaultFoods={
   carb:[
     // 米飯類
-    {name:'白米(生)',c:78,p:7,f:0.7},{name:'白米(熟)',c:28,p:2.7,f:0.3},
-    {name:'糙米(生)',c:73,p:7.5,f:2.7},{name:'糙米(熟)',c:23,p:2.6,f:0.9},
+    {name:'白米(生)・100g≈279g熟',c:78,p:7,f:0.7},{name:'白米(熟)',c:28,p:2.7,f:0.3},
+    {name:'糙米(生)・100g≈317g熟',c:73,p:7.5,f:2.7},{name:'糙米(熟)',c:23,p:2.6,f:0.9},
     {name:'五穀米(熟)',c:25,p:3,f:1},{name:'壽司米(熟)',c:30,p:2.5,f:0.2},
     {name:'白稀飯',c:12,p:1.1,f:0.1},{name:'糯米飯',c:35,p:3,f:0.3},
     // 根莖澱粉
@@ -878,7 +878,7 @@ const defaultFoods={
     {name:'饅頭',c:47,p:7,f:1},{name:'貝果',c:53,p:11,f:1.5},
     {name:'法國麵包',c:55,p:9,f:2},{name:'蘇打餅乾',c:71,p:9,f:14},
     // 燕麥麥片
-    {name:'燕麥(乾)',c:67,p:13,f:7},{name:'即食燕麥片',c:60,p:11,f:7},
+    {name:'燕麥(乾)・100g≈558g熟',c:67,p:13,f:7},{name:'即食燕麥片',c:60,p:11,f:7},
     {name:'大燕麥片(熟)',c:12,p:2.4,f:1.4},
     // 水果(碳水來源)
     {name:'香蕉',c:22,p:1.1,f:0.3},{name:'蘋果',c:14,p:0.3,f:0.2},
@@ -893,18 +893,18 @@ const defaultFoods={
   ],
   protein:[
     // 雞肉
-    {name:'雞胸肉(生)',c:0,p:23,f:2},{name:'雞胸肉(熟)',c:0,p:31,f:3.6},
+    {name:'雞胸肉(生)・100g≈74g熟',c:0,p:23,f:2},{name:'雞胸肉(熟)',c:0,p:31,f:3.6},
     {name:'舒肥雞胸肉',c:1,p:24,f:1.5},{name:'即食雞胸肉',c:2,p:22,f:2},
-    {name:'去皮雞腿肉(生)',c:0,p:18,f:5},{name:'去皮雞腿肉(熟)',c:0,p:28,f:6},
+    {name:'去皮雞腿肉(生)・100g≈64g熟',c:0,p:18,f:5},{name:'去皮雞腿肉(熟)',c:0,p:28,f:6},
     {name:'帶皮雞腿肉(熟)',c:0,p:25,f:13},{name:'雞翅(熟)',c:0,p:23,f:16},
     // 蛋類
     {name:'雞蛋',c:0.7,p:13,f:11},{name:'水煮蛋',c:0.7,p:13,f:11},
     {name:'蛋白',c:0.7,p:11,f:0.2},{name:'蛋黃',c:3.6,p:16,f:27},
     {name:'茶葉蛋',c:1.5,p:13,f:9},
     // 牛豬
-    {name:'牛肉(生)',c:0,p:21,f:4},{name:'牛肉(熟)',c:0,p:26,f:5},
+    {name:'牛肉(生)・100g≈81g熟',c:0,p:21,f:4},{name:'牛肉(熟)',c:0,p:26,f:5},
     {name:'牛腱',c:0,p:28,f:5},{name:'菲力牛排',c:0,p:22,f:8},
-    {name:'豬里肌(生)',c:0,p:20,f:6},{name:'豬里肌(熟)',c:0,p:22,f:8},
+    {name:'豬里肌(生)・100g≈91g熟',c:0,p:20,f:6},{name:'豬里肌(熟)',c:0,p:22,f:8},
     {name:'豬絞肉',c:0,p:18,f:20},{name:'豬腱',c:0,p:21,f:4},
     // 海鮮魚類
     {name:'鮭魚',c:0,p:25,f:13},{name:'鯛魚片',c:0,p:18,f:1},
@@ -1125,8 +1125,29 @@ function bindFoodEvents(prefix,getMd,onUpdate,getTargets){
 
   // Gram input
   document.querySelectorAll('.'+prefix+'-gram-input').forEach(inp=>{
-    inp.addEventListener('input',()=>{const[type,idx]=inp.dataset[prefix+'Gram'].split('-');const v=Math.max(1,Math.min(2000,parseInt(inp.value)||1));getMd(type)[parseInt(idx)].grams=v;onUpdate(true);});
-    inp.addEventListener('blur',()=>{if(!inp.value||parseInt(inp.value)<1)inp.value=1;});
+    // 打字時:只更新資料 + 該行營養素文字,不重畫整頁(避免游標跳走)
+    inp.addEventListener('input',()=>{
+      const[type,idx]=inp.dataset[prefix+'Gram'].split('-');
+      const raw=inp.value;
+      // 允許暫時空白或輸入中,不強制改值
+      const v=Math.max(1,Math.min(2000,parseInt(raw)||1));
+      const item=getMd(type)[parseInt(idx)];
+      if(!item)return;
+      item.grams=v;
+      // 輕量更新:只改該行的營養素文字
+      const fml=document.getElementById(prefix+'-fml-'+type+'-'+idx);
+      if(fml){
+        const kc=Math.round(v*kcalFromMacros(item.food.c,item.food.p,item.food.f)/100);
+        fml.textContent='碳 '+(v*item.food.c/100).toFixed(1)+'・蛋 '+(v*item.food.p/100).toFixed(1)+'・脂 '+(v*item.food.f/100).toFixed(1)+'・'+kc+' kcal';
+      }
+      // 輕量更新進度條等(透過 onUpdate 的 light 模式)
+      if(typeof onUpdate==='function')onUpdate(true);
+    });
+    // 失焦時:修正空值 + 完整重畫(這時游標已經離開,重畫不影響)
+    inp.addEventListener('blur',()=>{
+      if(!inp.value||parseInt(inp.value)<1)inp.value=1;
+      if(typeof onUpdate==='function')onUpdate(false);
+    });
     inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();});
   });
 }
@@ -1175,7 +1196,7 @@ function renderTplEditor(){
   const consK=kcalFromMacros(cons.c,cons.p,cons.f);
   let tabs='';for(let i=1;i<=meals;i++)tabs+='<button class="meal-tab'+(curMealKey==='m'+i?' active':'')+'" onclick="setTplEditorMeal(\''+tpl.id+'\',\'m'+i+'\')">第 '+i+' 餐</button>';
   document.getElementById('tpl-editor').innerHTML='<div class="card" style="border-top:2px solid #B58A78;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;"><div style="font-size:14px;font-weight:500;">編輯:'+tpl.name+'</div><button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="curTplId=null;document.getElementById(\'tpl-editor\').innerHTML=\'\'">完成</button></div>'+barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal')+'<div class="meal-tabs" style="margin-top:1rem;">'+tabs+'</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem;"><div class="target-card"><div class="target-label">碳水目標</div><div class="target-val">'+mCarb+'g</div>'+remHTML(mCarb-cons.c)+'</div><div class="target-card"><div class="target-label">蛋白質目標</div><div class="target-val">'+mProt+'g</div>'+remHTML(mProt-cons.p)+'</div><div class="target-card"><div class="target-label">脂肪目標</div><div class="target-val">'+mFat+'g</div>'+remHTML(mFat-cons.f)+'</div><div class="target-card"><div class="target-label">熱量目標</div><div class="target-val kcal">'+mKcal+'</div>'+remHTML(mKcal-consK,' kcal')+'</div></div>'+renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'tpl')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'tpl')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'tpl')+'</div>';
-  bindFoodEvents('tpl',type=>{if(!tpl.meals[curMealKey])tpl.meals[curMealKey]={carb:[],prot:[],fat:[]};return tpl.meals[curMealKey][type];},()=>{scheduleSave('templates',templates);renderTplEditor();},(type)=>{const c=([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(type==='carb'?f.food.c:type==='prot'?f.food.p:f.food.f)/100,0);return type==='carb'?mCarb-c:type==='prot'?mProt-c:mFat-c;});
+  bindFoodEvents('tpl',type=>{if(!tpl.meals[curMealKey])tpl.meals[curMealKey]={carb:[],prot:[],fat:[]};return tpl.meals[curMealKey][type];},(light)=>{scheduleSave('templates',templates);if(!light)renderTplEditor();},(type)=>{const c=([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(type==='carb'?f.food.c:type==='prot'?f.food.p:f.food.f)/100,0);return type==='carb'?mCarb-c:type==='prot'?mProt-c:mFat-c;});
 }
 window.setTplEditorMeal=(id,key)=>{const tpl=templates.find(t=>t.id===id);if(tpl){tpl._curMeal=key;renderTplEditor();}};
 
@@ -1282,6 +1303,18 @@ window.removeDiaryExtra=key=>{
   saveDiary(selDate);renderDiaryContent();
 };
 
+function updateDiaryBars(dk,day){
+  const el=document.getElementById('diary-top-bars');
+  if(!el)return;
+  const entry=getDiaryEntry(dk);
+  let tC=0,tP=0,tF=0;
+  Object.values(entry.meals||{}).forEach(md=>{
+    ['carb','prot','fat'].forEach(t=>{(md[t]||[]).forEach(item=>{tC+=item.grams*(item.food.c/100);tP+=item.grams*(item.food.p/100);tF+=item.grams*(item.food.f/100);});});
+  });
+  const tK=kcalFromMacros(tC,tP,tF);
+  el.innerHTML=barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal');
+}
+
 function renderDiaryContent(){
   const dc=document.getElementById('diary-content');
   if(!selDate){dc.innerHTML='<div class="card"><div class="empty-track">請選擇日期查看飲食記錄</div></div>';return;}
@@ -1327,12 +1360,21 @@ function renderDiaryContent(){
     <div style="font-size:14px;font-weight:500;">${selDate.replace(/-/g,'/')}(${dayType==='high'?'高碳日':'低碳日'})</div>
     <button class="btn btn-outline" style="font-size:12px;padding:6px 12px;" onclick="openApplyModal()"><i class="ti ti-template" style="font-size:13px;margin-right:4px;"></i>套用模板</button>
   </div>
-  <div class="card">${barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal')}</div>
+  <div class="card" id="diary-top-bars">${barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal')}</div>
   <div class="card"><div class="meal-tabs">${tabsHTML}</div>${extraPos}${tcHTML}${renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'diary')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'diary')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'diary')}</div>`;
 
   bindFoodEvents('diary',
     type=>getDiaryItems(selDate,slot.key)[type],
-    ()=>{saveDiary(selDate);renderDiaryContent();},
+    (light)=>{
+      saveDiary(selDate);
+      if(light){
+        // 打字中:只更新頂部總進度條,不重建輸入框(避免游標跳走)
+        updateDiaryBars(selDate,day);
+      } else {
+        // 失焦或新增/刪除:完整重畫
+        renderDiaryContent();
+      }
+    },
     (type)=>{const c=getDiaryTotals(selDate,slot.key);return type==='carb'?tgt.c-c.c:type==='prot'?tgt.p-c.p:tgt.f-c.f;}
   );
 }
