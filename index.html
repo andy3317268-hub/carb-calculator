@@ -807,7 +807,7 @@ function loadLocalData(){
     const cfg=localStorage.getItem('local_diaryConfig');if(cfg){const d=JSON.parse(cfg);highDays=new Set(d.highDays||[0,3]);}
     const cf=localStorage.getItem('local_customFoods');if(cf)customFoods=JSON.parse(cf);
     const de=localStorage.getItem('diaryEntries');if(de)diaryEntries=JSON.parse(de);
-    const pd=localStorage.getItem('local_petData');if(pd)petData=JSON.parse(pd);
+    const pd=localStorage.getItem('local_petData');if(pd){petData=JSON.parse(pd);migratePetData();}
   }catch(e){console.error('local load',e);}
   updateMacroHints();clampDays();renderFoodLib();
 }
@@ -828,7 +828,7 @@ async function loadCloudData(){
     const snap=await getDocs(collection(db,'users',currentUser.uid,'diaryEntries'));
     snap.forEach(d=>{diaryEntries[d.id]=JSON.parse(d.data().value);});
     const petDoc=await getDoc(doc(db,'users',currentUser.uid,'petData','data'));
-    if(petDoc.exists())petData=JSON.parse(petDoc.data().value);
+    if(petDoc.exists()){petData=JSON.parse(petDoc.data().value);migratePetData();}
   }catch(e){console.error('cloud load',e);}
   updateMacroHints();clampDays();renderFoodLib();
 }
@@ -1686,16 +1686,47 @@ const STREAK_MILESTONES=[
 // 30 天後循環獎勵:每 5 天領 10 點
 const STREAK_CYCLE_DAYS=5;
 const STREAK_CYCLE_POINTS=10;
+// 寵物蛋價格
+const EGG_COST=100;
 
 let petData=null;
 function defaultPetData(){
-  return {chosen:false,species:null,name:'',exp:0,points:0,
+  return {chosen:false,
+    pets:[],                 // 多隻寵物 [{id,species,name,exp}]
+    current:0,               // 目前選中的寵物 index
+    points:0,
     streak:0,lastRecordDate:null,
-    dailyTasks:{},          // {日期: {任務id: 'done'|'claimed'}}
-    claimedMilestones:[],   // 已領過的里程碑天數 [3,7,...]
-    unlocked30:false,       // 是否解鎖過 30 天(解鎖後循環獎勵只需連續5天)
-    lastCycleClaim:0,       // 上次領循環獎勵時的連續天數(避免同區間重複領)
-    fedToday:null};         // 最後餵食日期(判斷今日餵食任務)
+    dailyTasks:{},
+    claimedMilestones:[],
+    unlocked30:false,
+    lastCycleClaim:0,
+    fedToday:null};
+}
+// 舊資料(單隻)遷移成新結構(多隻),保留既有寵物
+function migratePetData(){
+  if(!petData)return;
+  // 舊格式有 species 但沒有 pets 陣列 → 轉換
+  if(petData.pets===undefined){
+    const pets=[];
+    if(petData.chosen&&petData.species){
+      pets.push({id:Date.now(),species:petData.species,name:petData.name||PET_SPECIES[petData.species].name,exp:petData.exp||0});
+    }
+    petData.pets=pets;
+    petData.current=0;
+    delete petData.species;delete petData.name;delete petData.exp;
+  }
+  // 補齊缺的欄位
+  if(petData.current===undefined)petData.current=0;
+  if(!petData.pets)petData.pets=[];
+  if(petData.points===undefined)petData.points=0;
+  if(petData.dailyTasks===undefined)petData.dailyTasks={};
+  if(petData.claimedMilestones===undefined)petData.claimedMilestones=[];
+}
+// 取得目前選中的寵物
+function curPet(){
+  if(!petData||!petData.pets||!petData.pets.length)return null;
+  if(petData.current>=petData.pets.length)petData.current=0;
+  return petData.pets[petData.current];
 }
 function getPetStage(exp){
   if(exp>=EVO_THRESHOLDS[0]+EVO_THRESHOLDS[1])return 2;
@@ -1800,24 +1831,25 @@ function getDiaryDayTarget(tk){
   }catch(e){return null;}
 }
 window.feedPet=function(feedId){
-  if(!petData||!petData.chosen)return;
+  if(!petData)return;
+  const pet=curPet();
+  if(!pet)return;
   const feed=FEED_SHOP.find(f=>f.id===feedId);
   if(!feed)return;
   if(petData.points<feed.cost){showPetToast('點數不足!');return;}
-  const beforeStage=getPetStage(petData.exp);
+  const beforeStage=getPetStage(pet.exp);
   petData.points-=feed.cost;
-  petData.exp+=feed.exp;
-  const afterStage=getPetStage(petData.exp);
-  // 記錄今日已餵食 → 完成「餵食寵物」任務
+  pet.exp+=feed.exp;
+  const afterStage=getPetStage(pet.exp);
   const tk=todayKey();
   petData.fedToday=tk;
   ensureDailyTasks(tk);
   if(!petData.dailyTasks[tk]['feed'])petData.dailyTasks[tk]['feed']='done';
   scheduleSave('petData',petData);
   if(afterStage>beforeStage){
-    showPetToast('🎉 '+petData.name+' 進化成「'+STAGE_NAMES[afterStage]+'」了!');
+    showPetToast('🎉 '+pet.name+' 進化成「'+STAGE_NAMES[afterStage]+'」了!');
   } else {
-    showPetToast('😋 '+petData.name+' 吃了'+feed.name+',+'+feed.exp+' 經驗');
+    showPetToast('😋 '+pet.name+' 吃了'+feed.name+',+'+feed.exp+' 經驗');
   }
   renderPet();
 };
@@ -1910,19 +1942,58 @@ window.claimCycle=function(){
 };
 window.choosePet=function(species){
   if(!petData)petData=defaultPetData();
-  petData.species=species;
+  petData._pendingSpecies=species;
   petData._pendingChoose=true;
   renderPet();
 };
 window.confirmPet=function(){
   const nameInput=document.getElementById('petNameInput');
-  const nm=(nameInput?.value||'').trim()||PET_SPECIES[petData.species].name;
-  petData.name=nm;
+  const species=petData._pendingSpecies;
+  const nm=(nameInput?.value||'').trim()||PET_SPECIES[species].name;
+  // 加入第一隻寵物
+  petData.pets.push({id:Date.now(),species:species,name:nm,exp:0});
+  petData.current=petData.pets.length-1;
   petData.chosen=true;
   petData._pendingChoose=false;
+  petData._pendingSpecies=null;
   scheduleSave('petData',petData);
   showPetToast('🥚 '+nm+' 加入了!開始記錄飲食來養大牠吧');
   renderPet();
+};
+
+// ── 買蛋(兌換新寵物)──
+window.openEggShop=function(){petTab='egg';renderPet();};
+window.buyEgg=function(species){
+  if(petData.points<EGG_COST){showPetToast('點數不足!需要 '+EGG_COST+' 點');return;}
+  petData._buyingSpecies=species;
+  petData._namingNew=true;
+  renderPet();
+};
+window.confirmBuyEgg=function(){
+  const species=petData._buyingSpecies;
+  if(petData.points<EGG_COST){showPetToast('點數不足!');return;}
+  const nameInput=document.getElementById('newPetNameInput');
+  const nm=(nameInput?.value||'').trim()||PET_SPECIES[species].name;
+  petData.points-=EGG_COST;
+  petData.pets.push({id:Date.now(),species:species,name:nm,exp:0});
+  petData.current=petData.pets.length-1; // 切換到新寵物
+  petData._namingNew=false;
+  petData._buyingSpecies=null;
+  petTab='pet';
+  scheduleSave('petData',petData);
+  showPetToast('🎉 '+nm+' 孵化了!花費 '+EGG_COST+' 點');
+  renderPet();
+};
+window.cancelBuyEgg=function(){petData._namingNew=false;petData._buyingSpecies=null;renderPet();};
+
+// ── 切換目前養的寵物 ──
+window.switchCurrentPet=function(idx){
+  if(idx>=0&&idx<petData.pets.length){
+    petData.current=idx;
+    scheduleSave('petData',petData);
+    petTab='pet';
+    renderPet();
+  }
 };
 function showPetToast(msg){
   let t=document.getElementById('petToast');
@@ -1939,9 +2010,11 @@ window.renderPet=function(){
   const el=document.getElementById('pet-content');
   if(!el)return;
   if(!petData)petData=defaultPetData();
+  migratePetData();
+  // 還沒選第一隻
   if(!petData.chosen){
-    if(petData._pendingChoose&&petData.species){
-      const sp=PET_SPECIES[petData.species];
+    if(petData._pendingChoose&&petData._pendingSpecies){
+      const sp=PET_SPECIES[petData._pendingSpecies];
       el.innerHTML='<div class="card" style="text-align:center;">'
         +'<img src="'+sp.stages[0]+'" style="width:160px;height:160px;object-fit:contain;" alt="'+sp.name+'"/>'
         +'<div style="font-size:18px;font-weight:600;margin:12px 0 4px;">'+sp.name+'('+sp.type+'系)</div>'
@@ -1963,18 +2036,21 @@ window.renderPet=function(){
         +'</div>';
     }
     el.innerHTML='<div class="card" style="text-align:center;margin-bottom:16px;">'
-      +'<div style="font-size:17px;font-weight:600;margin-bottom:6px;">選擇你的夥伴 🥚</div>'
-      +'<div style="font-size:13px;color:var(--text2,#8B6F66);">記錄飲食可以獲得點數,用點數換飼料餵牠,牠會跟著你一起成長變壯!</div>'
+      +'<div style="font-size:17px;font-weight:600;margin-bottom:6px;">選擇你的第一隻夥伴 🥚</div>'
+      +'<div style="font-size:13px;color:var(--text2,#8B6F66);">記錄飲食完成任務可以獲得點數,用點數換飼料餵牠成長!</div>'
+      +'<div style="font-size:12px;color:#C2705C;margin-top:10px;background:#F9ECE4;padding:8px 12px;border-radius:8px;">⚠️ 請謹慎選擇,第一隻夥伴選定後就不能更換囉!之後可以用點數兌換寵物蛋,收集更多夥伴 🥚</div>'
       +'</div>'
       +'<div style="display:flex;gap:12px;flex-wrap:wrap;">'+cards+'</div>';
     return;
   }
-  const sp=PET_SPECIES[petData.species];
-  const stage=getPetStage(petData.exp);
+  const pet=curPet();
+  if(!pet){el.innerHTML='<div class="card">寵物資料載入中...</div>';return;}
+  const sp=PET_SPECIES[pet.species];
+  const stage=getPetStage(pet.exp);
   const img=sp.stages[stage];
   let expInStage,expNeeded,nextLabel;
-  if(stage===0){expInStage=petData.exp;expNeeded=EVO_THRESHOLDS[0];nextLabel='距離進化成「成體」';}
-  else if(stage===1){expInStage=petData.exp-EVO_THRESHOLDS[0];expNeeded=EVO_THRESHOLDS[1];nextLabel='距離進化成「進化體」';}
+  if(stage===0){expInStage=pet.exp;expNeeded=EVO_THRESHOLDS[0];nextLabel='距離進化成「成體」';}
+  else if(stage===1){expInStage=pet.exp-EVO_THRESHOLDS[0];expNeeded=EVO_THRESHOLDS[1];nextLabel='距離進化成「進化體」';}
   else {expInStage=1;expNeeded=1;nextLabel='已完全體!最強型態';}
   const pct=Math.min(100,Math.round(expInStage/expNeeded*100));
   const tab=petTab||'pet';
@@ -1983,6 +2059,22 @@ window.renderPet=function(){
     +'<button class="btn" onclick="switchPetTab(\'task\')" style="flex:1;'+(tab==='task'?'background:'+sp.color+';color:#fff;':'background:#FFFAF5;color:#3A2A26;border:1px solid #EFDED2;')+'">📋 每日任務'+(hasClaimableTask()?' <span style="background:#E24B4A;color:#fff;border-radius:10px;padding:0 6px;font-size:11px;">!</span>':'')+'</button>'
     +'</div>';
   if(tab==='task'){el.innerHTML=tabBar+renderTaskTab(sp);return;}
+  if(tab==='egg'){el.innerHTML=tabBar+renderEggShop();return;}
+  // 切換寵物橫列(有多隻才顯示)
+  let petSwitcher='';
+  if(petData.pets.length>1){
+    let chips='';
+    petData.pets.forEach((p,i)=>{
+      const psp=PET_SPECIES[p.species];
+      const st=getPetStage(p.exp);
+      const active=(i===petData.current);
+      chips+='<div onclick="switchCurrentPet('+i+')" style="cursor:pointer;text-align:center;min-width:64px;padding:6px;border-radius:10px;'+(active?'background:'+psp.color+'22;border:2px solid '+psp.color+';':'border:2px solid transparent;')+'">'
+        +'<img src="'+psp.stages[st]+'" style="width:44px;height:44px;object-fit:contain;"/>'
+        +'<div style="font-size:11px;font-weight:600;margin-top:2px;'+(active?'color:'+psp.color+';':'color:#8B6F66;')+'">'+p.name+'</div>'
+        +'</div>';
+    });
+    petSwitcher='<div class="card" style="margin-bottom:14px;"><div style="font-size:12px;color:var(--text2,#8B6F66);margin-bottom:8px;">目前養成(點擊切換)</div><div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;">'+chips+'</div></div>';
+  }
   let shop='';
   FEED_SHOP.forEach(f=>{
     const afford=petData.points>=f.cost;
@@ -1993,11 +2085,11 @@ window.renderPet=function(){
       +'<div style="font-size:11px;color:var(--text2,#8B6F66);">'+f.cost+' 點 → +'+f.exp+' 經驗</div>'
       +'</button>';
   });
-  el.innerHTML=tabBar
+  el.innerHTML=tabBar+petSwitcher
     +'<div class="card" style="text-align:center;position:relative;overflow:hidden;">'
     +'<div style="position:absolute;top:12px;right:14px;background:'+sp.color+';color:#fff;font-size:12px;padding:3px 10px;border-radius:12px;">'+sp.type+'系 · '+STAGE_NAMES[stage]+'</div>'
-    +'<img src="'+img+'" style="width:200px;height:200px;object-fit:contain;margin-top:8px;" alt="'+petData.name+'"/>'
-    +'<div style="font-size:20px;font-weight:700;margin-top:4px;">'+petData.name+'</div>'
+    +'<img src="'+img+'" style="width:200px;height:200px;object-fit:contain;margin-top:8px;" alt="'+pet.name+'"/>'
+    +'<div style="font-size:20px;font-weight:700;margin-top:4px;">'+pet.name+'</div>'
     +'<div style="margin:14px auto 4px;max-width:320px;">'
     +'<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2,#8B6F66);margin-bottom:4px;"><span>'+nextLabel+'</span><span>'+(stage<2?expInStage+' / '+expNeeded:'MAX')+'</span></div>'
     +'<div style="height:12px;background:#EFDED2;border-radius:6px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:'+sp.color+';border-radius:6px;transition:width 0.4s;"></div></div>'
@@ -2009,14 +2101,49 @@ window.renderPet=function(){
     +'</div>'
     +'<div class="card">'
     +'<div class="sec-label" style="margin-top:0;">飼料商店 · 餵食成長</div>'
-    +'<div style="font-size:12px;color:var(--text2,#8B6F66);margin-bottom:12px;">用任務賺到的點數換飼料,餵食增加經驗</div>'
+    +'<div style="font-size:12px;color:var(--text2,#8B6F66);margin-bottom:12px;">用任務賺到的點數換飼料,餵食目前選中的寵物</div>'
     +'<div style="display:flex;gap:10px;flex-wrap:wrap;">'+shop+'</div>'
     +'</div>'
+    +'<button class="btn btn-green" onclick="openEggShop()" style="width:100%;margin-bottom:14px;">🥚 兌換寵物蛋(收集新夥伴)</button>'
     +'<div class="card" style="font-size:12px;color:var(--text2,#8B6F66);line-height:1.7;">'
     +'<div style="font-weight:600;color:#3A2A26;margin-bottom:6px;">怎麼賺點數?</div>'
     +'到「每日任務」完成任務領點數<br>記錄飲食、達標、餵食都有任務<br>連續記錄越久,獎勵越多<br><br>漏記不會懲罰,寵物也不會掉經驗,安心記錄就好 🌿'
     +'</div>';
 };
+// 買蛋頁
+function renderEggShop(){
+  const sp0=PET_SPECIES[curPet().species];
+  // 命名新寵物畫面
+  if(petData._namingNew&&petData._buyingSpecies){
+    const sp=PET_SPECIES[petData._buyingSpecies];
+    return '<div class="card" style="text-align:center;">'
+      +'<img src="'+sp.stages[0]+'" style="width:140px;height:140px;object-fit:contain;"/>'
+      +'<div style="font-size:17px;font-weight:600;margin:10px 0 4px;">'+sp.name+'('+sp.type+'系)</div>'
+      +'<div style="font-size:13px;color:var(--text2,#8B6F66);margin-bottom:14px;">幫這隻新夥伴取個名字吧</div>'
+      +'<input id="newPetNameInput" type="text" maxlength="8" placeholder="取個名字(可留空)" style="width:100%;max-width:260px;padding:10px 14px;border-radius:10px;border:1px solid #EFDED2;text-align:center;font-size:15px;margin-bottom:14px;"/>'
+      +'<div style="display:flex;gap:10px;justify-content:center;">'
+      +'<button class="btn" onclick="cancelBuyEgg()" style="background:#EFDED2;color:#3A2A26;">取消</button>'
+      +'<button class="btn btn-green" onclick="confirmBuyEgg()">孵化!(-'+EGG_COST+' 點)</button>'
+      +'</div></div>';
+  }
+  let cards='';
+  for(const key in PET_SPECIES){
+    const sp=PET_SPECIES[key];
+    const owned=petData.pets.filter(p=>p.species===key).length;
+    cards+='<div class="card" style="text-align:center;flex:1;min-width:140px;">'
+      +'<img src="'+sp.stages[0]+'" style="width:100px;height:100px;object-fit:contain;"/>'
+      +'<div style="font-size:15px;font-weight:600;margin-top:6px;">'+sp.name+'</div>'
+      +'<div style="font-size:12px;color:var(--text2,#8B6F66);margin:2px 0 8px;">'+sp.type+'系'+(owned>0?' · 已有 '+owned+' 隻':'')+'</div>'
+      +'<button class="btn btn-green" onclick="buyEgg(\''+key+'\')" style="width:100%;'+(petData.points>=EGG_COST?'':'opacity:0.45;')+'">'+EGG_COST+' 點兌換</button>'
+      +'</div>';
+  }
+  return '<div class="card" style="text-align:center;margin-bottom:14px;">'
+    +'<div style="font-size:17px;font-weight:600;margin-bottom:4px;">寵物蛋商店 🥚</div>'
+    +'<div style="font-size:13px;color:var(--text2,#8B6F66);">用 '+EGG_COST+' 點兌換新夥伴,可重複收集同種(各自獨立養成)</div>'
+    +'<div style="font-size:14px;font-weight:600;color:'+sp0.color+';margin-top:8px;">目前點數:'+petData.points+'</div>'
+    +'</div>'
+    +'<div style="display:flex;gap:12px;flex-wrap:wrap;">'+cards+'</div>';
+}
 function hasClaimableTask(){
   if(!petData||!petData.chosen)return false;
   for(const t of DAILY_TASKS){if(getTaskState(t.id)==='done')return true;}
@@ -2078,7 +2205,7 @@ function taskProgressText(taskId){
 let petTab='pet';
 window.switchPetTab=function(t){petTab=t;renderPet();};
 window.cancelChoose=function(){
-  if(petData){petData._pendingChoose=false;petData.species=null;}
+  if(petData){petData._pendingChoose=false;petData._pendingSpecies=null;}
   renderPet();
 };
 
