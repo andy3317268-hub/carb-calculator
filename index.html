@@ -532,6 +532,7 @@
     <button class="sidebar-btn" id="nav-diary" onclick="switchSection('diary')"><i class="ti ti-calendar-week"></i><span class="tooltip">飲食日記</span></button>
     <button class="sidebar-btn" id="nav-template" onclick="switchSection('template')"><i class="ti ti-layout-list"></i><span class="tooltip">飲食模板</span></button>
     <button class="sidebar-btn" id="nav-foods" onclick="switchSection('foods')"><i class="ti ti-salad"></i><span class="tooltip">食物庫</span></button>
+    <button class="sidebar-btn" id="nav-pet" onclick="switchSection('pet')"><i class="ti ti-paw"></i><span class="tooltip">寵物</span></button>
     <button class="sidebar-btn" onclick="openSettings()"><i class="ti ti-settings"></i><span class="tooltip">設定</span></button>
     <div class="sidebar-spacer"></div>
     <div id="userAvatarWrap" style="position:relative;">
@@ -628,6 +629,12 @@
           <div id="foodLibProt" style="margin-bottom:1.5rem;"></div>
           <div id="foodLibFat"></div>
         </div>
+      </div>
+
+      <!-- SECTION 5: Pet (養成) -->
+      <div class="section" id="section-pet">
+        <div class="section-title">寵物</div>
+        <div id="pet-content"></div>
       </div>
 
     </div>
@@ -800,6 +807,7 @@ function loadLocalData(){
     const cfg=localStorage.getItem('local_diaryConfig');if(cfg){const d=JSON.parse(cfg);highDays=new Set(d.highDays||[0,3]);}
     const cf=localStorage.getItem('local_customFoods');if(cf)customFoods=JSON.parse(cf);
     const de=localStorage.getItem('diaryEntries');if(de)diaryEntries=JSON.parse(de);
+    const pd=localStorage.getItem('local_petData');if(pd)petData=JSON.parse(pd);
   }catch(e){console.error('local load',e);}
   updateMacroHints();clampDays();renderFoodLib();
 }
@@ -819,6 +827,8 @@ async function loadCloudData(){
     if(foodDoc.exists())customFoods=JSON.parse(foodDoc.data().value);
     const snap=await getDocs(collection(db,'users',currentUser.uid,'diaryEntries'));
     snap.forEach(d=>{diaryEntries[d.id]=JSON.parse(d.data().value);});
+    const petDoc=await getDoc(doc(db,'users',currentUser.uid,'petData','data'));
+    if(petDoc.exists())petData=JSON.parse(petDoc.data().value);
   }catch(e){console.error('cloud load',e);}
   updateMacroHints();clampDays();renderFoodLib();
 }
@@ -961,6 +971,7 @@ window.switchSection=name=>{
   if(name==='diary')renderDiary();
   if(name==='template')renderTemplateSection();
   if(name==='foods')renderFoodLib();
+  if(name==='pet')renderPet();
 };
 
 window.selectGender=g=>{selGender=g;document.getElementById('btnM').className='gender-btn'+(g==='m'?' active-m':'');document.getElementById('btnF').className='gender-btn'+(g==='f'?' active-f':'');updateMacroHints();updateSliderBounds();recalc();};
@@ -1265,7 +1276,7 @@ function isHighDay(d){return highDays.has(dayOfWeek(d));}
 function getDiaryEntry(dk){if(!diaryEntries[dk])diaryEntries[dk]={meals:{},extras:[],extraCount:0};return diaryEntries[dk];}
 function getDiaryItems(dk,mk){const e=getDiaryEntry(dk);if(!e.meals[mk])e.meals[mk]={carb:[],prot:[],fat:[]};return e.meals[mk];}
 function getDiaryTotals(dk,mk){const md=getDiaryItems(dk,mk);const all=[...md.carb,...md.prot,...md.fat];return{c:all.reduce((s,f)=>s+f.grams*(f.food.c/100),0),p:all.reduce((s,f)=>s+f.grams*(f.food.p/100),0),f:all.reduce((s,f)=>s+f.grams*(f.food.f/100),0)};}
-function saveDiary(dk){scheduleSave('diary_'+dk,diaryEntries[dk]);}
+function saveDiary(dk){scheduleSave('diary_'+dk,diaryEntries[dk]);if(typeof checkPetReward==='function'&&dk===todayKey())checkPetReward();}
 
 function renderDiary(){
   if(!calcResult){document.getElementById('diary-no-calc').style.display='block';document.getElementById('diary-main').style.display='none';return;}
@@ -1631,6 +1642,254 @@ async function applyImportedData(data){
   if(document.getElementById('section-diary').classList.contains('active'))renderDiary();
   if(document.getElementById('section-template').classList.contains('active'))renderTemplateSection();
 }
+
+
+// ════════════════════════════════════════════════════════
+// 寵物養成系統 (Pet System) — 階段 1
+// ════════════════════════════════════════════════════════
+const PET_SPECIES={
+  grass:{name:'苗壯獸',type:'草',color:'#88A85E',
+    stages:['pets/pet-grass-1.png','pets/pet-grass-2.png','pets/pet-grass-3.png'],
+    desc:'頭頂發芽的草系怪獸,越練頭頂的植物越茂盛。'},
+  water:{name:'滴水獸',type:'水',color:'#5AA8C4',
+    stages:['pets/pet-water-1.png','pets/pet-water-2.png','pets/pet-water-3.png'],
+    desc:'愛流口水的水系怪獸,練成後是水做的猛男。'},
+  fire:{name:'火苗獸',type:'火',color:'#D9684A',
+    stages:['pets/pet-fire-1.png','pets/pet-fire-2.png','pets/pet-fire-3.png'],
+    desc:'頭頂小火苗的火系怪獸,進化後火力全開。'}
+};
+const EVO_THRESHOLDS=[100,300];
+const STAGE_NAMES=['幼體','成體','進化體'];
+const FEED_SHOP=[
+  {id:'normal',name:'普通飼料',cost:2,exp:5,icon:'🥬'},
+  {id:'premium',name:'高級飼料',cost:5,exp:15,icon:'🍖'},
+  {id:'deluxe',name:'豪華大餐',cost:10,exp:35,icon:'🍱'}
+];
+let petData=null;
+function defaultPetData(){
+  return {chosen:false,species:null,name:'',exp:0,points:0,
+    streak:0,lastRecordDate:null,rewardedDates:{}};
+}
+function getPetStage(exp){
+  if(exp>=EVO_THRESHOLDS[0]+EVO_THRESHOLDS[1])return 2;
+  if(exp>=EVO_THRESHOLDS[0])return 1;
+  return 0;
+}
+function todayKey(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+window.checkPetReward=function(){
+  if(!petData||!petData.chosen)return;
+  const tk=todayKey();
+  if(!petData.rewardedDates)petData.rewardedDates={};
+  const entry=diaryEntries[tk];
+  let hasRecord=false;
+  if(entry&&entry.meals){
+    for(const mk in entry.meals){
+      const m=entry.meals[mk];
+      if((m.carb&&m.carb.length)||(m.prot&&m.prot.length)||(m.fat&&m.fat.length)){hasRecord=true;break;}
+    }
+  }
+  if(!hasRecord)return;
+  const todayReward=petData.rewardedDates[tk]||{record:false,goal:false};
+  let gained=0;let msgs=[];
+  if(!todayReward.record){
+    todayReward.record=true;
+    gained+=10;msgs.push('記錄飲食 +10');
+    updateStreak(tk);
+    const bonus=streakBonus(petData.streak);
+    if(bonus>0){gained+=bonus;msgs.push('連續'+petData.streak+'天 +'+bonus);}
+  }
+  if(!todayReward.goal&&isGoalMet(tk)){
+    todayReward.goal=true;
+    gained+=15;msgs.push('營養達標 +15');
+  }
+  if(gained>0){
+    petData.points+=gained;
+    petData.rewardedDates[tk]=todayReward;
+    scheduleSave('petData',petData);
+    showPetToast('🐾 '+msgs.join('、'));
+    if(document.getElementById('section-pet').classList.contains('active'))renderPet();
+  }
+};
+function updateStreak(tk){
+  const last=petData.lastRecordDate;
+  if(last===tk)return;
+  if(last){
+    const ld=new Date(last),td=new Date(tk);
+    const diff=Math.round((td-ld)/86400000);
+    if(diff===1)petData.streak+=1;
+    else if(diff>1)petData.streak=1;
+  } else {
+    petData.streak=1;
+  }
+  petData.lastRecordDate=tk;
+}
+function streakBonus(streak){
+  if(streak>=14&&streak%14===0)return 20;
+  if(streak>=7&&streak%7===0)return 10;
+  if(streak>=3&&streak%3===0)return 5;
+  return 0;
+}
+function isGoalMet(tk){
+  try{
+    const entry=diaryEntries[tk];
+    if(!entry||!entry.meals)return false;
+    const tgt=getDiaryDayTarget(tk);
+    if(!tgt)return false;
+    let c=0,p=0,f=0;
+    for(const mk in entry.meals){
+      const m=entry.meals[mk];
+      ['carb','prot','fat'].forEach(t=>{(m[t]||[]).forEach(it=>{c+=it.grams*it.food.c/100;p+=it.grams*it.food.p/100;f+=it.grams*it.food.f/100;});});
+    }
+    const ok=(v,t)=>t>0&&v>=t*0.85&&v<=t*1.15;
+    return ok(c,tgt.c)&&ok(p,tgt.p)&&ok(f,tgt.f);
+  }catch(e){return false;}
+}
+function getDiaryDayTarget(tk){
+  try{
+    const t=getActiveTier();if(!t)return null;
+    const d=new Date(tk);
+    const isHigh=highDays.has((d.getDay()+6)%7);
+    const weight=parseFloat(document.getElementById('weight')?.value)||0;
+    if(!weight)return null;
+    const cs=document.getElementById('carbSlider'),fs=document.getElementById('fatSlider');
+    const carbHigh=cs?sliderToVal(cs):t.carb;
+    const fatLow=fs?sliderToVal(fs):t.fat;
+    const hd=parseInt(document.getElementById('highDays').value)||2,ld=7-hd;
+    const carbLow=(t.carb*7-carbHigh*hd)/ld;
+    const fatHigh=(t.fat*7-fatLow*ld)/hd;
+    const carbMult=isHigh?carbHigh:carbLow;
+    const fatMult=isHigh?fatHigh:fatLow;
+    const c=weight*carbMult,p=weight*t.protein,f=weight*fatMult;
+    return {c,p,f};
+  }catch(e){return null;}
+}
+window.feedPet=function(feedId){
+  if(!petData||!petData.chosen)return;
+  const feed=FEED_SHOP.find(f=>f.id===feedId);
+  if(!feed)return;
+  if(petData.points<feed.cost){showPetToast('點數不足!');return;}
+  const beforeStage=getPetStage(petData.exp);
+  petData.points-=feed.cost;
+  petData.exp+=feed.exp;
+  const afterStage=getPetStage(petData.exp);
+  scheduleSave('petData',petData);
+  if(afterStage>beforeStage){
+    showPetToast('🎉 '+petData.name+' 進化成「'+STAGE_NAMES[afterStage]+'」了!');
+  } else {
+    showPetToast('😋 '+petData.name+' 吃了'+feed.name+',+'+feed.exp+' 經驗');
+  }
+  renderPet();
+};
+window.choosePet=function(species){
+  if(!petData)petData=defaultPetData();
+  petData.species=species;
+  petData._pendingChoose=true;
+  renderPet();
+};
+window.confirmPet=function(){
+  const nameInput=document.getElementById('petNameInput');
+  const nm=(nameInput?.value||'').trim()||PET_SPECIES[petData.species].name;
+  petData.name=nm;
+  petData.chosen=true;
+  petData._pendingChoose=false;
+  scheduleSave('petData',petData);
+  showPetToast('🥚 '+nm+' 加入了!開始記錄飲食來養大牠吧');
+  renderPet();
+};
+function showPetToast(msg){
+  let t=document.getElementById('petToast');
+  if(!t){
+    t=document.createElement('div');t.id='petToast';
+    t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(58,42,38,0.92);color:#fff;padding:12px 20px;border-radius:24px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;max-width:90%;text-align:center;';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>{t.style.opacity='0';},2600);
+}
+window.renderPet=function(){
+  const el=document.getElementById('pet-content');
+  if(!el)return;
+  if(!petData)petData=defaultPetData();
+  if(!petData.chosen){
+    if(petData._pendingChoose&&petData.species){
+      const sp=PET_SPECIES[petData.species];
+      el.innerHTML='<div class="card" style="text-align:center;">'
+        +'<img src="'+sp.stages[0]+'" style="width:160px;height:160px;object-fit:contain;" alt="'+sp.name+'"/>'
+        +'<div style="font-size:18px;font-weight:600;margin:12px 0 4px;">'+sp.name+'('+sp.type+'系)</div>'
+        +'<div style="font-size:13px;color:var(--text2,#8B6F66);margin-bottom:16px;">'+sp.desc+'</div>'
+        +'<input id="petNameInput" type="text" maxlength="8" placeholder="幫牠取個名字(可留空)" style="width:100%;max-width:260px;padding:10px 14px;border-radius:10px;border:1px solid #EFDED2;text-align:center;font-size:15px;margin-bottom:14px;"/>'
+        +'<div style="display:flex;gap:10px;justify-content:center;">'
+        +'<button class="btn" onclick="cancelChoose()" style="background:#EFDED2;color:#3A2A26;">重選</button>'
+        +'<button class="btn btn-green" onclick="confirmPet()">就決定是牠!</button>'
+        +'</div></div>';
+      return;
+    }
+    let cards='';
+    for(const key in PET_SPECIES){
+      const sp=PET_SPECIES[key];
+      cards+='<div class="card" style="text-align:center;cursor:pointer;flex:1;min-width:140px;" onclick="choosePet(\''+key+'\')">'
+        +'<img src="'+sp.stages[0]+'" style="width:120px;height:120px;object-fit:contain;" alt="'+sp.name+'"/>'
+        +'<div style="font-size:16px;font-weight:600;margin-top:8px;">'+sp.name+'</div>'
+        +'<div style="font-size:12px;color:var(--text2,#8B6F66);margin-top:2px;">'+sp.type+'系</div>'
+        +'</div>';
+    }
+    el.innerHTML='<div class="card" style="text-align:center;margin-bottom:16px;">'
+      +'<div style="font-size:17px;font-weight:600;margin-bottom:6px;">選擇你的夥伴 🥚</div>'
+      +'<div style="font-size:13px;color:var(--text2,#8B6F66);">記錄飲食可以獲得點數,用點數換飼料餵牠,牠會跟著你一起成長變壯!</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:12px;flex-wrap:wrap;">'+cards+'</div>';
+    return;
+  }
+  const sp=PET_SPECIES[petData.species];
+  const stage=getPetStage(petData.exp);
+  const img=sp.stages[stage];
+  let expInStage,expNeeded,nextLabel;
+  if(stage===0){expInStage=petData.exp;expNeeded=EVO_THRESHOLDS[0];nextLabel='距離進化成「成體」';}
+  else if(stage===1){expInStage=petData.exp-EVO_THRESHOLDS[0];expNeeded=EVO_THRESHOLDS[1];nextLabel='距離進化成「進化體」';}
+  else {expInStage=1;expNeeded=1;nextLabel='已完全體!最強型態';}
+  const pct=Math.min(100,Math.round(expInStage/expNeeded*100));
+  let shop='';
+  FEED_SHOP.forEach(f=>{
+    const afford=petData.points>=f.cost;
+    shop+='<button class="btn" onclick="feedPet(\''+f.id+'\')" '+(afford?'':'disabled')+' '
+      +'style="flex:1;min-width:90px;flex-direction:column;padding:12px 8px;'+(afford?'':'opacity:0.45;cursor:not-allowed;')+'background:#FFFAF5;border:1px solid #EFDED2;color:#3A2A26;">'
+      +'<div style="font-size:24px;">'+f.icon+'</div>'
+      +'<div style="font-size:13px;font-weight:600;margin-top:4px;">'+f.name+'</div>'
+      +'<div style="font-size:11px;color:var(--text2,#8B6F66);">'+f.cost+' 點 → +'+f.exp+' 經驗</div>'
+      +'</button>';
+  });
+  el.innerHTML=
+    '<div class="card" style="text-align:center;position:relative;overflow:hidden;">'
+    +'<div style="position:absolute;top:12px;right:14px;background:'+sp.color+';color:#fff;font-size:12px;padding:3px 10px;border-radius:12px;">'+sp.type+'系 · '+STAGE_NAMES[stage]+'</div>'
+    +'<img src="'+img+'" style="width:200px;height:200px;object-fit:contain;margin-top:8px;" alt="'+petData.name+'"/>'
+    +'<div style="font-size:20px;font-weight:700;margin-top:4px;">'+petData.name+'</div>'
+    +'<div style="margin:14px auto 4px;max-width:320px;">'
+    +'<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2,#8B6F66);margin-bottom:4px;"><span>'+nextLabel+'</span><span>'+(stage<2?expInStage+' / '+expNeeded:'MAX')+'</span></div>'
+    +'<div style="height:12px;background:#EFDED2;border-radius:6px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:'+sp.color+';border-radius:6px;transition:width 0.4s;"></div></div>'
+    +'</div>'
+    +'</div>'
+    +'<div style="display:flex;gap:12px;margin:14px 0;">'
+    +'<div class="card" style="flex:1;text-align:center;margin:0;"><div style="font-size:24px;font-weight:700;color:'+sp.color+';">'+petData.points+'</div><div style="font-size:12px;color:var(--text2,#8B6F66);">可用點數</div></div>'
+    +'<div class="card" style="flex:1;text-align:center;margin:0;"><div style="font-size:24px;font-weight:700;color:'+sp.color+';">🔥 '+petData.streak+'</div><div style="font-size:12px;color:var(--text2,#8B6F66);">連續記錄天數</div></div>'
+    +'</div>'
+    +'<div class="card">'
+    +'<div class="sec-label" style="margin-top:0;">飼料商店 · 餵食成長</div>'
+    +'<div style="font-size:12px;color:var(--text2,#8B6F66);margin-bottom:12px;">用記錄飲食賺到的點數換飼料,餵食增加經驗</div>'
+    +'<div style="display:flex;gap:10px;flex-wrap:wrap;">'+shop+'</div>'
+    +'</div>'
+    +'<div class="card" style="font-size:12px;color:var(--text2,#8B6F66);line-height:1.7;">'
+    +'<div style="font-weight:600;color:#3A2A26;margin-bottom:6px;">怎麼賺點數?</div>'
+    +'每天記錄飲食 +10 點<br>當天營養接近目標 額外 +15 點<br>連續記錄 3/7/14 天有額外加成<br><br>漏記不會懲罰,寵物也不會掉經驗,安心記錄就好 🌿'
+    +'</div>';
+};
+window.cancelChoose=function(){
+  if(petData){petData._pendingChoose=false;petData.species=null;}
+  renderPet();
+};
 
 updateMacroHints();clampDays();
 </script>
