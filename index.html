@@ -1665,10 +1665,37 @@ const FEED_SHOP=[
   {id:'premium',name:'高級飼料',cost:5,exp:15,icon:'🍖'},
   {id:'deluxe',name:'豪華大餐',cost:10,exp:35,icon:'🍱'}
 ];
+
+// 每日任務定義(每天 0 點重置)
+const DAILY_TASKS=[
+  {id:'checkin', name:'每日簽到',       desc:'打開任務頁就能領',   points:5,  icon:'📅'},
+  {id:'meal1',   name:'記錄任一餐',     desc:'今天記錄至少 1 餐',  points:8,  icon:'🍽️'},
+  {id:'meal2',   name:'記錄兩餐',       desc:'今天記錄至少 2 餐',  points:10, icon:'🍱'},
+  {id:'meal3',   name:'記錄完整三餐',   desc:'早、午、晚都有記錄', points:12, icon:'🌟'},
+  {id:'goal',    name:'營養達標',       desc:'三大營養素接近目標', points:15, icon:'🎯'},
+  {id:'feed',    name:'餵食寵物',       desc:'餵寵物吃一次飼料',   points:5,  icon:'🐾'}
+];
+
+// 連續記錄里程碑(一次性,領過永久消失)
+const STREAK_MILESTONES=[
+  {days:3,  points:10},
+  {days:7,  points:20},
+  {days:14, points:30},
+  {days:30, points:50}
+];
+// 30 天後循環獎勵:每 5 天領 10 點
+const STREAK_CYCLE_DAYS=5;
+const STREAK_CYCLE_POINTS=10;
+
 let petData=null;
 function defaultPetData(){
   return {chosen:false,species:null,name:'',exp:0,points:0,
-    streak:0,lastRecordDate:null,rewardedDates:{}};
+    streak:0,lastRecordDate:null,
+    dailyTasks:{},          // {日期: {任務id: 'done'|'claimed'}}
+    claimedMilestones:[],   // 已領過的里程碑天數 [3,7,...]
+    unlocked30:false,       // 是否解鎖過 30 天(解鎖後循環獎勵只需連續5天)
+    lastCycleClaim:0,       // 上次領循環獎勵時的連續天數(避免同區間重複領)
+    fedToday:null};         // 最後餵食日期(判斷今日餵食任務)
 }
 function getPetStage(exp){
   if(exp>=EVO_THRESHOLDS[0]+EVO_THRESHOLDS[1])return 2;
@@ -1679,40 +1706,52 @@ function todayKey(){
   const d=new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
+// 記錄飲食時呼叫:更新今日任務的「完成」狀態(不自動發點數,等使用者去領)
 window.checkPetReward=function(){
   if(!petData||!petData.chosen)return;
   const tk=todayKey();
-  if(!petData.rewardedDates)petData.rewardedDates={};
-  const entry=diaryEntries[tk];
-  let hasRecord=false;
-  if(entry&&entry.meals){
-    for(const mk in entry.meals){
-      const m=entry.meals[mk];
-      if((m.carb&&m.carb.length)||(m.prot&&m.prot.length)||(m.fat&&m.fat.length)){hasRecord=true;break;}
-    }
-  }
-  if(!hasRecord)return;
-  const todayReward=petData.rewardedDates[tk]||{record:false,goal:false};
-  let gained=0;let msgs=[];
-  if(!todayReward.record){
-    todayReward.record=true;
-    gained+=10;msgs.push('記錄飲食 +10');
-    updateStreak(tk);
-    const bonus=streakBonus(petData.streak);
-    if(bonus>0){gained+=bonus;msgs.push('連續'+petData.streak+'天 +'+bonus);}
-  }
-  if(!todayReward.goal&&isGoalMet(tk)){
-    todayReward.goal=true;
-    gained+=15;msgs.push('營養達標 +15');
-  }
-  if(gained>0){
-    petData.points+=gained;
-    petData.rewardedDates[tk]=todayReward;
+  ensureDailyTasks(tk);
+  let changed=false;
+  // 計算今天記錄了幾餐(早/午/晚)
+  const mealsRecorded=countMealsRecorded(tk);
+  const tasks=petData.dailyTasks[tk];
+  // 更新各任務「達成」狀態(done),但不改 claimed
+  const markDone=(id,cond)=>{
+    if(cond&&!tasks[id]){tasks[id]='done';changed=true;}
+  };
+  markDone('meal1', mealsRecorded>=1);
+  markDone('meal2', mealsRecorded>=2);
+  markDone('meal3', mealsRecorded>=3);
+  markDone('goal',  isGoalMet(tk));
+  if(changed){
     scheduleSave('petData',petData);
-    showPetToast('🐾 '+msgs.join('、'));
-    if(document.getElementById('section-pet').classList.contains('active'))renderPet();
+    if(document.getElementById('section-pet')?.classList.contains('active'))renderPet();
+    showPetToast('🎯 有任務可以領取囉!');
   }
 };
+
+// 確保今天的任務物件存在(換日自動重置)
+function ensureDailyTasks(tk){
+  if(!petData.dailyTasks)petData.dailyTasks={};
+  if(!petData.dailyTasks[tk]){
+    petData.dailyTasks[tk]={};
+    // 清掉舊日期,只保留今天(避免無限長大)
+    for(const k in petData.dailyTasks){if(k!==tk)delete petData.dailyTasks[k];}
+  }
+}
+
+// 計算某天記錄了幾個不同的餐段(有食物的餐段數)
+function countMealsRecorded(tk){
+  const entry=diaryEntries[tk];
+  if(!entry||!entry.meals)return 0;
+  let n=0;
+  for(const mk in entry.meals){
+    const m=entry.meals[mk];
+    if((m.carb&&m.carb.length)||(m.prot&&m.prot.length)||(m.fat&&m.fat.length))n++;
+  }
+  return n;
+}
+
 function updateStreak(tk){
   const last=petData.lastRecordDate;
   if(last===tk)return;
@@ -1725,12 +1764,6 @@ function updateStreak(tk){
     petData.streak=1;
   }
   petData.lastRecordDate=tk;
-}
-function streakBonus(streak){
-  if(streak>=14&&streak%14===0)return 20;
-  if(streak>=7&&streak%7===0)return 10;
-  if(streak>=3&&streak%3===0)return 5;
-  return 0;
 }
 function isGoalMet(tk){
   try{
@@ -1775,12 +1808,104 @@ window.feedPet=function(feedId){
   petData.points-=feed.cost;
   petData.exp+=feed.exp;
   const afterStage=getPetStage(petData.exp);
+  // 記錄今日已餵食 → 完成「餵食寵物」任務
+  const tk=todayKey();
+  petData.fedToday=tk;
+  ensureDailyTasks(tk);
+  if(!petData.dailyTasks[tk]['feed'])petData.dailyTasks[tk]['feed']='done';
   scheduleSave('petData',petData);
   if(afterStage>beforeStage){
     showPetToast('🎉 '+petData.name+' 進化成「'+STAGE_NAMES[afterStage]+'」了!');
   } else {
     showPetToast('😋 '+petData.name+' 吃了'+feed.name+',+'+feed.exp+' 經驗');
   }
+  renderPet();
+};
+
+// ── 任務系統函式 ──
+// 取得某每日任務的狀態:'locked'(未達成)|'done'(可領)|'claimed'(已領)
+function getTaskState(taskId){
+  const tk=todayKey();
+  ensureDailyTasks(tk);
+  const tasks=petData.dailyTasks[tk];
+  if(tasks[taskId]==='claimed')return 'claimed';
+  // 簽到:隨時可領(只要還沒領)
+  if(taskId==='checkin')return 'done';
+  // 餵食:看今天有沒有餵
+  if(taskId==='feed')return (tasks['feed']==='done')?'done':'locked';
+  // 記錄類/達標:依即時計算
+  const meals=countMealsRecorded(tk);
+  if(taskId==='meal1')return meals>=1?'done':'locked';
+  if(taskId==='meal2')return meals>=2?'done':'locked';
+  if(taskId==='meal3')return meals>=3?'done':'locked';
+  if(taskId==='goal') return isGoalMet(tk)?'done':'locked';
+  return 'locked';
+}
+
+// 領取每日任務
+window.claimTask=function(taskId){
+  if(!petData||!petData.chosen)return;
+  const tk=todayKey();
+  ensureDailyTasks(tk);
+  const state=getTaskState(taskId);
+  if(state!=='done'){return;}
+  const task=DAILY_TASKS.find(t=>t.id===taskId);
+  if(!task)return;
+  // 簽到日:領取時也更新連續記錄(用簽到當每日活躍依據之一)
+  petData.dailyTasks[tk][taskId]='claimed';
+  petData.points+=task.points;
+  // 第一次完成「記錄任一餐」時更新 streak
+  if(taskId==='meal1'){updateStreak(tk);}
+  scheduleSave('petData',petData);
+  showPetToast('✅ '+task.name+' +'+task.points+' 點');
+  renderPet();
+};
+
+// 取得連續里程碑可領清單(尚未領的、已達成的)
+function getClaimableMilestones(){
+  const out=[];
+  STREAK_MILESTONES.forEach(m=>{
+    if(petData.streak>=m.days && !(petData.claimedMilestones||[]).includes(m.days)){
+      out.push(m);
+    }
+  });
+  return out;
+}
+
+// 領取里程碑
+window.claimMilestone=function(days){
+  const m=STREAK_MILESTONES.find(x=>x.days===days);
+  if(!m)return;
+  if(petData.streak<days)return;
+  if(!petData.claimedMilestones)petData.claimedMilestones=[];
+  if(petData.claimedMilestones.includes(days))return;
+  petData.claimedMilestones.push(days);
+  petData.points+=m.points;
+  if(days>=30)petData.unlocked30=true; // 解鎖循環獎勵
+  scheduleSave('petData',petData);
+  showPetToast('🏆 連續'+days+'天達成!+'+m.points+' 點');
+  renderPet();
+};
+
+// 循環獎勵:解鎖30天後,每連續5天可領一次
+function getCycleClaim(){
+  if(!petData.unlocked30)return null;
+  // 目前連續天數所在的「5天區間」基準
+  const cycleNum=Math.floor(petData.streak/STREAK_CYCLE_DAYS); // 例如 streak=35 → 7
+  const lastNum=Math.floor((petData.lastCycleClaim||0)/STREAK_CYCLE_DAYS);
+  if(petData.streak>=STREAK_CYCLE_DAYS && cycleNum>lastNum){
+    return {streak:petData.streak,points:STREAK_CYCLE_POINTS};
+  }
+  return null;
+}
+
+window.claimCycle=function(){
+  const c=getCycleClaim();
+  if(!c)return;
+  petData.points+=c.points;
+  petData.lastCycleClaim=petData.streak; // 記錄這次領取時的連續數
+  scheduleSave('petData',petData);
+  showPetToast('🎁 連續記錄獎勵 +'+c.points+' 點');
   renderPet();
 };
 window.choosePet=function(species){
@@ -1852,6 +1977,12 @@ window.renderPet=function(){
   else if(stage===1){expInStage=petData.exp-EVO_THRESHOLDS[0];expNeeded=EVO_THRESHOLDS[1];nextLabel='距離進化成「進化體」';}
   else {expInStage=1;expNeeded=1;nextLabel='已完全體!最強型態';}
   const pct=Math.min(100,Math.round(expInStage/expNeeded*100));
+  const tab=petTab||'pet';
+  const tabBar='<div style="display:flex;gap:8px;margin-bottom:14px;">'
+    +'<button class="btn" onclick="switchPetTab(\'pet\')" style="flex:1;'+(tab==='pet'?'background:'+sp.color+';color:#fff;':'background:#FFFAF5;color:#3A2A26;border:1px solid #EFDED2;')+'">🐾 我的寵物</button>'
+    +'<button class="btn" onclick="switchPetTab(\'task\')" style="flex:1;'+(tab==='task'?'background:'+sp.color+';color:#fff;':'background:#FFFAF5;color:#3A2A26;border:1px solid #EFDED2;')+'">📋 每日任務'+(hasClaimableTask()?' <span style="background:#E24B4A;color:#fff;border-radius:10px;padding:0 6px;font-size:11px;">!</span>':'')+'</button>'
+    +'</div>';
+  if(tab==='task'){el.innerHTML=tabBar+renderTaskTab(sp);return;}
   let shop='';
   FEED_SHOP.forEach(f=>{
     const afford=petData.points>=f.cost;
@@ -1862,8 +1993,8 @@ window.renderPet=function(){
       +'<div style="font-size:11px;color:var(--text2,#8B6F66);">'+f.cost+' 點 → +'+f.exp+' 經驗</div>'
       +'</button>';
   });
-  el.innerHTML=
-    '<div class="card" style="text-align:center;position:relative;overflow:hidden;">'
+  el.innerHTML=tabBar
+    +'<div class="card" style="text-align:center;position:relative;overflow:hidden;">'
     +'<div style="position:absolute;top:12px;right:14px;background:'+sp.color+';color:#fff;font-size:12px;padding:3px 10px;border-radius:12px;">'+sp.type+'系 · '+STAGE_NAMES[stage]+'</div>'
     +'<img src="'+img+'" style="width:200px;height:200px;object-fit:contain;margin-top:8px;" alt="'+petData.name+'"/>'
     +'<div style="font-size:20px;font-weight:700;margin-top:4px;">'+petData.name+'</div>'
@@ -1878,14 +2009,74 @@ window.renderPet=function(){
     +'</div>'
     +'<div class="card">'
     +'<div class="sec-label" style="margin-top:0;">飼料商店 · 餵食成長</div>'
-    +'<div style="font-size:12px;color:var(--text2,#8B6F66);margin-bottom:12px;">用記錄飲食賺到的點數換飼料,餵食增加經驗</div>'
+    +'<div style="font-size:12px;color:var(--text2,#8B6F66);margin-bottom:12px;">用任務賺到的點數換飼料,餵食增加經驗</div>'
     +'<div style="display:flex;gap:10px;flex-wrap:wrap;">'+shop+'</div>'
     +'</div>'
     +'<div class="card" style="font-size:12px;color:var(--text2,#8B6F66);line-height:1.7;">'
     +'<div style="font-weight:600;color:#3A2A26;margin-bottom:6px;">怎麼賺點數?</div>'
-    +'每天記錄飲食 +10 點<br>當天營養接近目標 額外 +15 點<br>連續記錄 3/7/14 天有額外加成<br><br>漏記不會懲罰,寵物也不會掉經驗,安心記錄就好 🌿'
+    +'到「每日任務」完成任務領點數<br>記錄飲食、達標、餵食都有任務<br>連續記錄越久,獎勵越多<br><br>漏記不會懲罰,寵物也不會掉經驗,安心記錄就好 🌿'
     +'</div>';
 };
+function hasClaimableTask(){
+  if(!petData||!petData.chosen)return false;
+  for(const t of DAILY_TASKS){if(getTaskState(t.id)==='done')return true;}
+  if(getClaimableMilestones().length>0)return true;
+  if(getCycleClaim())return true;
+  return false;
+}
+function renderTaskTab(sp){
+  let html='';
+  html+='<div class="card" style="text-align:center;margin-bottom:14px;"><div style="font-size:28px;font-weight:700;color:'+sp.color+';">'+petData.points+' 點</div><div style="font-size:12px;color:var(--text2,#8B6F66);">目前可用點數</div></div>';
+  html+='<div class="card"><div class="sec-label" style="margin-top:0;">每日任務 · 每天 0 點重置</div>';
+  DAILY_TASKS.forEach(t=>{
+    const st=getTaskState(t.id);
+    let btn,rowStyle='';
+    if(st==='claimed'){btn='<span style="font-size:13px;color:#9C9C9C;">✓ 已領取</span>';rowStyle='opacity:0.5;';}
+    else if(st==='done'){btn='<button class="btn btn-green" onclick="claimTask(\''+t.id+'\')" style="padding:6px 16px;font-size:13px;">領取 +'+t.points+'</button>';}
+    else {btn='<span style="font-size:12px;color:var(--text2,#8B6F66);">'+taskProgressText(t.id)+'</span>';}
+    html+='<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F2E8E0;'+rowStyle+'">'
+      +'<div style="font-size:24px;">'+t.icon+'</div>'
+      +'<div style="flex:1;"><div style="font-size:14px;font-weight:600;">'+t.name+'</div><div style="font-size:12px;color:var(--text2,#8B6F66);">'+t.desc+' · +'+t.points+' 點</div></div>'
+      +'<div>'+btn+'</div></div>';
+  });
+  html+='</div>';
+  html+='<div class="card"><div class="sec-label" style="margin-top:0;">連續記錄獎勵 🔥 目前連續 '+petData.streak+' 天</div>';
+  const cycle=getCycleClaim();
+  if(cycle){
+    html+='<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F2E8E0;">'
+      +'<div style="font-size:24px;">🎁</div>'
+      +'<div style="flex:1;"><div style="font-size:14px;font-weight:600;">連續記錄獎勵</div><div style="font-size:12px;color:var(--text2,#8B6F66);">每連續 5 天可領一次</div></div>'
+      +'<button class="btn btn-green" onclick="claimCycle()" style="padding:6px 16px;font-size:13px;">領取 +'+cycle.points+'</button></div>';
+  }
+  STREAK_MILESTONES.forEach(m=>{
+    const claimed=(petData.claimedMilestones||[]).includes(m.days);
+    const reached=petData.streak>=m.days;
+    let btn,rowStyle='';
+    if(claimed){btn='<span style="font-size:13px;color:#9C9C9C;">✓ 已領取</span>';rowStyle='opacity:0.5;';}
+    else if(reached){btn='<button class="btn btn-green" onclick="claimMilestone('+m.days+')" style="padding:6px 16px;font-size:13px;">領取 +'+m.points+'</button>';}
+    else {btn='<span style="font-size:12px;color:var(--text2,#8B6F66);">'+petData.streak+' / '+m.days+' 天</span>';}
+    html+='<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F2E8E0;'+rowStyle+'">'
+      +'<div style="font-size:24px;">🏆</div>'
+      +'<div style="flex:1;"><div style="font-size:14px;font-weight:600;">連續記錄 '+m.days+' 天</div><div style="font-size:12px;color:var(--text2,#8B6F66);">一次性獎勵 · +'+m.points+' 點</div></div>'
+      +'<div>'+btn+'</div></div>';
+  });
+  if(petData.unlocked30){html+='<div style="font-size:12px;color:var(--text2,#8B6F66);margin-top:10px;line-height:1.6;">已解鎖長期獎勵:之後每連續記錄 5 天就能領一次,中斷也只要再連續 5 天就能繼續領 🌿</div>';}
+  html+='</div>';
+  html+='<div class="card" style="font-size:12px;color:var(--text2,#8B6F66);line-height:1.7;">完成任務後記得回來「領取」才會拿到點數喔!漏記不會懲罰,輕鬆記錄就好 🌿</div>';
+  return html;
+}
+function taskProgressText(taskId){
+  const tk=todayKey();
+  const meals=countMealsRecorded(tk);
+  if(taskId==='meal1')return meals+' / 1 餐';
+  if(taskId==='meal2')return meals+' / 2 餐';
+  if(taskId==='meal3')return meals+' / 3 餐';
+  if(taskId==='goal')return '尚未達標';
+  if(taskId==='feed')return '尚未餵食';
+  return '未完成';
+}
+let petTab='pet';
+window.switchPetTab=function(t){petTab=t;renderPet();};
 window.cancelChoose=function(){
   if(petData){petData._pendingChoose=false;petData.species=null;}
   renderPet();
