@@ -810,6 +810,7 @@ function loadLocalData(){
     const pd=localStorage.getItem('local_petData');if(pd){petData=JSON.parse(pd);migratePetData();}
   }catch(e){console.error('local load',e);}
   updateMacroHints();clampDays();renderFoodLib();
+  if(typeof startRoaming==='function')setTimeout(startRoaming,300);
 }
 
 async function loadCloudData(){
@@ -831,6 +832,7 @@ async function loadCloudData(){
     if(petDoc.exists()){petData=JSON.parse(petDoc.data().value);migratePetData();}
   }catch(e){console.error('cloud load',e);}
   updateMacroHints();clampDays();renderFoodLib();
+  if(typeof startRoaming==='function')setTimeout(startRoaming,300);
 }
 
 // ── Onboarding ─────────────────────────────────────────
@@ -1692,15 +1694,17 @@ const EGG_COST=300;
 let petData=null;
 function defaultPetData(){
   return {chosen:false,
-    pets:[],                 // 多隻寵物 [{id,species,name,exp}]
-    current:0,               // 目前選中的寵物 index
+    pets:[],
+    current:0,
     points:0,
     streak:0,lastRecordDate:null,
     dailyTasks:{},
     claimedMilestones:[],
     unlocked30:false,
     lastCycleClaim:0,
-    fedToday:null};
+    fedToday:null,
+    roamPetIdx:0,      // 桌寵顯示哪隻寵物的 index
+    roamEnabled:true}; // 桌寵是否開啟
 }
 // 舊資料(單隻)遷移成新結構(多隻),保留既有寵物
 function migratePetData(){
@@ -1721,6 +1725,8 @@ function migratePetData(){
   if(petData.points===undefined)petData.points=0;
   if(petData.dailyTasks===undefined)petData.dailyTasks={};
   if(petData.claimedMilestones===undefined)petData.claimedMilestones=[];
+  if(petData.roamEnabled===undefined)petData.roamEnabled=true;
+  if(petData.roamPetIdx===undefined)petData.roamPetIdx=petData.current||0;
 }
 // 取得目前選中的寵物
 function curPet(){
@@ -1848,6 +1854,8 @@ window.feedPet=function(feedId){
   scheduleSave('petData',petData);
   if(afterStage>beforeStage){
     showPetToast('🎉 '+pet.name+' 進化成「'+STAGE_NAMES[afterStage]+'」了!');
+    // 若進化的是目前正在閒晃的寵物,更新桌寵圖
+    if(petData.roamPetIdx===petData.current)startRoaming();
   } else {
     showPetToast('😋 '+pet.name+' 吃了'+feed.name+',+'+feed.exp+' 經驗');
   }
@@ -1950,15 +1958,16 @@ window.confirmPet=function(){
   const nameInput=document.getElementById('petNameInput');
   const species=petData._pendingSpecies;
   const nm=(nameInput?.value||'').trim()||PET_SPECIES[species].name;
-  // 加入第一隻寵物
   petData.pets.push({id:Date.now(),species:species,name:nm,exp:0});
   petData.current=petData.pets.length-1;
+  petData.roamPetIdx=petData.current;
   petData.chosen=true;
   petData._pendingChoose=false;
   petData._pendingSpecies=null;
   scheduleSave('petData',petData);
   showPetToast('🥚 '+nm+' 加入了!開始記錄飲食來養大牠吧');
   renderPet();
+  startRoaming();
 };
 
 // ── 買蛋(兌換新寵物)──
@@ -2054,12 +2063,14 @@ window.renderPet=function(){
   else {expInStage=1;expNeeded=1;nextLabel='已完全體!最強型態';}
   const pct=Math.min(100,Math.round(expInStage/expNeeded*100));
   const tab=petTab||'pet';
-  const tabBar='<div style="display:flex;gap:8px;margin-bottom:14px;">'
-    +'<button class="btn" onclick="switchPetTab(\'pet\')" style="flex:1;'+(tab==='pet'?'background:'+sp.color+';color:#fff;':'background:#FFFAF5;color:#3A2A26;border:1px solid #EFDED2;')+'">🐾 我的寵物</button>'
-    +'<button class="btn" onclick="switchPetTab(\'task\')" style="flex:1;'+(tab==='task'?'background:'+sp.color+';color:#fff;':'background:#FFFAF5;color:#3A2A26;border:1px solid #EFDED2;')+'">📋 每日任務'+(hasClaimableTask()?' <span style="background:#E24B4A;color:#fff;border-radius:10px;padding:0 6px;font-size:11px;">!</span>':'')+'</button>'
+  const tabBar='<div style="display:flex;gap:6px;margin-bottom:14px;">'
+    +'<button class="btn" onclick="switchPetTab(\'pet\')" style="flex:1;padding:10px 6px;font-size:13px;'+(tab==='pet'?'background:'+sp.color+';color:#fff;':'background:#FFFAF5;color:#3A2A26;border:1px solid #EFDED2;')+'">🐾 寵物</button>'
+    +'<button class="btn" onclick="switchPetTab(\'task\')" style="flex:1;padding:10px 6px;font-size:13px;'+(tab==='task'?'background:'+sp.color+';color:#fff;':'background:#FFFAF5;color:#3A2A26;border:1px solid #EFDED2;')+'">📋 任務'+(hasClaimableTask()?' <span style="background:#E24B4A;color:#fff;border-radius:10px;padding:0 5px;font-size:10px;">!</span>':'')+'</button>'
+    +'<button class="btn" onclick="switchPetTab(\'dex\')" style="flex:1;padding:10px 6px;font-size:13px;'+(tab==='dex'?'background:'+sp.color+';color:#fff;':'background:#FFFAF5;color:#3A2A26;border:1px solid #EFDED2;')+'">📖 圖鑑</button>'
     +'</div>';
   if(tab==='task'){el.innerHTML=tabBar+renderTaskTab(sp);return;}
   if(tab==='egg'){el.innerHTML=tabBar+renderEggShop();return;}
+  if(tab==='dex'){el.innerHTML=tabBar+renderPetDex(sp);return;}
   // 切換寵物橫列(有多隻才顯示)
   let petSwitcher='';
   if(petData.pets.length>1){
@@ -2144,6 +2155,55 @@ function renderEggShop(){
     +'</div>'
     +'<div style="display:flex;gap:12px;flex-wrap:wrap;">'+cards+'</div>';
 }
+
+// 圖鑑分頁:顯示所有寵物種類 + 已擁有的所有寵物個體 + 切換閒晃寵物 + 桌寵開關
+function renderPetDex(sp0){
+  // 種類圖鑑:每個 species 一張卡,已擁有顯示真實圖+數量,未擁有顯示剪影
+  let speciesCards='';
+  for(const key in PET_SPECIES){
+    const sp=PET_SPECIES[key];
+    const owned=petData.pets.filter(p=>p.species===key);
+    const has=owned.length>0;
+    speciesCards+='<div class="card" style="text-align:center;flex:1;min-width:140px;">'
+      +'<img src="'+sp.stages[2]+'" style="width:100px;height:100px;object-fit:contain;'+(has?'':'')+'" class="'+(has?'':'silhouette')+'" alt="'+sp.name+'"/>'
+      +'<div style="font-size:15px;font-weight:600;margin-top:6px;'+(has?'':'color:#9C9C9C;')+'">'+(has?sp.name:'？？？')+'</div>'
+      +'<div style="font-size:12px;color:var(--text2,#8B6F66);margin-top:2px;">'+(has?sp.type+'系 · 擁有 '+owned.length+' 隻':'尚未獲得')+'</div>'
+      +'</div>';
+  }
+
+  // 桌寵控制
+  let roamControl='';
+  if(petData.pets.length>0){
+    roamControl='<div class="card"><div class="sec-label" style="margin-top:0;">桌寵設定</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'
+      +'<span style="font-size:14px;">讓寵物在 App 裡閒晃</span>'
+      +'<button class="btn" onclick="toggleRoam()" style="padding:6px 16px;font-size:13px;'+(petData.roamEnabled?'background:'+sp0.color+';color:#fff;':'background:#EFDED2;color:#3A2A26;')+'">'+(petData.roamEnabled?'已開啟':'已關閉')+'</button>'
+      +'</div>';
+    if(petData.roamEnabled){
+      roamControl+='<div style="font-size:12px;color:var(--text2,#8B6F66);margin-bottom:10px;">點選下方寵物,讓牠出來閒晃:</div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+      petData.pets.forEach((p,i)=>{
+        const psp=PET_SPECIES[p.species];
+        const st=getPetStage(p.exp);
+        const active=(i===petData.roamPetIdx);
+        roamControl+='<div onclick="setRoamPet('+i+')" style="cursor:pointer;text-align:center;width:72px;padding:6px;border-radius:10px;'+(active?'background:'+psp.color+'22;border:2px solid '+psp.color+';':'border:2px solid transparent;')+'">'
+          +'<img src="'+psp.stages[st]+'" style="width:48px;height:48px;object-fit:contain;"/>'
+          +'<div style="font-size:11px;font-weight:600;margin-top:2px;'+(active?'color:'+psp.color+';':'color:#8B6F66;')+'">'+p.name+'</div>'
+          +'</div>';
+      });
+      roamControl+='</div>';
+    }
+    roamControl+='</div>';
+  }
+
+  return '<div class="card" style="text-align:center;margin-bottom:14px;">'
+    +'<div style="font-size:17px;font-weight:600;margin-bottom:4px;">寵物圖鑑 📖</div>'
+    +'<div style="font-size:13px;color:var(--text2,#8B6F66);">收集所有種類的怪獸,看看牠們的最終型態</div>'
+    +'</div>'
+    +'<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;">'+speciesCards+'</div>'
+    +roamControl;
+}
+
 function hasClaimableTask(){
   if(!petData||!petData.chosen)return false;
   for(const t of DAILY_TASKS){if(getTaskState(t.id)==='done')return true;}
@@ -2204,6 +2264,126 @@ function taskProgressText(taskId){
 }
 let petTab='pet';
 window.switchPetTab=function(t){petTab=t;renderPet();};
+
+// ════════════════════════════════════════════════════════
+// 桌寵系統(寵物在畫面上閒晃)
+// ════════════════════════════════════════════════════════
+let roamTimer=null;
+let lastFootprintTime=0;
+let petFacingLeft=false;
+
+window.startRoaming=function startRoaming(){
+  stopRoaming(); // 先清掉舊計時器
+  const el=document.getElementById('roamingPet');
+  if(!el)return;
+  if(!petData||!petData.chosen||!petData.pets||!petData.pets.length){el.style.display='none';return;}
+  if(!petData.roamEnabled){el.style.display='none';return;}
+  // 用 roamPetIdx 決定顯示哪隻(若超出範圍就用 current)
+  let idx=petData.roamPetIdx;
+  if(idx==null||idx<0||idx>=petData.pets.length)idx=petData.current||0;
+  const pet=petData.pets[idx];
+  if(!pet){el.style.display='none';return;}
+  const sp=PET_SPECIES[pet.species];
+  const stage=getPetStage(pet.exp);
+  const img=document.getElementById('roamingPetImg');
+  img.src=sp.stages[stage];
+  img.alt=pet.name;
+  el.style.display='block';
+  // 第一次定位到中央偏下
+  if(!el._initialized){
+    el.style.left=(window.innerWidth/2-50)+'px';
+    el.style.top=(window.innerHeight*0.7)+'px';
+    el._initialized=true;
+  }
+  // 每隔幾秒選一個新位置移動過去
+  roamTimer=setInterval(()=>roamStep(),6500);
+  setTimeout(roamStep,400); // 立刻動一次
+}
+
+window.stopRoaming=function stopRoaming(){
+  if(roamTimer){clearInterval(roamTimer);roamTimer=null;}
+  const el=document.getElementById('roamingPet');
+  if(el)el.style.display='none';
+}
+
+window.roamStep=function roamStep(){
+  const el=document.getElementById('roamingPet');
+  if(!el||el.style.display==='none')return;
+  // 隨機選新目標(畫面中,避開上方安全距離以免擋導航)
+  const margin=20;
+  const topMin=80;             // 上方留 80px(避免擋頂部)
+  const bottomMin=120;         // 下方留 120px(避免擋底部按鈕)
+  const maxX=Math.max(margin,window.innerWidth-100-margin);
+  const maxY=Math.max(topMin,window.innerHeight-100-bottomMin);
+  const newX=Math.random()*(maxX-margin)+margin;
+  const newY=Math.random()*(maxY-topMin)+topMin;
+  const curX=parseFloat(el.style.left)||window.innerWidth/2;
+  // 判斷方向決定翻轉
+  if(newX<curX-20){petFacingLeft=true;}
+  else if(newX>curX+20){petFacingLeft=false;}
+  const img=document.getElementById('roamingPetImg');
+  // 翻轉(透過外層 div 的 transform,避免覆蓋 bob 動畫)
+  el.style.transform=petFacingLeft?'scaleX(-1)':'scaleX(1)';
+  // 移動
+  el.style.left=newX+'px';
+  el.style.top=newY+'px';
+  // 灑腳印
+  scheduleFootprints(curX,parseFloat(el.style.top)||0,newX,newY);
+}
+
+function scheduleFootprints(x0,y0,x1,y1){
+  // 走動過程中分段灑 4-5 個腳印
+  const steps=5;
+  for(let i=1;i<=steps;i++){
+    const t=i/(steps+1);
+    setTimeout(()=>{
+      const x=x0+(x1-x0)*t+50; // 50 是寵物的中心 X 偏移
+      const y=y0+(y1-y0)*t+95; // 腳印在寵物腳下
+      dropFootprint(x,y);
+    }, 6500*t);
+  }
+}
+
+window.dropFootprint=function dropFootprint(x,y){
+  const layer=document.getElementById('footprintsLayer');
+  if(!layer)return;
+  const fp=document.createElement('div');
+  fp.className='footprint';
+  fp.style.left=(x-5)+'px';
+  fp.style.top=(y-3)+'px';
+  layer.appendChild(fp);
+  setTimeout(()=>{if(fp.parentNode)fp.parentNode.removeChild(fp);},2600);
+}
+
+// 設定桌寵要顯示哪隻寵物
+window.setRoamPet=function(idx){
+  if(!petData||idx<0||idx>=petData.pets.length)return;
+  petData.roamPetIdx=idx;
+  scheduleSave('petData',petData);
+  startRoaming();
+  showPetToast('🐾 '+petData.pets[idx].name+' 出來閒晃了');
+  renderPet();
+};
+
+// 開關桌寵
+window.toggleRoam=function(){
+  if(!petData)return;
+  petData.roamEnabled=!petData.roamEnabled;
+  scheduleSave('petData',petData);
+  if(petData.roamEnabled){startRoaming();showPetToast('🐾 寵物出來閒晃囉');}
+  else {stopRoaming();showPetToast('已收起寵物');}
+  renderPet();
+};
+
+// 視窗大小改變時,確保寵物還在畫面內
+window.addEventListener('resize',()=>{
+  const el=document.getElementById('roamingPet');
+  if(!el||el.style.display==='none')return;
+  const x=parseFloat(el.style.left)||0;
+  const y=parseFloat(el.style.top)||0;
+  if(x>window.innerWidth-100)el.style.left=(window.innerWidth-110)+'px';
+  if(y>window.innerHeight-100)el.style.top=(window.innerHeight-130)+'px';
+});
 window.cancelChoose=function(){
   if(petData){petData._pendingChoose=false;petData._pendingSpecies=null;}
   renderPet();
@@ -2211,5 +2391,29 @@ window.cancelChoose=function(){
 
 updateMacroHints();clampDays();
 </script>
+<!-- 桌寵 (浮在所有頁面的寵物) -->
+<div id="roamingPet" style="position:fixed;left:50%;top:60%;width:100px;height:100px;pointer-events:none;z-index:100;display:none;transition:left 6s linear, top 6s linear;">
+  <img id="roamingPetImg" src="" style="width:100%;height:100%;object-fit:contain;transform-origin:center;animation:petBob 1.2s ease-in-out infinite;" alt=""/>
+</div>
+<div id="footprintsLayer" style="position:fixed;inset:0;pointer-events:none;z-index:99;overflow:hidden;"></div>
+<style>
+@keyframes petBob {
+  0%,100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-4px) scaleY(0.97); }
+}
+.footprint {
+  position:absolute;
+  width:10px; height:6px;
+  border-radius:50%;
+  background:rgba(139,111,102,0.35);
+  pointer-events:none;
+  animation: footFade 2.5s ease-out forwards;
+}
+@keyframes footFade {
+  0% { opacity: 0.55; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.7); }
+}
+.silhouette { filter: brightness(0) opacity(0.25); }
+</style>
 </body>
 </html>
