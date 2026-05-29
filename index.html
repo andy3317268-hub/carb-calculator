@@ -2331,55 +2331,73 @@ window.startRoaming=function startRoaming(){
   // 每隔幾秒選一個新位置移動過去
   roamTimer=setInterval(()=>roamStep(),10500);
   setTimeout(roamStep,400); // 立刻動一次
+  // 啟動軌跡追蹤迴圈(每幀讀寵物實際位置,定時灑軌跡)
+  startTrailLoop();
 }
 
 window.stopRoaming=function stopRoaming(){
   if(roamTimer){clearInterval(roamTimer);roamTimer=null;}
+  stopTrailLoop();
   const el=document.getElementById('roamingPet');
   if(el)el.style.display='none';
+}
+
+// 軌跡追蹤迴圈:每幀讀寵物實際位置,每隔 N 毫秒灑一個軌跡
+let trailRAF=null;
+let lastTrailTime=0;
+let lastTrailPos=null;
+const TRAIL_INTERVAL=380;   // 灑軌跡的時間間隔(毫秒,愈小愈密)
+const TRAIL_MIN_DIST=18;    // 兩個軌跡之間最小距離(像素)
+
+function startTrailLoop(){
+  stopTrailLoop();
+  lastTrailTime=0;
+  lastTrailPos=null;
+  function loop(ts){
+    const el=document.getElementById('roamingPet');
+    if(!el||el.style.display==='none'){trailRAF=null;return;}
+    // 用 getBoundingClientRect 讀寵物實際視覺位置(包含 transition 中的位置)
+    const r=el.getBoundingClientRect();
+    const footX=r.left+r.width/2;
+    const footY=r.top+r.height-6; // 寵物腳下(底部稍上)
+    if(ts-lastTrailTime>TRAIL_INTERVAL){
+      // 計算與上次軌跡的距離,有移動才灑
+      if(!lastTrailPos||Math.hypot(footX-lastTrailPos.x,footY-lastTrailPos.y)>TRAIL_MIN_DIST){
+        let species='grass';
+        if(petData&&petData.pets&&petData.pets[petData.roamPetIdx]){
+          species=petData.pets[petData.roamPetIdx].species;
+        }
+        dropTrail(footX,footY,species);
+        lastTrailPos={x:footX,y:footY};
+        lastTrailTime=ts;
+      }
+    }
+    trailRAF=requestAnimationFrame(loop);
+  }
+  trailRAF=requestAnimationFrame(loop);
+}
+
+function stopTrailLoop(){
+  if(trailRAF){cancelAnimationFrame(trailRAF);trailRAF=null;}
 }
 
 window.roamStep=function roamStep(){
   const el=document.getElementById('roamingPet');
   if(!el||el.style.display==='none')return;
-  // 隨機選新目標(畫面中,避開上方安全距離以免擋導航)
   const margin=20;
-  const topMin=80;             // 上方留 80px(避免擋頂部)
-  const bottomMin=120;         // 下方留 120px(避免擋底部按鈕)
+  const topMin=80;
+  const bottomMin=120;
   const maxX=Math.max(margin,window.innerWidth-100-margin);
   const maxY=Math.max(topMin,window.innerHeight-100-bottomMin);
   const newX=Math.random()*(maxX-margin)+margin;
   const newY=Math.random()*(maxY-topMin)+topMin;
   const curX=parseFloat(el.style.left)||window.innerWidth/2;
-  // 判斷方向決定翻轉
   if(newX<curX-20){petFacingLeft=true;}
   else if(newX>curX+20){petFacingLeft=false;}
-  const img=document.getElementById('roamingPetImg');
-  // 翻轉(透過外層 div 的 transform,避免覆蓋 bob 動畫)
   el.style.transform=petFacingLeft?'scaleX(-1)':'scaleX(1)';
-  // 移動
   el.style.left=newX+'px';
   el.style.top=newY+'px';
-  // 灑腳印
-  scheduleFootprints(curX,parseFloat(el.style.top)||0,newX,newY);
-}
-
-function scheduleFootprints(x0,y0,x1,y1){
-  // 取得目前閒晃寵物的屬性
-  let species='grass';
-  if(petData&&petData.pets&&petData.pets[petData.roamPetIdx]){
-    species=petData.pets[petData.roamPetIdx].species;
-  }
-  // 走動過程中分段灑 5 個軌跡
-  const steps=5;
-  for(let i=1;i<=steps;i++){
-    const t=i/(steps+1);
-    setTimeout(()=>{
-      const x=x0+(x1-x0)*t+50;
-      const y=y0+(y1-y0)*t+95; // 軌跡在寵物腳下
-      dropTrail(x,y,species);
-    }, 10000*t);
-  }
+  // 不再呼叫 scheduleFootprints,改由 RAF 迴圈持續追蹤
 }
 
 // 屬性軌跡 SVG 圖案(各自的 viewBox + 內容)
