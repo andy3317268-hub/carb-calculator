@@ -1308,6 +1308,8 @@ function renderTplEditor(){
   if(curSlot?.isExtra){
     const ex=tpl.extras.find(e=>e.key===curMealKey);
     const afterVal=ex?.after??1;
+    const curLabel=ex?.label||'額外餐';
+    const escLabel=curLabel.replace(/"/g,'&quot;');
     let posText;
     if(afterVal===0)posText='第 1 餐前';
     else if(afterVal>=meals)posText='第 '+meals+' 餐後';
@@ -1315,6 +1317,7 @@ function renderTplEditor(){
     const canUp=afterVal>0;
     const canDown=afterVal<meals;
     extraPosHTML='<div class="extra-pos-row"><span class="badge badge-extra">額外餐食</span>'
+      +'<input type="text" maxlength="10" value="'+escLabel+'" style="flex:1;min-width:80px;max-width:140px;padding:4px 8px;font-size:13px;border:1px solid #EFDED2;border-radius:6px;background:#FFFAF5;" placeholder="名稱(留空回預設)" onblur="renameTplExtra(\''+tpl.id+'\',\''+curMealKey+'\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()" title="可改名(最多10字)"/>'
       +'<span style="font-size:13px;color:#6B5752;">位置:'+posText+'</span>'
       +'<button class="btn btn-outline" style="padding:4px 10px;font-size:13px;'+(canUp?'':'opacity:0.4;cursor:not-allowed;')+'" '+(canUp?'':'disabled')+' onclick="moveTplExtra(\''+tpl.id+'\',\''+curMealKey+'\',-1)">↑ 上移</button>'
       +'<button class="btn btn-outline" style="padding:4px 10px;font-size:13px;'+(canDown?'':'opacity:0.4;cursor:not-allowed;')+'" '+(canDown?'':'disabled')+' onclick="moveTplExtra(\''+tpl.id+'\',\''+curMealKey+'\',1)">↓ 下移</button>'
@@ -1334,12 +1337,25 @@ window.setTplEditorMeal=(id,key)=>{const tpl=templates.find(t=>t.id===id);if(tpl
 window.addTplExtra=(id)=>{
   const tpl=templates.find(t=>t.id===id);if(!tpl)return;
   if(!tpl.extras)tpl.extras=[];
-  if(typeof tpl.extraCount!=='number')tpl.extraCount=0;
-  tpl.extraCount++;
+  const num=nextExtraNumber(tpl.extras);
   const key='extra_'+Date.now();
-  tpl.extras.push({key,label:'額外餐 '+tpl.extraCount,after:1});
+  tpl.extras.push({key,label:'額外餐 '+num,after:1});
   tpl.meals[key]={carb:[],prot:[],fat:[]};
   tpl._curMeal=key;
+  scheduleSave('templates',templates);
+  renderTplEditor();
+};
+window.renameTplExtra=(id,key,newName)=>{
+  const tpl=templates.find(t=>t.id===id);if(!tpl)return;
+  const ex=(tpl.extras||[]).find(e=>e.key===key);
+  if(!ex)return;
+  const trimmed=(newName||'').trim().slice(0,10);
+  if(!trimmed){
+    const num=nextExtraNumber((tpl.extras||[]).filter(e=>e.key!==key));
+    ex.label='額外餐 '+num;
+  } else {
+    ex.label=trimmed;
+  }
   scheduleSave('templates',templates);
   renderTplEditor();
 };
@@ -1448,11 +1464,18 @@ window.applyTemplate=id=>{
       (tplMd[type]||[]).forEach(item=>entry.meals[mk][type].push(JSON.parse(JSON.stringify(item))));
     });
   });
-  // 2. 套用 extras — 為每個模板 extra 在當天日記建立新 extra(新 key,累加在現有後面)
+  // 2. 套用 extras — 為每個模板 extra 在當天日記建立新 extra(新 key)
   (tpl.extras||[]).forEach(tplEx=>{
-    entry.extraCount++;
-    const newKey='extra_'+Date.now()+'_'+entry.extraCount;
-    entry.extras.push({key:newKey,label:tplEx.label||('額外餐 '+entry.extraCount),after:tplEx.after??1});
+    const newKey='extra_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    // 如果模板 extra 是預設「額外餐 N」格式 → 在日記中重新編號(避免重複)
+    // 如果是自訂名字(下午茶等) → 保留原樣
+    let label;
+    if((tplEx.label||'').match(/^額外餐\s*\d+$/)){
+      label='額外餐 '+nextExtraNumber(entry.extras);
+    } else {
+      label=tplEx.label;
+    }
+    entry.extras.push({key:newKey,label,after:tplEx.after??1});
     const tplMd=tpl.meals[tplEx.key]||{carb:[],prot:[],fat:[]};
     entry.meals[newKey]={carb:[],prot:[],fat:[]};
     ['carb','prot','fat'].forEach(type=>{
@@ -1464,14 +1487,25 @@ window.applyTemplate=id=>{
 
 // Extras
 window.setDiaryMeal=key=>{curDiaryMeal=key;renderDiaryContent();};
+// 從 extras 陣列找最小未使用的「額外餐 N」編號(只看符合預設格式的)
+function nextExtraNumber(extras){
+  const used=new Set();
+  (extras||[]).forEach(e=>{
+    const m=(e.label||'').match(/^額外餐\s*(\d+)$/);
+    if(m)used.add(parseInt(m[1]));
+  });
+  let n=1;
+  while(used.has(n))n++;
+  return n;
+}
+
 window.addDiaryExtra=()=>{
   if(!selDate)return;
   const entry=getDiaryEntry(selDate);
   if(!entry.extras)entry.extras=[];
-  if(typeof entry.extraCount!=='number')entry.extraCount=0;
-  entry.extraCount++;
+  const num=nextExtraNumber(entry.extras);
   const key='extra_'+Date.now();
-  entry.extras.push({key,label:'額外餐 '+entry.extraCount,after:1});
+  entry.extras.push({key,label:'額外餐 '+num,after:1});
   if(!entry.meals)entry.meals={};
   entry.meals[key]={carb:[],prot:[],fat:[]};
   curDiaryMeal=key;
@@ -1481,6 +1515,21 @@ window.updateDiaryExtraPos=(key,val)=>{
   const entry=getDiaryEntry(selDate);
   const ex=(entry.extras||[]).find(e=>e.key===key);
   if(ex){ex.after=parseInt(val);saveDiary(selDate);renderDiaryContent();}
+};
+// 重新命名日記額外餐
+window.renameDiaryExtra=(key,newName)=>{
+  const entry=getDiaryEntry(selDate);
+  const ex=(entry.extras||[]).find(e=>e.key===key);
+  if(!ex)return;
+  const trimmed=(newName||'').trim().slice(0,10);
+  if(!trimmed){
+    // 空名字 → 改回預設「額外餐 N」(找個沒用的編號)
+    const num=nextExtraNumber((entry.extras||[]).filter(e=>e.key!==key));
+    ex.label='額外餐 '+num;
+  } else {
+    ex.label=trimmed;
+  }
+  saveDiary(selDate);renderDiaryContent();
 };
 window.moveDiaryExtra=(key,delta)=>{
   const entry=getDiaryEntry(selDate);
@@ -1547,14 +1596,17 @@ function renderDiaryContent(){
   if(slot?.isExtra){
     const ex=(entry.extras||[]).find(e=>e.key===slot.key);
     const afterVal=ex?.after??1;
-    // 顯示位置文字
+    const curLabel=ex?.label||'額外餐';
     let posText;
     if(afterVal===0)posText='第 1 餐前';
     else if(afterVal>=day.meals)posText='第 '+day.meals+' 餐後';
     else posText='第 '+afterVal+' 餐後';
     const canUp=afterVal>0;
     const canDown=afterVal<day.meals;
+    // 用 input 直接呈現名字,blur 或 Enter 時存
+    const escLabel=curLabel.replace(/"/g,'&quot;');
     extraPos=`<div class="extra-pos-row"><span class="badge badge-extra">額外餐食</span>
+      <input type="text" maxlength="10" value="${escLabel}" style="flex:1;min-width:80px;max-width:140px;padding:4px 8px;font-size:13px;border:1px solid #EFDED2;border-radius:6px;background:#FFFAF5;" placeholder="名稱(留空回預設)" onblur="renameDiaryExtra('${slot.key}',this.value)" onkeydown="if(event.key==='Enter')this.blur()" title="可改名(最多10字)"/>
       <span style="font-size:13px;color:#6B5752;">位置:${posText}</span>
       <button class="btn btn-outline" style="padding:4px 10px;font-size:13px;${canUp?'':'opacity:0.4;cursor:not-allowed;'}" ${canUp?'':'disabled'} onclick="moveDiaryExtra('${slot.key}',-1)">↑ 上移</button>
       <button class="btn btn-outline" style="padding:4px 10px;font-size:13px;${canDown?'':'opacity:0.4;cursor:not-allowed;'}" ${canDown?'':'disabled'} onclick="moveDiaryExtra('${slot.key}',1)">↓ 下移</button>
