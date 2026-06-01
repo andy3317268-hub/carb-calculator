@@ -654,10 +654,10 @@
   </div>
 </div>
 
-<!-- Add Food Modal -->
+<!-- Add/Edit Food Modal -->
 <div class="modal-overlay" id="addFoodModal">
   <div class="modal">
-    <div class="modal-title">新增食物</div>
+    <div class="modal-title" id="addFoodModalTitle">新增食物</div>
     <div class="custom-food-field"><label>食物名稱</label><input type="text" id="af-name" placeholder="例如:雞蛋豆腐"/></div>
     <div class="custom-food-field" style="margin-top:8px;"><label>分類</label><select id="af-cat"><option value="carb">碳水類</option><option value="protein">蛋白質類</option><option value="fat">脂肪類</option></select></div>
     <div class="custom-food-row-3" style="margin-top:8px;">
@@ -668,7 +668,7 @@
     <div style="font-size:11px;color:#9C7E76;margin-top:-4px;margin-bottom:8px;">熱量會自動計算(碳水×4 + 蛋白質×4 + 脂肪×9)</div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeAddFoodModal()">取消</button>
-      <button class="btn btn-green" onclick="addCustomFood()">新增</button>
+      <button class="btn btn-green" id="addFoodConfirmBtn" onclick="addCustomFood()">新增</button>
     </div>
   </div>
 </div>
@@ -1247,7 +1247,12 @@ function renderTemplateSection(){
   const listEl=document.getElementById('tpl-list');
   if(templates.length===0){listEl.innerHTML='<div class="empty-track" style="padding:1rem 0;">還沒有模板,點右上角新增</div>';}
   else{
-    listEl.innerHTML='<div class="tpl-list">'+templates.map(t=>'<div class="tpl-card"><div class="tpl-card-header"><div><div class="tpl-card-name">'+t.name+'</div><div class="tpl-card-meta">'+(t.dayType==='high'?'高碳日':'低碳日')+'・'+Object.keys(t.meals).length+' 餐</div></div><div class="tpl-card-actions"><button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="editTemplate(\''+t.id+'\')">編輯</button><button class="btn btn-red" style="font-size:12px;padding:5px 10px;" onclick="deleteTemplate(\''+t.id+'\')">刪除</button></div></div></div>').join('')+'</div>';
+    listEl.innerHTML='<div class="tpl-list">'+templates.map(t=>{
+      const nMeals=Object.keys(t.meals).filter(k=>k.startsWith('m')).length;
+      const nExtras=(t.extras||[]).length;
+      const meta=(t.dayType==='high'?'高碳日':'低碳日')+'・'+nMeals+' 餐'+(nExtras>0?' +'+nExtras+' 額外':'');
+      return '<div class="tpl-card"><div class="tpl-card-header"><div><div class="tpl-card-name">'+t.name+'</div><div class="tpl-card-meta">'+meta+'</div></div><div class="tpl-card-actions"><button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="editTemplate(\''+t.id+'\')">編輯</button><button class="btn btn-red" style="font-size:12px;padding:5px 10px;" onclick="deleteTemplate(\''+t.id+'\')">刪除</button></div></div></div>';
+    }).join('')+'</div>';
   }
   if(curTplId)renderTplEditor();else document.getElementById('tpl-editor').innerHTML='';
 }
@@ -1257,19 +1262,108 @@ window.deleteTemplate=id=>{if(!confirm('確定要刪除這個模板?'))return;te
 
 function renderTplEditor(){
   const tpl=templates.find(t=>t.id===curTplId);if(!tpl)return;
-  const day=calcResult[tpl.dayType];const meals=Object.keys(tpl.meals).length;
-  const curMealKey=tpl._curMeal||'m1';if(!tpl.meals[curMealKey])tpl.meals[curMealKey]={carb:[],prot:[],fat:[]};
+  // 確保 extras 結構存在(舊資料相容)
+  if(!tpl.extras)tpl.extras=[];
+  if(typeof tpl.extraCount!=='number')tpl.extraCount=0;
+  const day=calcResult[tpl.dayType];const meals=Object.keys(tpl.meals).filter(k=>k.startsWith('m')).length;
+  // 組合 allSlots:早餐前 extras + 各正餐(後接該餐後 extras)
+  const allSlots=[];
+  (tpl.extras||[]).filter(e=>e.after===0).forEach(e=>allSlots.push({key:e.key,label:e.label,isExtra:true}));
+  for(let i=1;i<=meals;i++){
+    allSlots.push({key:'m'+i,label:'第 '+i+' 餐',isExtra:false});
+    (tpl.extras||[]).filter(e=>e.after===i).forEach(e=>allSlots.push({key:e.key,label:e.label,isExtra:true}));
+  }
+  const curMealKey=tpl._curMeal||'m1';
+  if(!tpl.meals[curMealKey])tpl.meals[curMealKey]={carb:[],prot:[],fat:[]};
   const md=tpl.meals[curMealKey];
-  let tC=0,tP=0,tF=0;Object.values(tpl.meals).forEach(m=>{const all=[...m.carb,...m.prot,...m.fat];tC+=all.reduce((s,f)=>s+f.grams*(f.food.c/100),0);tP+=all.reduce((s,f)=>s+f.grams*(f.food.p/100),0);tF+=all.reduce((s,f)=>s+f.grams*(f.food.f/100),0);});
+  const curSlot=allSlots.find(s=>s.key===curMealKey);
+
+  // 整天累計(只算正餐,不算 extras,因為 extras 是額外加的)
+  let tC=0,tP=0,tF=0;
+  Object.keys(tpl.meals).forEach(k=>{
+    if(!k.startsWith('m'))return; // 跳過 extra
+    const m=tpl.meals[k];
+    const all=[...m.carb,...m.prot,...m.fat];
+    tC+=all.reduce((s,f)=>s+f.grams*(f.food.c/100),0);
+    tP+=all.reduce((s,f)=>s+f.grams*(f.food.p/100),0);
+    tF+=all.reduce((s,f)=>s+f.grams*(f.food.f/100),0);
+  });
   const tK=kcalFromMacros(tC,tP,tF);
   const mCarb=Math.round(day.carb/meals),mProt=Math.round(day.prot/meals),mFat=Math.round(day.fat/meals),mKcal=Math.round(day.kcal/meals);
   const cons={c:([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(f.food.c/100),0),p:([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(f.food.p/100),0),f:([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(f.food.f/100),0)};
   const consK=kcalFromMacros(cons.c,cons.p,cons.f);
-  let tabs='';for(let i=1;i<=meals;i++)tabs+='<button class="meal-tab'+(curMealKey==='m'+i?' active':'')+'" onclick="setTplEditorMeal(\''+tpl.id+'\',\'m'+i+'\')">第 '+i+' 餐</button>';
-  document.getElementById('tpl-editor').innerHTML='<div class="card" style="border-top:2px solid #B58A78;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;"><div style="font-size:14px;font-weight:500;">編輯:'+tpl.name+'</div><button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="curTplId=null;document.getElementById(\'tpl-editor\').innerHTML=\'\'">完成</button></div>'+barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal')+'<div class="meal-tabs" style="margin-top:1rem;">'+tabs+'</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem;"><div class="target-card"><div class="target-label">碳水目標</div><div class="target-val">'+mCarb+'g</div>'+remHTML(mCarb-cons.c)+'</div><div class="target-card"><div class="target-label">蛋白質目標</div><div class="target-val">'+mProt+'g</div>'+remHTML(mProt-cons.p)+'</div><div class="target-card"><div class="target-label">脂肪目標</div><div class="target-val">'+mFat+'g</div>'+remHTML(mFat-cons.f)+'</div><div class="target-card"><div class="target-label">熱量目標</div><div class="target-val kcal">'+mKcal+'</div>'+remHTML(mKcal-consK,' kcal')+'</div></div>'+renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'tpl')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'tpl')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'tpl')+'</div>';
+
+  // tabs: 用 allSlots 渲染
+  let tabs='';
+  allSlots.forEach(slot=>{
+    const active=curMealKey===slot.key?' active':'';
+    const cls=slot.isExtra?' meal-tab-extra':'';
+    tabs+='<button class="meal-tab'+active+cls+'" onclick="setTplEditorMeal(\''+tpl.id+'\',\''+slot.key+'\')">'+slot.label+'</button>';
+  });
+  // 新增額外餐按鈕
+  tabs+='<button class="meal-tab" style="background:#F9ECE4;color:#B58A78;border:1px dashed #B58A78;" onclick="addTplExtra(\''+tpl.id+'\')">+ 額外餐</button>';
+
+  // 額外餐控制列(如果目前是 extra)
+  let extraPosHTML='';
+  if(curSlot?.isExtra){
+    const ex=tpl.extras.find(e=>e.key===curMealKey);
+    const afterVal=ex?.after??1;
+    let posText;
+    if(afterVal===0)posText='第 1 餐前';
+    else if(afterVal>=meals)posText='第 '+meals+' 餐後';
+    else posText='第 '+afterVal+' 餐後';
+    const canUp=afterVal>0;
+    const canDown=afterVal<meals;
+    extraPosHTML='<div class="extra-pos-row"><span class="badge badge-extra">額外餐食</span>'
+      +'<span style="font-size:13px;color:#6B5752;">位置:'+posText+'</span>'
+      +'<button class="btn btn-outline" style="padding:4px 10px;font-size:13px;'+(canUp?'':'opacity:0.4;cursor:not-allowed;')+'" '+(canUp?'':'disabled')+' onclick="moveTplExtra(\''+tpl.id+'\',\''+curMealKey+'\',-1)">↑ 上移</button>'
+      +'<button class="btn btn-outline" style="padding:4px 10px;font-size:13px;'+(canDown?'':'opacity:0.4;cursor:not-allowed;')+'" '+(canDown?'':'disabled')+' onclick="moveTplExtra(\''+tpl.id+'\',\''+curMealKey+'\',1)">↓ 下移</button>'
+      +'<button class="extra-remove-btn" onclick="removeTplExtra(\''+tpl.id+'\',\''+curMealKey+'\')">刪除</button></div>';
+  }
+
+  // extra 不顯示「目標」,只顯示「攝入」
+  const isExtra=curSlot?.isExtra;
+  const targetsHTML=isExtra
+    ? '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem;"><div class="target-card"><div class="target-label">碳水攝入</div><div class="target-val">'+Math.round(cons.c)+'g</div></div><div class="target-card"><div class="target-label">蛋白質攝入</div><div class="target-val">'+Math.round(cons.p)+'g</div></div><div class="target-card"><div class="target-label">脂肪攝入</div><div class="target-val">'+Math.round(cons.f)+'g</div></div><div class="target-card"><div class="target-label">熱量攝入</div><div class="target-val kcal">'+Math.round(consK)+'</div></div></div>'
+    : '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem;"><div class="target-card"><div class="target-label">碳水目標</div><div class="target-val">'+mCarb+'g</div>'+remHTML(mCarb-cons.c)+'</div><div class="target-card"><div class="target-label">蛋白質目標</div><div class="target-val">'+mProt+'g</div>'+remHTML(mProt-cons.p)+'</div><div class="target-card"><div class="target-label">脂肪目標</div><div class="target-val">'+mFat+'g</div>'+remHTML(mFat-cons.f)+'</div><div class="target-card"><div class="target-label">熱量目標</div><div class="target-val kcal">'+mKcal+'</div>'+remHTML(mKcal-consK,' kcal')+'</div></div>';
+
+  document.getElementById('tpl-editor').innerHTML='<div class="card" style="border-top:2px solid #B58A78;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;"><div style="font-size:14px;font-weight:500;">編輯:'+tpl.name+'</div><button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="curTplId=null;document.getElementById(\'tpl-editor\').innerHTML=\'\'">完成</button></div>'+barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal')+'<div class="meal-tabs" style="margin-top:1rem;">'+tabs+'</div>'+extraPosHTML+targetsHTML+renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'tpl')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'tpl')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'tpl')+'</div>';
   bindFoodEvents('tpl',type=>{if(!tpl.meals[curMealKey])tpl.meals[curMealKey]={carb:[],prot:[],fat:[]};return tpl.meals[curMealKey][type];},(light)=>{scheduleSave('templates',templates);if(!light)renderTplEditor();},(type)=>{const c=([...md.carb,...md.prot,...md.fat]).reduce((s,f)=>s+f.grams*(type==='carb'?f.food.c:type==='prot'?f.food.p:f.food.f)/100,0);return type==='carb'?mCarb-c:type==='prot'?mProt-c:mFat-c;});
 }
 window.setTplEditorMeal=(id,key)=>{const tpl=templates.find(t=>t.id===id);if(tpl){tpl._curMeal=key;renderTplEditor();}};
+window.addTplExtra=(id)=>{
+  const tpl=templates.find(t=>t.id===id);if(!tpl)return;
+  if(!tpl.extras)tpl.extras=[];
+  if(typeof tpl.extraCount!=='number')tpl.extraCount=0;
+  tpl.extraCount++;
+  const key='extra_'+Date.now();
+  tpl.extras.push({key,label:'額外餐 '+tpl.extraCount,after:1});
+  tpl.meals[key]={carb:[],prot:[],fat:[]};
+  tpl._curMeal=key;
+  scheduleSave('templates',templates);
+  renderTplEditor();
+};
+window.moveTplExtra=(id,key,delta)=>{
+  const tpl=templates.find(t=>t.id===id);if(!tpl)return;
+  const ex=(tpl.extras||[]).find(e=>e.key===key);
+  if(!ex)return;
+  const meals=Object.keys(tpl.meals).filter(k=>k.startsWith('m')).length;
+  const cur=ex.after??1;
+  const newPos=cur+delta;
+  if(newPos<0||newPos>meals)return;
+  ex.after=newPos;
+  scheduleSave('templates',templates);
+  renderTplEditor();
+};
+window.removeTplExtra=(id,key)=>{
+  if(!confirm('確定刪除這份額外餐食?'))return;
+  const tpl=templates.find(t=>t.id===id);if(!tpl)return;
+  tpl.extras=(tpl.extras||[]).filter(e=>e.key!==key);
+  delete tpl.meals[key];
+  if(tpl._curMeal===key)tpl._curMeal='m1';
+  scheduleSave('templates',templates);
+  renderTplEditor();
+};
 
 // ── Diary ─────────────────────────────────────────────
 function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -1314,6 +1408,8 @@ function computeDiaryTargets(dk){
   const date=new Date(dk),dayType=isHighDay(date)?'high':'low',day=calcResult[dayType];
   const entry=getDiaryEntry(dk);let remC=day.carb,remP=day.prot,remF=day.fat,remM=day.meals;
   const allSlots=[];
+  // 早餐前的額外餐
+  (entry.extras||[]).filter(e=>e.after===0).forEach(e=>allSlots.push({key:e.key,label:e.label,isExtra:true}));
   for(let i=1;i<=day.meals;i++){allSlots.push({key:'m'+i,label:'第 '+i+' 餐',isExtra:false});(entry.extras||[]).filter(e=>e.after===i).forEach(e=>allSlots.push({key:e.key,label:e.label,isExtra:true}));}
   const targets={};
   allSlots.forEach(slot=>{
@@ -1329,17 +1425,38 @@ window.openApplyModal=()=>{
   const matched=templates.filter(t=>t.dayType===dayType);
   const listEl=document.getElementById('applyTplList');
   if(matched.length===0){listEl.innerHTML='<div style="color:#9C7E76;font-size:13px;padding:8px 0;">沒有符合今天類型('+(dayType==='high'?'高碳日':'低碳日')+')的模板</div>';}
-  else{listEl.innerHTML=matched.map(t=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid #EFDED2;"><div><div style="font-size:13px;font-weight:500;">'+t.name+'</div><div style="font-size:12px;color:#9C7E76;">'+Object.keys(t.meals).length+' 餐</div></div><button class="btn btn-green" style="font-size:12px;padding:5px 12px;" onclick="applyTemplate(\''+t.id+'\')">套用</button></div>').join('');}
+  else{listEl.innerHTML=matched.map(t=>{
+    const nMeals=Object.keys(t.meals).filter(k=>k.startsWith('m')).length;
+    const nExtras=(t.extras||[]).length;
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid #EFDED2;"><div><div style="font-size:13px;font-weight:500;">'+t.name+'</div><div style="font-size:12px;color:#9C7E76;">'+nMeals+' 餐'+(nExtras>0?' +'+nExtras+' 額外':'')+'</div></div><button class="btn btn-green" style="font-size:12px;padding:5px 12px;" onclick="applyTemplate(\''+t.id+'\')">套用</button></div>';
+  }).join('');}
   document.getElementById('applyTplModal').classList.add('show');
 };
 window.closeApplyModal=()=>document.getElementById('applyTplModal').classList.remove('show');
 window.applyTemplate=id=>{
   const tpl=templates.find(t=>t.id===id);if(!tpl||!selDate)return;
   const entry=getDiaryEntry(selDate);
-  Object.entries(tpl.meals).forEach(([mk,tplMd])=>{
+  if(!entry.meals)entry.meals={};
+  if(!entry.extras)entry.extras=[];
+  if(typeof entry.extraCount!=='number')entry.extraCount=0;
+  // 1. 套用正餐(m1, m2, ...) — 累加食物
+  Object.keys(tpl.meals).forEach(mk=>{
+    if(!mk.startsWith('m'))return;
+    const tplMd=tpl.meals[mk];
     if(!entry.meals[mk])entry.meals[mk]={carb:[],prot:[],fat:[]};
     ['carb','prot','fat'].forEach(type=>{
       (tplMd[type]||[]).forEach(item=>entry.meals[mk][type].push(JSON.parse(JSON.stringify(item))));
+    });
+  });
+  // 2. 套用 extras — 為每個模板 extra 在當天日記建立新 extra(新 key,累加在現有後面)
+  (tpl.extras||[]).forEach(tplEx=>{
+    entry.extraCount++;
+    const newKey='extra_'+Date.now()+'_'+entry.extraCount;
+    entry.extras.push({key:newKey,label:tplEx.label||('額外餐 '+entry.extraCount),after:tplEx.after??1});
+    const tplMd=tpl.meals[tplEx.key]||{carb:[],prot:[],fat:[]};
+    entry.meals[newKey]={carb:[],prot:[],fat:[]};
+    ['carb','prot','fat'].forEach(type=>{
+      (tplMd[type]||[]).forEach(item=>entry.meals[newKey][type].push(JSON.parse(JSON.stringify(item))));
     });
   });
   saveDiary(selDate);closeApplyModal();renderDiaryContent();renderCalendar();
@@ -1364,6 +1481,20 @@ window.updateDiaryExtraPos=(key,val)=>{
   const entry=getDiaryEntry(selDate);
   const ex=(entry.extras||[]).find(e=>e.key===key);
   if(ex){ex.after=parseInt(val);saveDiary(selDate);renderDiaryContent();}
+};
+window.moveDiaryExtra=(key,delta)=>{
+  const entry=getDiaryEntry(selDate);
+  const ex=(entry.extras||[]).find(e=>e.key===key);
+  if(!ex)return;
+  const tier=getActiveTier();
+  const [y,m,d]=selDate.split('-').map(Number);
+  const dateObj=new Date(y,m-1,d);
+  const day=tier?(isHighDay(dateObj)?tier.high:tier.low):{meals:3};
+  const cur=ex.after??1;
+  const newPos=cur+delta;
+  if(newPos<0||newPos>day.meals)return;
+  ex.after=newPos;
+  saveDiary(selDate);renderDiaryContent();
 };
 window.removeDiaryExtra=key=>{
   if(!confirm('確定刪除這份額外餐食?'))return;
@@ -1414,9 +1545,19 @@ function renderDiaryContent(){
   let extraPos='';
   if(slot?.isExtra){
     const ex=(entry.extras||[]).find(e=>e.key===slot.key);
-    let opts='';
-    for(let i=1;i<=day.meals;i++){opts+=`<option value="${i}" ${ex?.after===i?'selected':''}>第 ${i} 餐後</option>`;}
-    extraPos=`<div class="extra-pos-row"><span class="badge badge-extra">額外餐食</span><label>插入位置</label><select style="flex:1;" onchange="updateDiaryExtraPos('${slot.key}',this.value)">${opts}</select><button class="extra-remove-btn" onclick="removeDiaryExtra('${slot.key}')">刪除</button></div>`;
+    const afterVal=ex?.after??1;
+    // 顯示位置文字
+    let posText;
+    if(afterVal===0)posText='第 1 餐前';
+    else if(afterVal>=day.meals)posText='第 '+day.meals+' 餐後';
+    else posText='第 '+afterVal+' 餐後';
+    const canUp=afterVal>0;
+    const canDown=afterVal<day.meals;
+    extraPos=`<div class="extra-pos-row"><span class="badge badge-extra">額外餐食</span>
+      <span style="font-size:13px;color:#6B5752;">位置:${posText}</span>
+      <button class="btn btn-outline" style="padding:4px 10px;font-size:13px;${canUp?'':'opacity:0.4;cursor:not-allowed;'}" ${canUp?'':'disabled'} onclick="moveDiaryExtra('${slot.key}',-1)">↑ 上移</button>
+      <button class="btn btn-outline" style="padding:4px 10px;font-size:13px;${canDown?'':'opacity:0.4;cursor:not-allowed;'}" ${canDown?'':'disabled'} onclick="moveDiaryExtra('${slot.key}',1)">↓ 下移</button>
+      <button class="extra-remove-btn" onclick="removeDiaryExtra('${slot.key}')">刪除</button></div>`;
   }
 
   const tcHTML=`<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem;">
@@ -1467,15 +1608,47 @@ window.renderFoodLib=function renderFoodLib(){
     }).join('');
     const cu=cuArr.map(({f,i})=>{
       const k=kcalFromMacros(f.c,f.p,f.f);
-      return'<div class="food-lib-item"><div><div class="food-lib-name">'+f.name+'</div><div class="food-lib-macros">碳 '+f.c+'g・蛋 '+f.p+'g・脂 '+f.f+'g・'+k+' kcal</div></div><button onclick="deleteCustomFood(\''+key+'\','+i+')" style="background:none;border:none;cursor:pointer;color:#C8B0A6;font-size:18px;line-height:1;" title="刪除">×</button></div>';
+      return'<div class="food-lib-item"><div><div class="food-lib-name">'+f.name+'</div><div class="food-lib-macros">碳 '+f.c+'g・蛋 '+f.p+'g・脂 '+f.f+'g・'+k+' kcal</div></div>'
+        +'<div style="display:flex;gap:4px;align-items:center;">'
+        +'<button onclick="openEditFoodModal(\''+key+'\','+i+')" style="background:none;border:none;cursor:pointer;color:#9C7E76;font-size:16px;line-height:1;padding:4px 6px;" title="編輯">✎</button>'
+        +'<button onclick="deleteCustomFood(\''+key+'\','+i+')" style="background:none;border:none;cursor:pointer;color:#C8B0A6;font-size:18px;line-height:1;padding:4px 6px;" title="刪除">×</button>'
+        +'</div></div>';
     }).join('');
     const empty=df===''&&cu===''?'<div style="color:#B8A096;font-size:13px;padding:8px 0;">'+(sq?'此分類無符合搜尋的食物':'尚無食物')+'</div>':'';
     el.innerHTML='<div style="font-size:12px;font-weight:500;margin-bottom:10px;"><span class="badge '+badge+'">'+label+'</span></div>'+df+cu+empty;
   });
 }
 
-window.openAddFoodModal=()=>{document.getElementById('af-name').value='';document.getElementById('af-c').value='';document.getElementById('af-p').value='';document.getElementById('af-f').value='';document.getElementById('addFoodModal').classList.add('show');};
-window.closeAddFoodModal=()=>document.getElementById('addFoodModal').classList.remove('show');
+window.openAddFoodModal=()=>{
+  document.getElementById('af-name').value='';
+  document.getElementById('af-c').value='';
+  document.getElementById('af-p').value='';
+  document.getElementById('af-f').value='';
+  document.getElementById('af-cat').disabled=false;
+  document.getElementById('addFoodModalTitle').textContent='新增食物';
+  document.getElementById('addFoodConfirmBtn').textContent='新增';
+  window._editingFood=null;
+  document.getElementById('addFoodModal').classList.add('show');
+};
+window.openEditFoodModal=(cat,idx)=>{
+  const f=customFoods[cat][idx];
+  if(!f)return;
+  document.getElementById('af-name').value=f.name;
+  document.getElementById('af-cat').value=cat;
+  document.getElementById('af-cat').disabled=true; // 編輯時不能改分類
+  document.getElementById('af-c').value=f.c;
+  document.getElementById('af-p').value=f.p;
+  document.getElementById('af-f').value=f.f;
+  document.getElementById('addFoodModalTitle').textContent='編輯食物';
+  document.getElementById('addFoodConfirmBtn').textContent='儲存';
+  window._editingFood={cat,idx};
+  document.getElementById('addFoodModal').classList.add('show');
+};
+window.closeAddFoodModal=()=>{
+  document.getElementById('addFoodModal').classList.remove('show');
+  document.getElementById('af-cat').disabled=false;
+  window._editingFood=null;
+};
 window.addCustomFood=()=>{
   const name=document.getElementById('af-name').value.trim();
   if(!name)return alert('請輸入食物名稱');
@@ -1483,7 +1656,14 @@ window.addCustomFood=()=>{
   const c=parseFloat(document.getElementById('af-c').value)||0;
   const p=parseFloat(document.getElementById('af-p').value)||0;
   const f=parseFloat(document.getElementById('af-f').value)||0;
-  customFoods[cat].push({name,c,p,f});
+  if(window._editingFood){
+    // 編輯模式
+    const {cat:ec,idx}=window._editingFood;
+    customFoods[ec][idx]={name,c,p,f};
+  } else {
+    // 新增模式
+    customFoods[cat].push({name,c,p,f});
+  }
   scheduleSave('customFoods',customFoods);
   closeAddFoodModal();
   renderFoodLib();
