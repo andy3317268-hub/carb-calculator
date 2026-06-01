@@ -1337,6 +1337,7 @@ window.setTplEditorMeal=(id,key)=>{const tpl=templates.find(t=>t.id===id);if(tpl
 window.addTplExtra=(id)=>{
   const tpl=templates.find(t=>t.id===id);if(!tpl)return;
   if(!tpl.extras)tpl.extras=[];
+  renumberExtras(tpl.extras);
   const num=nextExtraNumber(tpl.extras);
   const key='extra_'+Date.now();
   tpl.extras.push({key,label:'額外餐 '+num,after:1});
@@ -1351,11 +1352,11 @@ window.renameTplExtra=(id,key,newName)=>{
   if(!ex)return;
   const trimmed=(newName||'').trim().slice(0,10);
   if(!trimmed){
-    const num=nextExtraNumber((tpl.extras||[]).filter(e=>e.key!==key));
-    ex.label='額外餐 '+num;
+    ex.label='額外餐 0';
   } else {
     ex.label=trimmed;
   }
+  renumberExtras(tpl.extras);
   scheduleSave('templates',templates);
   renderTplEditor();
 };
@@ -1377,6 +1378,7 @@ window.removeTplExtra=(id,key)=>{
   tpl.extras=(tpl.extras||[]).filter(e=>e.key!==key);
   delete tpl.meals[key];
   if(tpl._curMeal===key)tpl._curMeal='m1';
+  renumberExtras(tpl.extras);
   scheduleSave('templates',templates);
   renderTplEditor();
 };
@@ -1499,10 +1501,25 @@ function nextExtraNumber(extras){
   return n;
 }
 
+// 重新編號:把所有「額外餐 N」格式的,依陣列順序重編為 1、2、3...
+// 自訂名字(下午茶/宵夜等)不動
+function renumberExtras(extras){
+  if(!extras)return;
+  let n=1;
+  extras.forEach(e=>{
+    if((e.label||'').match(/^額外餐\s*\d+$/)){
+      e.label='額外餐 '+n;
+      n++;
+    }
+  });
+}
+
 window.addDiaryExtra=()=>{
   if(!selDate)return;
   const entry=getDiaryEntry(selDate);
   if(!entry.extras)entry.extras=[];
+  // 先重編現有(保險),再加新的
+  renumberExtras(entry.extras);
   const num=nextExtraNumber(entry.extras);
   const key='extra_'+Date.now();
   entry.extras.push({key,label:'額外餐 '+num,after:1});
@@ -1523,12 +1540,13 @@ window.renameDiaryExtra=(key,newName)=>{
   if(!ex)return;
   const trimmed=(newName||'').trim().slice(0,10);
   if(!trimmed){
-    // 空名字 → 改回預設「額外餐 N」(找個沒用的編號)
-    const num=nextExtraNumber((entry.extras||[]).filter(e=>e.key!==key));
-    ex.label='額外餐 '+num;
+    // 空名字 → 先暫時標成預設,讓 renumber 處理編號
+    ex.label='額外餐 0';
   } else {
     ex.label=trimmed;
   }
+  // 重新編號所有預設格式的
+  renumberExtras(entry.extras);
   saveDiary(selDate);renderDiaryContent();
 };
 window.moveDiaryExtra=(key,delta)=>{
@@ -1552,6 +1570,8 @@ window.removeDiaryExtra=key=>{
   entry.extras=(entry.extras||[]).filter(e=>e.key!==key);
   delete entry.meals[key];
   curDiaryMeal=null;
+  // 刪除後重新編號預設格式的額外餐
+  renumberExtras(entry.extras);
   saveDiary(selDate);renderDiaryContent();
 };
 
