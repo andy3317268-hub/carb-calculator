@@ -1486,13 +1486,14 @@ window.moveDiaryExtra=(key,delta)=>{
   const entry=getDiaryEntry(selDate);
   const ex=(entry.extras||[]).find(e=>e.key===key);
   if(!ex)return;
-  const tier=getActiveTier();
+  if(!calcResult)return;
   const [y,m,d]=selDate.split('-').map(Number);
   const dateObj=new Date(y,m-1,d);
-  const day=tier?(isHighDay(dateObj)?tier.high:tier.low):{meals:3};
+  const dayInfo=isHighDay(dateObj)?calcResult.high:calcResult.low;
+  const meals=dayInfo.meals;
   const cur=ex.after??1;
   const newPos=cur+delta;
-  if(newPos<0||newPos>day.meals)return;
+  if(newPos<0||newPos>meals)return;
   ex.after=newPos;
   saveDiary(selDate);renderDiaryContent();
 };
