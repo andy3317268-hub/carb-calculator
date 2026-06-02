@@ -118,6 +118,8 @@
     .meal-tab.active{background:#FFFAF5;border:1.5px solid #B58A78;color:#946A58;font-weight:500;}
     .meal-tab.extra-tab{border-color:#D9B5B5;color:#7A5050;}
     .meal-tab.extra-tab.active{border:1.5px solid #B58A8A;background:#F1E0DF;color:#7A5050;}
+    .diary-tab{flex:1;background:#FFFAF5;border:1px solid #EFDED2;border-radius:8px;padding:10px 8px;cursor:pointer;font-size:13px;color:#3A2A26;font-family:inherit;transition:all 0.15s;}
+    .diary-tab.active{background:#B58A78;border-color:#B58A78;color:#FFFFFF;font-weight:600;}
     .add-extra-btn{background:#F5E8DE;border:0.5px dashed #C8AFA0;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;color:#B8A096;font-family:inherit;}
     .food-section{margin-bottom:1rem;}
     .food-section-title{font-size:13px;font-weight:500;color:#8B6F66;margin-bottom:8px;}
@@ -530,8 +532,6 @@
   <nav class="sidebar">
     <button class="sidebar-btn active" id="nav-calc" onclick="switchSection('calc')"><i class="ti ti-calculator"></i><span class="tooltip">營養計算</span></button>
     <button class="sidebar-btn" id="nav-diary" onclick="switchSection('diary')"><i class="ti ti-calendar-week"></i><span class="tooltip">飲食日記</span></button>
-    <button class="sidebar-btn" id="nav-template" onclick="switchSection('template')"><i class="ti ti-layout-list"></i><span class="tooltip">飲食模板</span></button>
-    <button class="sidebar-btn" id="nav-foods" onclick="switchSection('foods')"><i class="ti ti-salad"></i><span class="tooltip">食物庫</span></button>
     <button class="sidebar-btn" id="nav-pet" onclick="switchSection('pet')"><i class="ti ti-paw"></i><span class="tooltip">寵物</span></button>
     <button class="sidebar-btn" onclick="openSettings()"><i class="ti ti-settings"></i><span class="tooltip">設定</span></button>
     <div class="sidebar-spacer"></div>
@@ -583,51 +583,59 @@
         </div>
       </div>
 
-      <!-- SECTION 2: Diary -->
+      <!-- SECTION 2: Diary (含分頁:日記/模板/食物庫) -->
       <div class="section" id="section-diary">
         <div class="section-title">飲食日記</div>
-        <div class="card" id="diary-no-calc" style="display:none;"><div class="empty-track">請先在「營養計算」頁面完成設定</div></div>
-        <div id="diary-main" style="display:none;">
-          <div id="diary-summary"></div>
-          <div class="week-setup"><div class="sec-label">設定高碳日(點選切換)</div><div class="weekday-grid" id="weekdayGrid"></div></div>
+        <!-- 分頁切換列 -->
+        <div id="diaryTabBar" style="display:flex;gap:6px;margin-bottom:1rem;">
+          <button class="diary-tab active" data-tab="diary" onclick="switchDiaryTab('diary')">📅 日記</button>
+          <button class="diary-tab" data-tab="template" onclick="switchDiaryTab('template')">📋 模板</button>
+          <button class="diary-tab" data-tab="foods" onclick="switchDiaryTab('foods')">🥗 食物庫</button>
+        </div>
+
+        <!-- 分頁:日記 -->
+        <div class="diary-tab-content" id="diary-tab-diary">
+          <div class="card" id="diary-no-calc" style="display:none;"><div class="empty-track">請先在「營養計算」頁面完成設定</div></div>
+          <div id="diary-main" style="display:none;">
+            <div id="diary-summary"></div>
+            <div class="week-setup"><div class="sec-label">設定高碳日(點選切換)</div><div class="weekday-grid" id="weekdayGrid"></div></div>
+            <div class="card">
+              <div class="cal-header"><button class="cal-nav" onclick="calPrevMonth()"><i class="ti ti-chevron-left" style="font-size:14px"></i></button><div class="cal-title" id="calTitle"></div><button class="cal-nav" onclick="calNextMonth()"><i class="ti ti-chevron-right" style="font-size:14px"></i></button></div>
+              <div class="cal-grid" id="calDayLabels"></div>
+              <div class="cal-grid" id="calGrid"></div>
+            </div>
+            <div id="diary-content"></div>
+          </div>
+        </div>
+
+        <!-- 分頁:模板 -->
+        <div class="diary-tab-content" id="diary-tab-template" style="display:none;">
+          <div class="card" id="tpl-no-calc" style="display:none;"><div class="empty-track">請先在「營養計算」頁面完成設定</div></div>
+          <div id="tpl-main" style="display:none;">
+            <div id="tpl-summary"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+              <div style="font-size:14px;color:#8B6F66;">已建立的模板</div>
+              <button class="btn btn-green" onclick="openNewTplModal()">+ 新增模板</button>
+            </div>
+            <div id="tpl-list"></div>
+            <div id="tpl-editor"></div>
+          </div>
+        </div>
+
+        <!-- 分頁:食物庫 -->
+        <div class="diary-tab-content" id="diary-tab-foods" style="display:none;">
           <div class="card">
-            <div class="cal-header"><button class="cal-nav" onclick="calPrevMonth()"><i class="ti ti-chevron-left" style="font-size:14px"></i></button><div class="cal-title" id="calTitle"></div><button class="cal-nav" onclick="calNextMonth()"><i class="ti ti-chevron-right" style="font-size:14px"></i></button></div>
-            <div class="cal-grid" id="calDayLabels"></div>
-            <div class="cal-grid" id="calGrid"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:8px;">
+              <div class="sec-label" style="margin:0;">所有食物(每 100g)</div>
+              <button class="btn btn-green" onclick="openAddFoodModal()">+ 新增食物</button>
+            </div>
+            <div class="food-lib-search">
+              <input type="search" id="foodLibSearch" placeholder="搜尋食物..." oninput="renderFoodLib()"/>
+            </div>
+            <div id="foodLibCarb" style="margin-bottom:1.5rem;"></div>
+            <div id="foodLibProt" style="margin-bottom:1.5rem;"></div>
+            <div id="foodLibFat"></div>
           </div>
-          <div id="diary-content"></div>
-        </div>
-      </div>
-
-      <!-- SECTION 3: Template -->
-      <div class="section" id="section-template">
-        <div class="section-title">飲食模板</div>
-        <div class="card" id="tpl-no-calc" style="display:none;"><div class="empty-track">請先在「營養計算」頁面完成設定</div></div>
-        <div id="tpl-main" style="display:none;">
-          <div id="tpl-summary"></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-            <div style="font-size:14px;color:#8B6F66;">已建立的模板</div>
-            <button class="btn btn-green" onclick="openNewTplModal()">+ 新增模板</button>
-          </div>
-          <div id="tpl-list"></div>
-          <div id="tpl-editor"></div>
-        </div>
-      </div>
-
-      <!-- SECTION 4: Foods -->
-      <div class="section" id="section-foods">
-        <div class="section-title">食物庫</div>
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:8px;">
-            <div class="sec-label" style="margin:0;">所有食物(每 100g)</div>
-            <button class="btn btn-green" onclick="openAddFoodModal()">+ 新增食物</button>
-          </div>
-          <div class="food-lib-search">
-            <input type="search" id="foodLibSearch" placeholder="搜尋食物..." oninput="renderFoodLib()"/>
-          </div>
-          <div id="foodLibCarb" style="margin-bottom:1.5rem;"></div>
-          <div id="foodLibProt" style="margin-bottom:1.5rem;"></div>
-          <div id="foodLibFat"></div>
         </div>
       </div>
 
@@ -965,15 +973,40 @@ let curDiaryMeal=null;
 // Search state for food pickers
 let foodSearchState={};// keyed by `${prefix}-${type}`
 
+let diaryTab='diary'; // 目前在哪個分頁
+
 window.switchSection=name=>{
+  // 把舊呼叫(template/foods)重導向到 diary 的對應分頁
+  if(name==='template'){switchSection('diary');switchDiaryTab('template');return;}
+  if(name==='foods'){switchSection('diary');switchDiaryTab('foods');return;}
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sidebar-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('section-'+name).classList.add('active');
   const navBtn=document.getElementById('nav-'+name);if(navBtn)navBtn.classList.add('active');
-  if(name==='diary')renderDiary();
-  if(name==='template')renderTemplateSection();
-  if(name==='foods')renderFoodLib();
+  if(name==='diary'){
+    // 進入日記時,渲染目前所在的分頁
+    if(diaryTab==='diary')renderDiary();
+    else if(diaryTab==='template')renderTemplateSection();
+    else if(diaryTab==='foods')renderFoodLib();
+  }
   if(name==='pet')renderPet();
+};
+
+window.switchDiaryTab=name=>{
+  diaryTab=name;
+  // 切換分頁按鈕 active 狀態
+  document.querySelectorAll('#diaryTabBar .diary-tab').forEach(b=>{
+    if(b.dataset.tab===name)b.classList.add('active');
+    else b.classList.remove('active');
+  });
+  // 切換內容顯示
+  document.querySelectorAll('.diary-tab-content').forEach(c=>c.style.display='none');
+  const target=document.getElementById('diary-tab-'+name);
+  if(target)target.style.display='';
+  // 渲染對應內容
+  if(name==='diary')renderDiary();
+  else if(name==='template')renderTemplateSection();
+  else if(name==='foods')renderFoodLib();
 };
 
 window.selectGender=g=>{selGender=g;document.getElementById('btnM').className='gender-btn'+(g==='m'?' active-m':'');document.getElementById('btnF').className='gender-btn'+(g==='f'?' active-f':'');updateMacroHints();updateSliderBounds();recalc();};
@@ -1894,8 +1927,10 @@ async function applyImportedData(data){
   }
   // 刷新所有畫面
   renderFoodLib();
-  if(document.getElementById('section-diary').classList.contains('active'))renderDiary();
-  if(document.getElementById('section-template').classList.contains('active'))renderTemplateSection();
+  if(document.getElementById('section-diary').classList.contains('active')){
+    if(diaryTab==='diary')renderDiary();
+    else if(diaryTab==='template')renderTemplateSection();
+  }
 }
 
 
