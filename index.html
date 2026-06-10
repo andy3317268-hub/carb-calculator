@@ -1311,12 +1311,12 @@ function renderTplEditor(){
   const md=tpl.meals[curMealKey];
   const curSlot=allSlots.find(s=>s.key===curMealKey);
 
-  // 整天累計(只算正餐,不算 extras,因為 extras 是額外加的)
+  // 整天累計(所有食物全加,包含額外餐,跟日記算法一致)
   let tC=0,tP=0,tF=0;
   Object.keys(tpl.meals).forEach(k=>{
-    if(!k.startsWith('m'))return; // 跳過 extra
     const m=tpl.meals[k];
-    const all=[...m.carb,...m.prot,...m.fat];
+    if(!m)return;
+    const all=[...(m.carb||[]),...(m.prot||[]),...(m.fat||[])];
     tC+=all.reduce((s,f)=>s+f.grams*(f.food.c/100),0);
     tP+=all.reduce((s,f)=>s+f.grams*(f.food.p/100),0);
     tF+=all.reduce((s,f)=>s+f.grams*(f.food.f/100),0);
