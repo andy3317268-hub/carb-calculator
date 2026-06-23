@@ -235,6 +235,39 @@
     .google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:#FFFAF5;border:0.5px solid #C8AFA0;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;color:#3A2A26;font-family:inherit;}
     .google-btn:hover{background:#F5E8DE;}
     
+    /* ============ 健身紀錄樣式 ============ */
+    .workout-exercise-card{background:#FFFAF5;border:0.5px solid #EFDED2;border-radius:10px;padding:1rem;margin-bottom:0.75rem;}
+    .workout-exercise-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;}
+    .workout-exercise-name{font-size:14px;font-weight:500;color:#3A2A26;}
+    .workout-exercise-actions{display:flex;gap:6px;}
+    .workout-set-row{display:grid;grid-template-columns:28px 1fr 1fr 1fr auto;gap:6px;align-items:center;margin-bottom:6px;}
+    .workout-set-num{font-size:12px;color:#B8A096;text-align:center;font-weight:500;}
+    .workout-set-label{font-size:11px;color:#9C7E76;text-align:center;margin-bottom:2px;}
+    .workout-set-input-wrap{display:flex;flex-direction:column;}
+    .workout-set-input{text-align:center;padding:6px 4px;font-size:13px;}
+    .workout-set-done{width:28px;height:28px;border-radius:8px;border:0.5px solid #C8AFA0;background:#FFFAF5;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.15s;color:#B8A096;}
+    .workout-set-done.checked{background:#A89878;border-color:#A89878;color:#FFFAF5;}
+    .workout-add-set-btn{width:100%;padding:6px;background:#F5E8DE;border:0.5px dashed #C8AFA0;border-radius:8px;cursor:pointer;font-size:12px;color:#9C7E76;font-family:inherit;margin-top:4px;}
+    .workout-add-set-btn:hover{background:#EFDFD0;color:#3A2A26;}
+    .workout-set-note{width:100%;margin-top:4px;font-size:12px;padding:5px 8px;border:0.5px solid #E5D2C5;border-radius:6px;background:#FAF2EC;color:#8B6F66;font-family:inherit;resize:none;}
+    .workout-set-note:focus{outline:none;border-color:#B58A78;}
+    .exercise-lib-item{background:#FFFAF5;border:0.5px solid #EFDED2;border-radius:10px;padding:0.875rem 1rem;margin-bottom:0.5rem;}
+    .exercise-lib-header{display:flex;align-items:center;justify-content:space-between;}
+    .exercise-lib-name{font-size:14px;font-weight:500;color:#3A2A26;}
+    .exercise-lib-meta{font-size:12px;color:#9C7E76;margin-top:2px;}
+    .exercise-settings-list{margin-top:0.75rem;display:flex;flex-direction:column;gap:6px;}
+    .exercise-setting-item{background:#F5E8DE;border-radius:8px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;}
+    .exercise-setting-label{font-size:12px;font-weight:500;color:#3A2A26;}
+    .exercise-setting-value{font-size:12px;color:#8B6F66;}
+    .workout-plan-card{background:#FFFAF5;border:0.5px solid #EFDED2;border-radius:10px;padding:1rem;margin-bottom:0.75rem;}
+    .workout-plan-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+    .workout-plan-name{font-size:14px;font-weight:500;color:#3A2A26;}
+    .workout-plan-meta{font-size:12px;color:#9C7E76;margin-bottom:0.5rem;}
+    .workout-plan-exercises{display:flex;flex-wrap:wrap;gap:4px;}
+    .workout-plan-exercise-tag{font-size:11px;padding:2px 8px;background:#EFDFD0;border-radius:6px;color:#8B6F66;}
+    .workout-empty{text-align:center;color:#C8B0A6;font-size:14px;padding:2rem 0;}
+    .wlog-date-dot{width:5px;height:5px;border-radius:50%;background:#A89878;display:inline-block;margin-left:6px;vertical-align:3px;}
+
     /* ============ 主題切換覆寫 ============ */
     /* 抹茶主題:body.theme-matcha 蓋過預設粉色 */
     body.theme-matcha{background:#F5F3EC;color:#2A2E22;}
@@ -533,6 +566,7 @@
     <button class="sidebar-btn active" id="nav-calc" onclick="switchSection('calc')"><i class="ti ti-calculator"></i><span class="tooltip">營養計算</span></button>
     <button class="sidebar-btn" id="nav-diary" onclick="switchSection('diary')"><i class="ti ti-calendar-week"></i><span class="tooltip">飲食日記</span></button>
     <button class="sidebar-btn" id="nav-pet" onclick="switchSection('pet')"><i class="ti ti-paw"></i><span class="tooltip">寵物</span></button>
+    <button class="sidebar-btn" id="nav-workout" onclick="switchSection('workout')"><i class="ti ti-barbell"></i><span class="tooltip">健身紀錄</span></button>
     <button class="sidebar-btn" onclick="openSettings()"><i class="ti ti-settings"></i><span class="tooltip">設定</span></button>
     <div class="sidebar-spacer"></div>
     <div id="userAvatarWrap" style="position:relative;">
@@ -645,6 +679,56 @@
         <div id="pet-content"></div>
       </div>
 
+      <!-- SECTION 6: Workout (健身紀錄) -->
+      <div class="section" id="section-workout">
+        <div class="section-title">健身紀錄</div>
+        <!-- 分頁切換列 -->
+        <div id="workoutTabBar" style="display:flex;gap:6px;margin-bottom:1rem;">
+          <button class="diary-tab active" data-wtab="log" onclick="switchWorkoutTab('log')">📅 訓練日誌</button>
+          <button class="diary-tab" data-wtab="exercises" onclick="switchWorkoutTab('exercises')">🏋️ 動作庫</button>
+          <button class="diary-tab" data-wtab="plans" onclick="switchWorkoutTab('plans')">📋 訓練計畫</button>
+        </div>
+
+        <!-- 分頁:訓練日誌 -->
+        <div class="workout-tab-content" id="workout-tab-log">
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button class="cal-nav" onclick="wLogPrevDay()"><i class="ti ti-chevron-left" style="font-size:14px"></i></button>
+                <div id="wLogDateDisplay" style="font-size:14px;font-weight:500;color:#3A2A26;white-space:nowrap;"></div>
+                <button class="cal-nav" onclick="wLogNextDay()"><i class="ti ti-chevron-right" style="font-size:14px"></i></button>
+              </div>
+              <button class="btn btn-outline" style="font-size:12px;padding:6px 10px;" onclick="openApplyPlanModal()"><i class="ti ti-clipboard-list" style="vertical-align:-2px;margin-right:4px;"></i>套用計畫</button>
+            </div>
+          </div>
+          <div id="wLogContent"></div>
+          <div style="margin-top:0.5rem;">
+            <button class="btn btn-green" style="width:100%;" onclick="openAddExerciseToLogModal()"><i class="ti ti-plus" style="vertical-align:-2px;margin-right:4px;"></i>新增動作</button>
+          </div>
+        </div>
+
+        <!-- 分頁:動作庫 -->
+        <div class="workout-tab-content" id="workout-tab-exercises" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+            <div style="font-size:14px;color:#8B6F66;">所有動作</div>
+            <button class="btn btn-green" onclick="openAddExerciseModal()">+ 新增動作</button>
+          </div>
+          <div class="card" style="margin-bottom:0.75rem;">
+            <input type="search" id="exerciseLibSearch" placeholder="搜尋動作名稱..." oninput="renderExerciseLib()" style="width:100%;"/>
+          </div>
+          <div id="exerciseLibList"></div>
+        </div>
+
+        <!-- 分頁:訓練計畫 -->
+        <div class="workout-tab-content" id="workout-tab-plans" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+            <div style="font-size:14px;color:#8B6F66;">訓練計畫</div>
+            <button class="btn btn-green" onclick="openAddPlanModal()">+ 新增計畫</button>
+          </div>
+          <div id="workoutPlanList"></div>
+        </div>
+      </div>
+
     </div>
   </main>
 </div>
@@ -677,6 +761,96 @@
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeAddFoodModal()">取消</button>
       <button class="btn btn-green" id="addFoodConfirmBtn" onclick="addCustomFood()">新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Exercise Modal (動作庫) -->
+<div class="modal-overlay" id="addExerciseModal">
+  <div class="modal wide">
+    <div class="modal-title" id="addExerciseModalTitle">新增動作</div>
+    <div class="custom-food-field"><label>動作名稱</label><input type="text" id="ae-name" placeholder="例如:臥推、深蹲"/></div>
+    <div class="custom-food-field" style="margin-top:8px;"><label>分類</label>
+      <select id="ae-cat">
+        <option value="胸">胸</option><option value="背">背</option><option value="腿">腿</option>
+        <option value="肩">肩</option><option value="手臂">手臂</option><option value="核心">核心</option>
+        <option value="有氧">有氧</option><option value="其他">其他</option>
+      </select>
+    </div>
+    <div class="custom-food-field" style="margin-top:8px;"><label>備註（選填，例如：注意事項）</label><input type="text" id="ae-note" placeholder="例如:保持核心收緊"/></div>
+    <div style="margin-top:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="sec-label" style="margin:0;">器械設定（可多組）</div>
+        <button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="addMachineSetting()">+ 新增設定</button>
+      </div>
+      <div id="machineSettingsList" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeAddExerciseModal()">取消</button>
+      <button class="btn btn-green" id="addExerciseConfirmBtn" onclick="confirmAddExercise()">新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Plan Modal -->
+<div class="modal-overlay" id="addPlanModal">
+  <div class="modal wide">
+    <div class="modal-title" id="addPlanModalTitle">新增訓練計畫</div>
+    <div class="custom-food-field"><label>計畫名稱</label><input type="text" id="ap-name" placeholder="例如:胸背日、推拉腿A"/></div>
+    <div style="margin-top:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="sec-label" style="margin:0;">動作清單</div>
+        <button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="addExerciseToPlanEditor()">+ 新增動作</button>
+      </div>
+      <div id="planEditorExercises" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeAddPlanModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmAddPlan()">儲存計畫</button>
+    </div>
+  </div>
+</div>
+
+<!-- Apply Plan Modal -->
+<div class="modal-overlay" id="applyPlanModal">
+  <div class="modal">
+    <div class="modal-title">套用訓練計畫</div>
+    <div class="sec-label">選擇計畫（會把計畫動作新增到今日日誌）</div>
+    <div id="applyPlanList" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeApplyPlanModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Exercise to Log Modal -->
+<div class="modal-overlay" id="addExToLogModal">
+  <div class="modal">
+    <div class="modal-title">新增動作到日誌</div>
+    <div class="custom-food-field">
+      <label>搜尋動作</label>
+      <input type="search" id="exLogSearch" placeholder="搜尋動作名稱..." oninput="renderExLogSearch()"/>
+    </div>
+    <div id="exLogSearchResults" style="margin-top:8px;max-height:220px;overflow-y:auto;border:0.5px solid #EFDED2;border-radius:8px;background:#FFFAF5;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeAddExerciseToLogModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Exercise Detail Modal (器械設定) -->
+<div class="modal-overlay" id="exerciseDetailModal">
+  <div class="modal wide">
+    <div class="modal-title" id="exDetailTitle"></div>
+    <div class="sec-label" id="exDetailNote" style="margin-bottom:1rem;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div class="sec-label" style="margin:0;">器械設定紀錄</div>
+      <button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="addMachineSettingInDetail()">+ 新增設定</button>
+    </div>
+    <div id="exDetailSettingsList" style="display:flex;flex-direction:column;gap:6px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeExerciseDetailModal()">關閉</button>
+      <button class="btn btn-red" id="exDetailDeleteBtn" onclick="deleteExerciseFromLib()">刪除動作</button>
     </div>
   </div>
 </div>
@@ -816,6 +990,8 @@ function loadLocalData(){
     const cf=localStorage.getItem('local_customFoods');if(cf)customFoods=JSON.parse(cf);
     const de=localStorage.getItem('diaryEntries');if(de)diaryEntries=JSON.parse(de);
     const pd=localStorage.getItem('local_petData');if(pd){petData=JSON.parse(pd);migratePetData();}
+    // Workout data
+    loadWorkoutLocal();
   }catch(e){console.error('local load',e);}
   updateMacroHints();clampDays();renderFoodLib();
   if(typeof startRoaming==='function')setTimeout(startRoaming,300);
@@ -975,6 +1151,521 @@ let foodSearchState={};// keyed by `${prefix}-${type}`
 
 let diaryTab='diary'; // 目前在哪個分頁
 
+// ── Workout 狀態 ───────────────────────────────────────
+let workoutExercises=[];   // 動作庫 [{id,name,category,note,machineSettings:[{label,value}]}]
+let workoutPlans=[];       // 訓練計畫 [{id,name,exercises:[{exerciseId,targetSets}]}]
+let workoutLogs={};        // {dateKey: [{exerciseId,sets:[{weight,reps,note,done}]}]}
+let wLogDate=new Date();   // 目前日誌顯示日期
+let workoutTab='log';
+let editingExerciseId=null;   // 動作庫編輯用
+let editingPlanId=null;       // 計畫編輯用
+let detailExerciseId=null;    // 器械設定詳細頁用
+
+// 日期工具
+function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function fmtDate(d){const wd=['日','一','二','三','四','五','六'];return d.getMonth()+1+'月'+d.getDate()+'日（週'+wd[d.getDay()]+'）';}
+
+// UUID
+function wUUID(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+// 儲存健身資料
+function saveWorkoutData(){
+  scheduleSave('workoutExercises',workoutExercises);
+  scheduleSave('workoutPlans',workoutPlans);
+}
+function saveWorkoutLog(dk){
+  scheduleSave('wlog_'+dk,workoutLogs[dk]||[]);
+}
+
+// 讀取（整合進 loadLocalData / loadCloudData）
+function loadWorkoutLocal(){
+  try{
+    const ex=localStorage.getItem('local_workoutExercises');if(ex)workoutExercises=JSON.parse(ex);
+    const pl=localStorage.getItem('local_workoutPlans');if(pl)workoutPlans=JSON.parse(pl);
+    // 讀日誌 (key 以 local_wlog_ 開頭)
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&k.startsWith('local_wlog_')){
+        const dk=k.replace('local_wlog_','');
+        try{workoutLogs[dk]=JSON.parse(localStorage.getItem(k));}catch(e){}
+      }
+    }
+  }catch(e){console.error('workout local load',e);}
+}
+
+// ── Workout Tab 切換 ────────────────────────────────────
+window.switchWorkoutTab=function(name){
+  workoutTab=name;
+  document.querySelectorAll('#workoutTabBar .diary-tab').forEach(b=>{
+    b.dataset.wtab===name?b.classList.add('active'):b.classList.remove('active');
+  });
+  document.querySelectorAll('.workout-tab-content').forEach(c=>c.style.display='none');
+  const t=document.getElementById('workout-tab-'+name);
+  if(t)t.style.display='';
+  if(name==='log')renderWLog();
+  else if(name==='exercises')renderExerciseLib();
+  else if(name==='plans')renderWorkoutPlans();
+};
+
+// ── 訓練日誌 ───────────────────────────────────────────
+window.wLogPrevDay=function(){wLogDate=new Date(wLogDate);wLogDate.setDate(wLogDate.getDate()-1);renderWLog();};
+window.wLogNextDay=function(){wLogDate=new Date(wLogDate);wLogDate.setDate(wLogDate.getDate()+1);renderWLog();};
+
+function renderWLog(){
+  const dk=dateKey(wLogDate);
+  document.getElementById('wLogDateDisplay').textContent=fmtDate(wLogDate);
+  const entries=workoutLogs[dk]||[];
+  const container=document.getElementById('wLogContent');
+  if(entries.length===0){
+    container.innerHTML='<div class="workout-empty">今日尚無訓練紀錄</div>';
+    return;
+  }
+  container.innerHTML=entries.map((entry,ei)=>{
+    const ex=workoutExercises.find(e=>e.id===entry.exerciseId)||{name:'未知動作',category:''};
+    const setsHTML=entry.sets.map((set,si)=>`
+      <div class="workout-set-row" data-ei="${ei}" data-si="${si}">
+        <div class="workout-set-num">${si+1}</div>
+        <div class="workout-set-input-wrap">
+          <div class="workout-set-label">kg</div>
+          <input class="workout-set-input" type="number" min="0" step="0.5" value="${set.weight||''}" placeholder="—"
+            onchange="updateSet(${ei},${si},'weight',this.value)"/>
+        </div>
+        <div class="workout-set-input-wrap">
+          <div class="workout-set-label">reps</div>
+          <input class="workout-set-input" type="number" min="0" step="1" value="${set.reps||''}" placeholder="—"
+            onchange="updateSet(${ei},${si},'reps',this.value)"/>
+        </div>
+        <div class="workout-set-input-wrap">
+          <div class="workout-set-label">備註</div>
+          <input class="workout-set-input" type="text" value="${set.note||''}" placeholder="—" style="font-size:12px;"
+            onchange="updateSet(${ei},${si},'note',this.value)"/>
+        </div>
+        <button class="workout-set-done${set.done?' checked':''}" onclick="toggleSetDone(${ei},${si})" title="標記完成">
+          ${set.done?'<i class="ti ti-check" style="font-size:13px;"></i>':'<i class="ti ti-circle" style="font-size:13px;"></i>'}
+        </button>
+      </div>
+    `).join('');
+    const doneCount=entry.sets.filter(s=>s.done).length;
+    return`<div class="workout-exercise-card">
+      <div class="workout-exercise-header">
+        <div>
+          <div class="workout-exercise-name">${ex.name}</div>
+          <div style="font-size:11px;color:#B8A096;margin-top:2px;">${ex.category||''}${doneCount>0?' · ✓ '+doneCount+'/'+entry.sets.length+' 組':' · '+entry.sets.length+' 組'}</div>
+        </div>
+        <div class="workout-exercise-actions">
+          <button class="btn btn-outline" style="font-size:12px;padding:4px 8px;" onclick="removeExerciseFromLog(${ei})">移除</button>
+        </div>
+      </div>
+      <div>${setsHTML}</div>
+      <button class="workout-add-set-btn" onclick="addSetToEntry(${ei})"><i class="ti ti-plus" style="vertical-align:-2px;margin-right:2px;"></i>新增一組</button>
+    </div>`;
+  }).join('');
+}
+
+window.updateSet=function(ei,si,field,val){
+  const dk=dateKey(wLogDate);
+  if(!workoutLogs[dk])workoutLogs[dk]=[];
+  if(!workoutLogs[dk][ei])return;
+  if(field==='weight'||field==='reps'){
+    workoutLogs[dk][ei].sets[si][field]=val===''?'':parseFloat(val)||0;
+  } else {
+    workoutLogs[dk][ei].sets[si][field]=val;
+  }
+  saveWorkoutLog(dk);
+};
+
+window.toggleSetDone=function(ei,si){
+  const dk=dateKey(wLogDate);
+  if(!workoutLogs[dk]||!workoutLogs[dk][ei])return;
+  workoutLogs[dk][ei].sets[si].done=!workoutLogs[dk][ei].sets[si].done;
+  saveWorkoutLog(dk);
+  renderWLog();
+};
+
+window.addSetToEntry=function(ei){
+  const dk=dateKey(wLogDate);
+  if(!workoutLogs[dk]||!workoutLogs[dk][ei])return;
+  // 複製上一組的重量/reps 當預設值
+  const prev=workoutLogs[dk][ei].sets.slice(-1)[0];
+  workoutLogs[dk][ei].sets.push({weight:prev?prev.weight:'',reps:prev?prev.reps:'',note:'',done:false});
+  saveWorkoutLog(dk);
+  renderWLog();
+};
+
+window.removeExerciseFromLog=function(ei){
+  const dk=dateKey(wLogDate);
+  if(!workoutLogs[dk])return;
+  workoutLogs[dk].splice(ei,1);
+  saveWorkoutLog(dk);
+  renderWLog();
+};
+
+// 新增動作到日誌 Modal
+window.openAddExerciseToLogModal=function(){
+  document.getElementById('exLogSearch').value='';
+  renderExLogSearch();
+  document.getElementById('addExToLogModal').classList.add('show');
+};
+window.closeAddExerciseToLogModal=function(){document.getElementById('addExToLogModal').classList.remove('show');};
+
+window.renderExLogSearch=function(){
+  const q=(document.getElementById('exLogSearch').value||'').trim().toLowerCase();
+  const list=workoutExercises.filter(e=>!q||e.name.toLowerCase().includes(q)||e.category.toLowerCase().includes(q));
+  const container=document.getElementById('exLogSearchResults');
+  if(workoutExercises.length===0){
+    container.innerHTML='<div class="food-search-empty">動作庫是空的，請先到「動作庫」頁面新增動作</div>';
+    return;
+  }
+  if(list.length===0){
+    container.innerHTML='<div class="food-search-empty">找不到「'+q+'」</div>';
+    return;
+  }
+  container.innerHTML=list.map(e=>`
+    <div class="food-search-item" onclick="addExerciseToLog('${e.id}')">
+      <div>
+        <div class="food-search-item-name">${e.name}</div>
+        <div class="food-search-item-macros">${e.category}${e.note?' · '+e.note:''}</div>
+      </div>
+      <i class="ti ti-plus" style="color:#9C7E76;font-size:16px;"></i>
+    </div>
+  `).join('');
+};
+
+window.addExerciseToLog=function(exId){
+  const dk=dateKey(wLogDate);
+  if(!workoutLogs[dk])workoutLogs[dk]=[];
+  // 預設 3 組
+  workoutLogs[dk].push({exerciseId:exId,sets:[
+    {weight:'',reps:'',note:'',done:false},
+    {weight:'',reps:'',note:'',done:false},
+    {weight:'',reps:'',note:'',done:false}
+  ]});
+  saveWorkoutLog(dk);
+  closeAddExerciseToLogModal();
+  renderWLog();
+};
+
+// 套用計畫到日誌
+window.openApplyPlanModal=function(){
+  const list=document.getElementById('applyPlanList');
+  if(workoutPlans.length===0){
+    list.innerHTML='<div class="workout-empty">尚無計畫，請先到「訓練計畫」建立</div>';
+  } else {
+    list.innerHTML=workoutPlans.map(p=>`
+      <button class="btn btn-outline" style="width:100%;text-align:left;padding:10px 14px;" onclick="applyPlanToLog('${p.id}')">
+        <div style="font-size:14px;font-weight:500;">${p.name}</div>
+        <div style="font-size:12px;color:#9C7E76;margin-top:2px;">${p.exercises.map(pe=>{const ex=workoutExercises.find(e=>e.id===pe.exerciseId);return ex?ex.name:'？';}).join(' · ')}</div>
+      </button>
+    `).join('');
+  }
+  document.getElementById('applyPlanModal').classList.add('show');
+};
+window.closeApplyPlanModal=function(){document.getElementById('applyPlanModal').classList.remove('show');};
+window.applyPlanToLog=function(planId){
+  const plan=workoutPlans.find(p=>p.id===planId);
+  if(!plan)return;
+  const dk=dateKey(wLogDate);
+  if(!workoutLogs[dk])workoutLogs[dk]=[];
+  plan.exercises.forEach(pe=>{
+    const sets=parseInt(pe.targetSets)||3;
+    const setArr=Array.from({length:sets},()=>({weight:'',reps:'',note:'',done:false}));
+    workoutLogs[dk].push({exerciseId:pe.exerciseId,sets:setArr});
+  });
+  saveWorkoutLog(dk);
+  closeApplyPlanModal();
+  renderWLog();
+};
+
+// ── 動作庫 ─────────────────────────────────────────────
+function renderExerciseLib(){
+  const q=(document.getElementById('exerciseLibSearch')?.value||'').trim().toLowerCase();
+  const list=workoutExercises.filter(e=>!q||e.name.toLowerCase().includes(q)||e.category.toLowerCase().includes(q));
+  const container=document.getElementById('exerciseLibList');
+  if(list.length===0){
+    container.innerHTML='<div class="workout-empty">'+(q?'找不到符合的動作':'尚無動作，點右上角新增')+'</div>';
+    return;
+  }
+  container.innerHTML=list.map(e=>{
+    const settingsHTML=e.machineSettings&&e.machineSettings.length>0
+      ?'<div class="exercise-settings-list">'+e.machineSettings.map(s=>`<div class="exercise-setting-item"><span class="exercise-setting-label">${s.label}</span><span class="exercise-setting-value">${s.value}</span></div>`).join('')+'</div>'
+      :'';
+    return`<div class="exercise-lib-item">
+      <div class="exercise-lib-header">
+        <div>
+          <div class="exercise-lib-name">${e.name}</div>
+          <div class="exercise-lib-meta">${e.category}${e.note?' · '+e.note:''}</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-outline" style="font-size:12px;padding:4px 8px;" onclick="openExerciseDetail('${e.id}')"><i class="ti ti-settings" style="font-size:13px;vertical-align:-2px;"></i> 設定</button>
+          <button class="btn btn-outline" style="font-size:12px;padding:4px 8px;" onclick="openEditExerciseModal('${e.id}')">編輯</button>
+        </div>
+      </div>
+      ${settingsHTML}
+    </div>`;
+  }).join('');
+}
+
+// 新增/編輯動作 Modal
+window.openAddExerciseModal=function(){
+  editingExerciseId=null;
+  document.getElementById('addExerciseModalTitle').textContent='新增動作';
+  document.getElementById('ae-name').value='';
+  document.getElementById('ae-cat').value='胸';
+  document.getElementById('ae-note').value='';
+  document.getElementById('machineSettingsList').innerHTML='';
+  document.getElementById('addExerciseConfirmBtn').textContent='新增';
+  document.getElementById('addExerciseModal').classList.add('show');
+};
+window.openEditExerciseModal=function(id){
+  const ex=workoutExercises.find(e=>e.id===id);if(!ex)return;
+  editingExerciseId=id;
+  document.getElementById('addExerciseModalTitle').textContent='編輯動作';
+  document.getElementById('ae-name').value=ex.name;
+  document.getElementById('ae-cat').value=ex.category||'其他';
+  document.getElementById('ae-note').value=ex.note||'';
+  renderMachineSettingsList(ex.machineSettings||[]);
+  document.getElementById('addExerciseConfirmBtn').textContent='儲存';
+  document.getElementById('addExerciseModal').classList.add('show');
+};
+window.closeAddExerciseModal=function(){document.getElementById('addExerciseModal').classList.remove('show');};
+
+function renderMachineSettingsList(settings){
+  const container=document.getElementById('machineSettingsList');
+  container.innerHTML=settings.map((s,i)=>`
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:center;">
+      <input type="text" placeholder="名稱（例如：坐姿角度）" value="${s.label||''}" oninput="updateMachineSettingField(${i},'label',this.value)" style="font-size:13px;"/>
+      <input type="text" placeholder="值（例如：4格、高位）" value="${s.value||''}" oninput="updateMachineSettingField(${i},'value',this.value)" style="font-size:13px;"/>
+      <button class="btn btn-outline" style="padding:6px 8px;" onclick="removeMachineSetting(${i})"><i class="ti ti-trash" style="font-size:13px;"></i></button>
+    </div>
+  `).join('');
+}
+
+let _tmpMachineSettings=[];
+window.addMachineSetting=function(){
+  _tmpMachineSettings.push({label:'',value:''});
+  renderMachineSettingsList(_tmpMachineSettings);
+};
+window.updateMachineSettingField=function(i,field,val){
+  if(!_tmpMachineSettings[i])return;
+  _tmpMachineSettings[i][field]=val;
+};
+window.removeMachineSetting=function(i){
+  _tmpMachineSettings.splice(i,1);
+  renderMachineSettingsList(_tmpMachineSettings);
+};
+
+// override openAddExerciseModal/openEditExerciseModal to init _tmpMachineSettings
+const _origOpenAdd=window.openAddExerciseModal;
+window.openAddExerciseModal=function(){
+  editingExerciseId=null;
+  _tmpMachineSettings=[];
+  document.getElementById('addExerciseModalTitle').textContent='新增動作';
+  document.getElementById('ae-name').value='';
+  document.getElementById('ae-cat').value='胸';
+  document.getElementById('ae-note').value='';
+  renderMachineSettingsList(_tmpMachineSettings);
+  document.getElementById('addExerciseConfirmBtn').textContent='新增';
+  document.getElementById('addExerciseModal').classList.add('show');
+};
+const _origOpenEdit=window.openEditExerciseModal;
+window.openEditExerciseModal=function(id){
+  const ex=workoutExercises.find(e=>e.id===id);if(!ex)return;
+  editingExerciseId=id;
+  _tmpMachineSettings=JSON.parse(JSON.stringify(ex.machineSettings||[]));
+  document.getElementById('addExerciseModalTitle').textContent='編輯動作';
+  document.getElementById('ae-name').value=ex.name;
+  document.getElementById('ae-cat').value=ex.category||'其他';
+  document.getElementById('ae-note').value=ex.note||'';
+  renderMachineSettingsList(_tmpMachineSettings);
+  document.getElementById('addExerciseConfirmBtn').textContent='儲存';
+  document.getElementById('addExerciseModal').classList.add('show');
+};
+
+window.confirmAddExercise=function(){
+  const name=document.getElementById('ae-name').value.trim();
+  if(!name){alert('請輸入動作名稱');return;}
+  const cat=document.getElementById('ae-cat').value;
+  const note=document.getElementById('ae-note').value.trim();
+  const settings=_tmpMachineSettings.filter(s=>s.label||s.value);
+  if(editingExerciseId){
+    const ex=workoutExercises.find(e=>e.id===editingExerciseId);
+    if(ex){ex.name=name;ex.category=cat;ex.note=note;ex.machineSettings=settings;}
+  } else {
+    workoutExercises.push({id:wUUID(),name,category:cat,note,machineSettings:settings});
+  }
+  saveWorkoutData();
+  closeAddExerciseModal();
+  renderExerciseLib();
+};
+
+// 器械設定詳細頁
+window.openExerciseDetail=function(id){
+  const ex=workoutExercises.find(e=>e.id===id);if(!ex)return;
+  detailExerciseId=id;
+  document.getElementById('exDetailTitle').textContent=ex.name;
+  document.getElementById('exDetailNote').textContent=ex.category+(ex.note?' · '+ex.note:'');
+  _tmpMachineSettings=JSON.parse(JSON.stringify(ex.machineSettings||[]));
+  renderDetailSettingsList();
+  document.getElementById('exerciseDetailModal').classList.add('show');
+};
+window.closeExerciseDetailModal=function(){document.getElementById('exerciseDetailModal').classList.remove('show');};
+
+function renderDetailSettingsList(){
+  const container=document.getElementById('exDetailSettingsList');
+  if(_tmpMachineSettings.length===0){
+    container.innerHTML='<div style="font-size:13px;color:#B8A096;text-align:center;padding:1rem 0;">尚無設定紀錄</div>';
+    return;
+  }
+  container.innerHTML=_tmpMachineSettings.map((s,i)=>`
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:center;">
+      <input type="text" placeholder="名稱（例如：坐姿角度）" value="${s.label||''}" oninput="updateDetailSettingField(${i},'label',this.value)" style="font-size:13px;"/>
+      <input type="text" placeholder="值（例如：4格）" value="${s.value||''}" oninput="updateDetailSettingField(${i},'value',this.value)" style="font-size:13px;"/>
+      <button class="btn btn-outline" style="padding:6px 8px;" onclick="removeDetailSetting(${i})"><i class="ti ti-trash" style="font-size:13px;"></i></button>
+    </div>
+  `).join('');
+}
+window.addMachineSettingInDetail=function(){
+  _tmpMachineSettings.push({label:'',value:''});
+  renderDetailSettingsList();
+  // 自動儲存
+  const ex=workoutExercises.find(e=>e.id===detailExerciseId);
+  if(ex){ex.machineSettings=JSON.parse(JSON.stringify(_tmpMachineSettings));saveWorkoutData();}
+};
+window.updateDetailSettingField=function(i,field,val){
+  if(!_tmpMachineSettings[i])return;
+  _tmpMachineSettings[i][field]=val;
+  const ex=workoutExercises.find(e=>e.id===detailExerciseId);
+  if(ex){ex.machineSettings=JSON.parse(JSON.stringify(_tmpMachineSettings));saveWorkoutData();}
+};
+window.removeDetailSetting=function(i){
+  _tmpMachineSettings.splice(i,1);
+  renderDetailSettingsList();
+  const ex=workoutExercises.find(e=>e.id===detailExerciseId);
+  if(ex){ex.machineSettings=JSON.parse(JSON.stringify(_tmpMachineSettings));saveWorkoutData();}
+};
+window.deleteExerciseFromLib=function(){
+  if(!confirm('確定要刪除這個動作？日誌中已紀錄的資料不受影響。'))return;
+  workoutExercises=workoutExercises.filter(e=>e.id!==detailExerciseId);
+  saveWorkoutData();
+  closeExerciseDetailModal();
+  renderExerciseLib();
+};
+
+// ── 訓練計畫 ───────────────────────────────────────────
+function renderWorkoutPlans(){
+  const container=document.getElementById('workoutPlanList');
+  if(workoutPlans.length===0){
+    container.innerHTML='<div class="workout-empty">尚無計畫，點右上角新增</div>';
+    return;
+  }
+  container.innerHTML=workoutPlans.map(p=>{
+    const tags=p.exercises.map(pe=>{
+      const ex=workoutExercises.find(e=>e.id===pe.exerciseId);
+      return ex?`<span class="workout-plan-exercise-tag">${ex.name}×${pe.targetSets||3}</span>`:'';
+    }).join('');
+    return`<div class="workout-plan-card">
+      <div class="workout-plan-header">
+        <div class="workout-plan-name">${p.name}</div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-outline" style="font-size:12px;padding:4px 8px;" onclick="openEditPlanModal('${p.id}')">編輯</button>
+          <button class="btn btn-outline" style="font-size:12px;padding:4px 8px;border-color:#B85040;color:#B85040;" onclick="deletePlan('${p.id}')"><i class="ti ti-trash" style="font-size:13px;"></i></button>
+        </div>
+      </div>
+      <div class="workout-plan-meta">${p.exercises.length} 個動作</div>
+      <div class="workout-plan-exercises">${tags}</div>
+    </div>`;
+  }).join('');
+}
+
+// 計畫 Modal
+let _planEditorExercises=[];
+window.openAddPlanModal=function(){
+  editingPlanId=null;
+  _planEditorExercises=[];
+  document.getElementById('addPlanModalTitle').textContent='新增訓練計畫';
+  document.getElementById('ap-name').value='';
+  renderPlanEditorList();
+  document.getElementById('addPlanModal').classList.add('show');
+};
+window.openEditPlanModal=function(id){
+  const plan=workoutPlans.find(p=>p.id===id);if(!plan)return;
+  editingPlanId=id;
+  _planEditorExercises=JSON.parse(JSON.stringify(plan.exercises));
+  document.getElementById('addPlanModalTitle').textContent='編輯訓練計畫';
+  document.getElementById('ap-name').value=plan.name;
+  renderPlanEditorList();
+  document.getElementById('addPlanModal').classList.add('show');
+};
+window.closeAddPlanModal=function(){document.getElementById('addPlanModal').classList.remove('show');};
+
+function renderPlanEditorList(){
+  const container=document.getElementById('planEditorExercises');
+  if(_planEditorExercises.length===0){
+    container.innerHTML='<div style="font-size:13px;color:#B8A096;text-align:center;padding:1rem 0;">尚無動作</div>';
+    return;
+  }
+  container.innerHTML=_planEditorExercises.map((pe,i)=>{
+    const ex=workoutExercises.find(e=>e.id===pe.exerciseId);
+    return`<div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;background:#F5E8DE;border-radius:8px;padding:8px 10px;">
+      <div style="font-size:13px;font-weight:500;color:#3A2A26;">${ex?ex.name:'未知動作'}</div>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <input type="number" min="1" max="20" value="${pe.targetSets||3}" style="width:44px;text-align:center;font-size:13px;padding:4px;"
+          onchange="updatePlanExSets(${i},this.value)"/>
+        <span style="font-size:12px;color:#9C7E76;">組</span>
+      </div>
+      <button class="btn btn-outline" style="padding:5px 8px;" onclick="removePlanEx(${i})"><i class="ti ti-trash" style="font-size:13px;"></i></button>
+    </div>`;
+  }).join('');
+}
+
+window.addExerciseToPlanEditor=function(){
+  if(workoutExercises.length===0){alert('請先到「動作庫」新增動作');return;}
+  // 用簡單的 prompt select 或 modal
+  const names=workoutExercises.map((e,i)=>`${i+1}. ${e.name}（${e.category}）`).join('\n');
+  const input=prompt('選擇動作（輸入編號）:\n'+names);
+  const idx=parseInt(input)-1;
+  if(isNaN(idx)||idx<0||idx>=workoutExercises.length)return;
+  _planEditorExercises.push({exerciseId:workoutExercises[idx].id,targetSets:3});
+  renderPlanEditorList();
+};
+window.updatePlanExSets=function(i,val){_planEditorExercises[i].targetSets=parseInt(val)||3;};
+window.removePlanEx=function(i){_planEditorExercises.splice(i,1);renderPlanEditorList();};
+
+window.confirmAddPlan=function(){
+  const name=document.getElementById('ap-name').value.trim();
+  if(!name){alert('請輸入計畫名稱');return;}
+  if(_planEditorExercises.length===0){alert('請至少新增一個動作');return;}
+  if(editingPlanId){
+    const plan=workoutPlans.find(p=>p.id===editingPlanId);
+    if(plan){plan.name=name;plan.exercises=_planEditorExercises;}
+  } else {
+    workoutPlans.push({id:wUUID(),name,exercises:_planEditorExercises});
+  }
+  scheduleSave('workoutPlans',workoutPlans);
+  closeAddPlanModal();
+  renderWorkoutPlans();
+};
+window.deletePlan=function(id){
+  if(!confirm('確定刪除這個計畫？'))return;
+  workoutPlans=workoutPlans.filter(p=>p.id!==id);
+  scheduleSave('workoutPlans',workoutPlans);
+  renderWorkoutPlans();
+};
+
+// ── 整合進 switchSection ─────────────────────────────
+// （在原 switchSection 中 if(name==='pet') 後面加上 workout）
+
+// ── 整合進 saveData / loadLocal ─────────────────────
+// saveData 已有 scheduleSave，workoutLogs 的 key 以 wlog_ 開頭
+// 攔截原 saveData 讓 wlog_ 也正確存 local
+const _origSaveData=window.saveData||null;
+
+// ── 初始化：renderWLog 等進入 workout section 時呼叫 ─
+function initWorkoutSection(){
+  wLogDate=new Date();
+  renderWLog();
+}
+
 window.switchSection=name=>{
   // 把舊呼叫(template/foods)重導向到 diary 的對應分頁
   if(name==='template'){switchSection('diary');switchDiaryTab('template');return;}
@@ -984,12 +1675,16 @@ window.switchSection=name=>{
   document.getElementById('section-'+name).classList.add('active');
   const navBtn=document.getElementById('nav-'+name);if(navBtn)navBtn.classList.add('active');
   if(name==='diary'){
-    // 進入日記時,渲染目前所在的分頁
     if(diaryTab==='diary')renderDiary();
     else if(diaryTab==='template')renderTemplateSection();
     else if(diaryTab==='foods')renderFoodLib();
   }
   if(name==='pet')renderPet();
+  if(name==='workout'){
+    if(workoutTab==='log')renderWLog();
+    else if(workoutTab==='exercises')renderExerciseLib();
+    else if(workoutTab==='plans')renderWorkoutPlans();
+  }
 };
 
 window.switchDiaryTab=name=>{
