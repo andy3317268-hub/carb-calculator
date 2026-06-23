@@ -1161,8 +1161,7 @@ let editingExerciseId=null;   // 動作庫編輯用
 let editingPlanId=null;       // 計畫編輯用
 let detailExerciseId=null;    // 器械設定詳細頁用
 
-// 日期工具
-function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+// 日期工具 (dateKey 定義在原本的程式碼中，此處只加 fmtDate)
 function fmtDate(d){const wd=['日','一','二','三','四','五','六'];return d.getMonth()+1+'月'+d.getDate()+'日（週'+wd[d.getDay()]+'）';}
 
 // UUID
