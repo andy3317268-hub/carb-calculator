@@ -177,6 +177,8 @@
     .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px;}
     .weekday-btn{border:0.5px solid #E5D2C5;border-radius:8px;padding:8px 4px;cursor:pointer;text-align:center;font-size:12px;font-weight:500;color:#9C7E76;background:#FFFAF5;font-family:inherit;}
     .weekday-btn.is-high{border:1.5px solid #A89878;background:#E6DDD0;color:#7A5848;}
+    .cal-day.is-past{opacity:0.45;}
+    .cal-day.is-future{opacity:0.85;}
     .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
     .cal-title{font-size:16px;font-weight:500;color:#3A2A26;}
     .cal-nav{background:none;border:0.5px solid #C8AFA0;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;}
@@ -572,7 +574,7 @@
             <div style="margin-top:1rem;"><div class="sec-label">性別</div><div class="gender-grid"><button class="gender-btn" id="btnM" onclick="selectGender('m')">男生</button><button class="gender-btn" id="btnF" onclick="selectGender('f')">女生</button></div></div>
             <div style="margin-top:1rem;"><div class="sec-label">運動級距</div><div class="tier-grid"><button class="tier-btn" data-tier="1" onclick="selectTier(1)"><div class="tn">第一級</div><div class="td">每週 2–3 小時</div><div class="tmacro" id="macro1"></div></button><button class="tier-btn" data-tier="2" onclick="selectTier(2)"><div class="tn">第二級</div><div class="td">每週 4–5 小時</div><div class="tmacro" id="macro2"></div></button><button class="tier-btn" data-tier="3" onclick="selectTier(3)"><div class="tn">第三級</div><div class="td">每週 6–7 小時</div><div class="tmacro" id="macro3"></div></button><button class="tier-btn" data-tier="4" onclick="selectTier(4)"><div class="tn">第四級</div><div class="td">每週 8–9 小時</div><div class="tmacro" id="macro4"></div></button><button class="tier-btn" data-tier="5" onclick="selectTier(5)" style="grid-column:span 2;"><div class="tn">自定義</div><div class="td">自行輸入三大營養素倍數</div></button></div><div id="customInputs" style="display:none;"><div class="custom-grid"><div class="custom-field"><label>碳水倍數</label><input type="number" id="customCarb" placeholder="2.2" min="0.1" max="10" step="0.1" oninput="updateSliderBounds();recalc();"/></div><div class="custom-field"><label>蛋白質倍數</label><input type="number" id="customProtein" placeholder="1.4" min="0.1" max="10" step="0.1" oninput="recalc();"/></div><div class="custom-field"><label>脂肪倍數</label><input type="number" id="customFat" placeholder="0.8" min="0.1" max="10" step="0.1" oninput="updateSliderBounds();recalc();"/></div></div></div></div>
             <div style="margin-top:1rem;"><div class="sec-label">體重</div><div class="input-row"><input type="number" id="weight" placeholder="例如 75" min="30" max="200" oninput="recalc()"/><span class="unit">公斤</span></div></div>
-            <div style="margin-top:1rem;"><div class="sec-label">高低碳日天數</div><div class="day-row"><span class="badge badge-high">高碳日</span><div class="day-controls"><button class="day-btn" onclick="adjustDays(-1)"><i class="ti ti-minus" style="font-size:14px"></i></button><input type="number" id="highDays" value="2" min="1" max="6" oninput="clampDays()" style="width:48px;text-align:center;"/><button class="day-btn" onclick="adjustDays(1)"><i class="ti ti-plus" style="font-size:14px"></i></button></div></div><div class="day-row" style="margin-bottom:0;"><span class="badge badge-low">低碳日</span><span id="lowDaysDisplay" style="font-size:14px;font-weight:500;">5 天</span></div></div>
+            <div style="margin-top:1rem;"><div class="sec-label">高低碳日天數</div><div class="day-row"><span class="badge badge-high">高碳日</span><div class="day-controls"><button class="day-btn" onclick="adjustDays(-1)"><i class="ti ti-minus" style="font-size:14px"></i></button><input type="number" id="highDays" value="2" min="1" max="6" oninput="clampDays()" style="width:48px;text-align:center;"/><button class="day-btn" onclick="adjustDays(1)"><i class="ti ti-plus" style="font-size:14px"></i></button></div></div><div class="day-row" style="margin-bottom:0;"><span class="badge badge-low">低碳日</span><span id="lowDaysDisplay" style="font-size:14px;font-weight:500;">5 天</span></div><div class="week-setup" style="margin-top:10px;"><div class="sec-label">設定高碳日(點選切換)</div><div class="weekday-grid" id="weekdayGrid"></div></div></div>
             <div style="margin-top:1rem;"><div class="sec-label">高低碳落差設定(週總量鎖定)</div><div class="slider-block"><div class="slider-header"><div><div class="slider-title">碳水化合物</div><div class="slider-focus" id="carbAvgHint">控制高碳日碳水倍數・週平均 — 倍</div></div><div class="slider-val">高碳日 <input type="number" id="carbHighInput" step="0.05" min="0" style="width:62px;text-align:center;padding:4px 6px;font-size:13px;" oninput="onCarbInput()" onblur="onCarbInputBlur()"/> 倍</div></div><input type="range" id="carbSlider" min="0" max="100" value="50" step="1" oninput="updateSliderBounds();recalc();" disabled/><div class="slider-ends"><span>← 無落差</span><span>最大落差 →</span></div></div><div class="slider-block"><div class="slider-header"><div><div class="slider-title">脂肪</div><div class="slider-focus" id="fatAvgHint">控制低碳日脂肪倍數・週平均 — 倍</div></div><div class="slider-val">低碳日 <input type="number" id="fatLowInput" step="0.05" min="0" style="width:62px;text-align:center;padding:4px 6px;font-size:13px;" oninput="onFatInput()" onblur="onFatInputBlur()"/> 倍</div></div><input type="range" id="fatSlider" min="0" max="100" value="50" step="1" oninput="updateSliderBounds();recalc();" disabled/><div class="slider-ends"><span>← 無落差</span><span>最大落差 →</span></div></div></div>
             <div style="margin-top:1rem;"><div class="sec-label">每日餐數</div><div class="input-row"><button class="day-btn" onclick="adjustMeals(-1)"><i class="ti ti-minus" style="font-size:14px"></i></button><input type="number" id="mealCount" value="3" min="1" max="8" style="width:60px;text-align:center;" oninput="recalc()"/><button class="day-btn" onclick="adjustMeals(1)"><i class="ti ti-plus" style="font-size:14px"></i></button><span class="unit">餐</span></div></div>
             <div class="result-cards" id="resultCards" style="display:none;">
@@ -598,9 +600,13 @@
           <div class="card" id="diary-no-calc" style="display:none;"><div class="empty-track">請先在「營養計算」頁面完成設定</div></div>
           <div id="diary-main" style="display:none;">
             <div id="diary-summary"></div>
-            <div class="week-setup"><div class="sec-label">設定高碳日(點選切換)</div><div class="weekday-grid" id="weekdayGrid"></div></div>
             <div class="card">
-              <div class="cal-header"><button class="cal-nav" onclick="calPrevMonth()"><i class="ti ti-chevron-left" style="font-size:14px"></i></button><div class="cal-title" id="calTitle"></div><button class="cal-nav" onclick="calNextMonth()"><i class="ti ti-chevron-right" style="font-size:14px"></i></button></div>
+              <div class="cal-header">
+                <button class="cal-nav" id="calPrevBtn" onclick="calPrev()"><i class="ti ti-chevron-left" style="font-size:14px"></i></button>
+                <div class="cal-title" id="calTitle"></div>
+                <button class="cal-nav" id="calNextBtn" onclick="calNext()"><i class="ti ti-chevron-right" style="font-size:14px"></i></button>
+                <button class="collapse-btn" id="calToggleBtn" onclick="toggleCalView()" style="margin-left:8px;font-size:12px;">展開月曆 <i class="ti ti-chevron-down" style="font-size:11px;vertical-align:-1px"></i></button>
+              </div>
               <div class="cal-grid" id="calDayLabels"></div>
               <div class="cal-grid" id="calGrid"></div>
             </div>
@@ -983,6 +989,9 @@ window.switchSection=name=>{
   document.querySelectorAll('.sidebar-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('section-'+name).classList.add('active');
   const navBtn=document.getElementById('nav-'+name);if(navBtn)navBtn.classList.add('active');
+  if(name==='calc'){
+    renderWeekdayGrid();
+  }
   if(name==='diary'){
     // 進入日記時,渲染目前所在的分頁
     if(diaryTab==='diary')renderDiary();
@@ -1186,13 +1195,7 @@ function bindFoodEvents(prefix,getMd,onUpdate,getTargets){
 
   function handlePick(type,food){
     const md=getMd(type);
-    const tgt=getTargets?getTargets(type):null;
-    const used=md.reduce((s,i)=>s+i.grams*(type==='carb'?i.food.c:type==='prot'?i.food.p:i.food.f)/100,0);
-    const rem=tgt!=null?Math.max(0,tgt-used):null;
-    const macro=type==='carb'?food.c:type==='prot'?food.p:food.f;
-    let dg=macro>0&&rem!=null&&rem>0?Math.round(rem/(macro/100)):100;
-    dg=Math.max(1,Math.min(2000,dg||100));
-    md.push({food,grams:dg});
+    md.push({food,grams:100});
     // Clear search after pick
     foodSearchState[prefix+'-'+type]='';
     onUpdate();
@@ -1435,25 +1438,78 @@ function renderWeekdayGrid(){
   const g=document.getElementById('weekdayGrid');g.innerHTML='';
   ['一','二','三','四','五','六','日'].forEach((n,i)=>{const b=document.createElement('button');b.className='weekday-btn'+(highDays.has(i)?' is-high':'');b.textContent='週'+n;b.onclick=()=>{if(highDays.has(i))highDays.delete(i);else highDays.add(i);scheduleSave('diaryConfig',{highDays:[...highDays]});renderDiary();};g.appendChild(b);});
 }
+let calExpanded=false;
+window.toggleCalView=()=>{
+  calExpanded=!calExpanded;
+  const btn=document.getElementById('calToggleBtn');
+  if(btn)btn.innerHTML=calExpanded?'收合週曆 <i class="ti ti-chevron-up" style="font-size:11px;vertical-align:-1px"></i>':'展開月曆 <i class="ti ti-chevron-down" style="font-size:11px;vertical-align:-1px"></i>';
+  renderCalendar();
+};
+window.calPrev=()=>{
+  if(calExpanded){curCalDate=new Date(curCalDate.getFullYear(),curCalDate.getMonth()-1,1);}
+  else{curCalDate=new Date(curCalDate.getFullYear(),curCalDate.getMonth(),curCalDate.getDate()-7);}
+  renderCalendar();
+};
+window.calNext=()=>{
+  if(calExpanded){curCalDate=new Date(curCalDate.getFullYear(),curCalDate.getMonth()+1,1);}
+  else{curCalDate=new Date(curCalDate.getFullYear(),curCalDate.getMonth(),curCalDate.getDate()+7);}
+  renderCalendar();
+};
 function renderCalendar(){
-  const y=curCalDate.getFullYear(),m=curCalDate.getMonth();
-  document.getElementById('calTitle').textContent=y+'年 '+(m+1)+'月';
-  document.getElementById('calDayLabels').innerHTML=['一','二','三','四','五','六','日'].map(d=>'<div class="cal-day-label">'+d+'</div>').join('');
-  const grid=document.getElementById('calGrid');grid.innerHTML='';
-  const first=new Date(y,m,1),startDow=dayOfWeek(first),days=new Date(y,m+1,0).getDate(),today=dateKey(new Date());
-  for(let i=0;i<startDow;i++){const el=document.createElement('div');el.className='cal-day empty';grid.appendChild(el);}
-  for(let d=1;d<=days;d++){
-    const date=new Date(y,m,d),dk=dateKey(date),isH=isHighDay(date);
-    const hasData=diaryEntries[dk]&&Object.values(diaryEntries[dk].meals||{}).some(md=>['carb','prot','fat'].some(t=>(md[t]||[]).length>0));
-    const btn=document.createElement('button');
-    btn.className='cal-day'+(dk===today?' today':'')+(selDate===dk?' selected':'')+(isH?' is-high':' is-low')+(hasData?' has-data':'');
-    btn.innerHTML=d+'<div class="cal-day-type">'+(isH?'高碳':'低碳')+'</div>';
-    btn.onclick=()=>{selDate=dk;curDiaryMeal=null;renderCalendar();renderDiaryContent();};
-    grid.appendChild(btn);
+  const today=dateKey(new Date());
+  const todayObj=new Date();
+  const grid=document.getElementById('calGrid');
+  const labels=document.getElementById('calDayLabels');
+  if(!grid)return;
+  labels.innerHTML=['一','二','三','四','五','六','日'].map(d=>'<div class="cal-day-label">'+d+'</div>').join('');
+  grid.innerHTML='';
+  if(calExpanded){
+    // 月視圖
+    const y=curCalDate.getFullYear(),m=curCalDate.getMonth();
+    document.getElementById('calTitle').textContent=y+'年 '+(m+1)+'月';
+    const first=new Date(y,m,1),startDow=dayOfWeek(first),days=new Date(y,m+1,0).getDate();
+    for(let i=0;i<startDow;i++){const el=document.createElement('div');el.className='cal-day empty';grid.appendChild(el);}
+    for(let d=1;d<=days;d++){
+      const date=new Date(y,m,d),dk=dateKey(date),isH=isHighDay(date);
+      const isPast=date<new Date(todayObj.getFullYear(),todayObj.getMonth(),todayObj.getDate());
+      const isFuture=date>new Date(todayObj.getFullYear(),todayObj.getMonth(),todayObj.getDate());
+      const hasData=diaryEntries[dk]&&Object.values(diaryEntries[dk].meals||{}).some(md=>['carb','prot','fat'].some(t=>(md[t]||[]).length>0));
+      const btn=document.createElement('button');
+      let cls='cal-day'+(dk===today?' today':'')+(selDate===dk?' selected':'')+(isH?' is-high':' is-low')+(hasData?' has-data':'')+(isPast?' is-past':'')+(isFuture?' is-future':'');
+      btn.className=cls;
+      btn.innerHTML=d+'<div class="cal-day-type">'+(isH?'高碳':'低碳')+'</div>';
+      btn.onclick=()=>{selDate=dk;curDiaryMeal=null;renderCalendar();renderDiaryContent();};
+      grid.appendChild(btn);
+    }
+  } else {
+    // 週視圖：找當週週一
+    const ref=new Date(curCalDate.getFullYear(),curCalDate.getMonth(),curCalDate.getDate());
+    const dow=dayOfWeek(ref); // 0=週一
+    const weekStart=new Date(ref.getFullYear(),ref.getMonth(),ref.getDate()-dow);
+    const weekEnd=new Date(weekStart.getFullYear(),weekStart.getMonth(),weekStart.getDate()+6);
+    // 標題：同月份只顯示一個月，跨月顯示兩個
+    let titleStr='';
+    if(weekStart.getMonth()===weekEnd.getMonth()){
+      titleStr=weekStart.getFullYear()+'年 '+(weekStart.getMonth()+1)+'月';
+    } else {
+      titleStr=(weekStart.getMonth()+1)+'月 / '+(weekEnd.getMonth()+1)+'月';
+    }
+    document.getElementById('calTitle').textContent=titleStr;
+    for(let i=0;i<7;i++){
+      const date=new Date(weekStart.getFullYear(),weekStart.getMonth(),weekStart.getDate()+i);
+      const dk=dateKey(date),isH=isHighDay(date);
+      const isPast=date<new Date(todayObj.getFullYear(),todayObj.getMonth(),todayObj.getDate());
+      const isFuture=date>new Date(todayObj.getFullYear(),todayObj.getMonth(),todayObj.getDate());
+      const hasData=diaryEntries[dk]&&Object.values(diaryEntries[dk].meals||{}).some(md=>['carb','prot','fat'].some(t=>(md[t]||[]).length>0));
+      const btn=document.createElement('button');
+      let cls='cal-day'+(dk===today?' today':'')+(selDate===dk?' selected':'')+(isH?' is-high':' is-low')+(hasData?' has-data':'')+(isPast?' is-past':'')+(isFuture?' is-future':'');
+      btn.className=cls;
+      btn.innerHTML=date.getDate()+'<div class="cal-day-type">'+(isH?'高碳':'低碳')+'</div>';
+      btn.onclick=()=>{selDate=dk;curDiaryMeal=null;renderCalendar();renderDiaryContent();};
+      grid.appendChild(btn);
+    }
   }
 }
-window.calPrevMonth=()=>{curCalDate=new Date(curCalDate.getFullYear(),curCalDate.getMonth()-1,1);renderCalendar();};
-window.calNextMonth=()=>{curCalDate=new Date(curCalDate.getFullYear(),curCalDate.getMonth()+1,1);renderCalendar();};
 
 function computeDiaryTargets(dk){
   const date=new Date(dk),dayType=isHighDay(date)?'high':'low',day=calcResult[dayType];
@@ -1632,15 +1688,11 @@ function renderDiaryContent(){
     ['carb','prot','fat'].forEach(t=>{(md[t]||[]).forEach(item=>{tC+=item.grams*(item.food.c/100);tP+=item.grams*(item.food.p/100);tF+=item.grams*(item.food.f/100);});});
   });
   const tK=kcalFromMacros(tC,tP,tF);
-  const tgt=targets[slot?.key]||{c:0,p:0,f:0,consumed:{c:0,p:0,f:0}};
-  const cons=tgt.consumed;
-  const consK=kcalFromMacros(cons.c,cons.p,cons.f);
-  const tgtK=kcalFromMacros(tgt.c,tgt.p,tgt.f);
   const dateObj=new Date(selDate),dayType=isHighDay(dateObj)?'high':'low';
 
   let tabsHTML='';
   allSlots.forEach(s=>{
-    const cls='meal-tab'+(s.isExtra?' extra-tab':'')+(s.key===curDiaryMeal?' active':'');
+    const cls='meal-tab'+(s.isExtra?' extra-tab':'')+( s.key===curDiaryMeal?' active':'');
     tabsHTML+=`<button class="${cls}" onclick="setDiaryMeal('${s.key}')">${s.label}</button>`;
   });
   tabsHTML+='<button class="add-extra-btn" onclick="addDiaryExtra()">+ 額外餐食</button>';
@@ -1656,22 +1708,14 @@ function renderDiaryContent(){
     else posText='第 '+afterVal+' 餐後';
     const canUp=afterVal>0;
     const canDown=afterVal<day.meals;
-    // 用 input 直接呈現名字,blur 或 Enter 時存
     const escLabel=curLabel.replace(/"/g,'&quot;');
     extraPos=`<div class="extra-pos-row"><span class="badge badge-extra">額外餐食</span>
       <input type="text" maxlength="10" value="${escLabel}" style="flex:1;min-width:80px;max-width:140px;padding:4px 8px;font-size:13px;border:1px solid #EFDED2;border-radius:6px;background:#FFFAF5;" placeholder="名稱(留空回預設)" onblur="renameDiaryExtra('${slot.key}',this.value)" onkeydown="if(event.key==='Enter')this.blur()" title="可改名(最多10字)"/>
       <span style="font-size:13px;color:#6B5752;">位置:${posText}</span>
-      <button class="btn btn-outline" style="padding:4px 10px;font-size:13px;${canUp?'':'opacity:0.4;cursor:not-allowed;'}" ${canUp?'':'disabled'} onclick="moveDiaryExtra('${slot.key}',-1)">↑ 上移</button>
-      <button class="btn btn-outline" style="padding:4px 10px;font-size:13px;${canDown?'':'opacity:0.4;cursor:not-allowed;'}" ${canDown?'':'disabled'} onclick="moveDiaryExtra('${slot.key}',1)">↓ 下移</button>
+      <button class="btn btn-outline" style="padding:4px 10px;font-size:13px;${canUp?'':'opacity:0.4;cursor:not-allowed;'}" ${canUp?'':' disabled'} onclick="moveDiaryExtra('${slot.key}',-1)">↑ 上移</button>
+      <button class="btn btn-outline" style="padding:4px 10px;font-size:13px;${canDown?'':'opacity:0.4;cursor:not-allowed;'}" ${canDown?'':' disabled'} onclick="moveDiaryExtra('${slot.key}',1)">↓ 下移</button>
       <button class="extra-remove-btn" onclick="removeDiaryExtra('${slot.key}')">刪除</button></div>`;
   }
-
-  const tcHTML=`<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem;">
-    <div class="target-card"><div class="target-label">${slot?.isExtra?'碳水攝入':'碳水目標'}</div><div class="target-val">${slot?.isExtra?Math.round(cons.c):tgt.c}g</div>${slot?.isExtra?'':remHTML(tgt.c-cons.c)}</div>
-    <div class="target-card"><div class="target-label">${slot?.isExtra?'蛋白質攝入':'蛋白質目標'}</div><div class="target-val">${slot?.isExtra?Math.round(cons.p):tgt.p}g</div>${slot?.isExtra?'':remHTML(tgt.p-cons.p)}</div>
-    <div class="target-card"><div class="target-label">${slot?.isExtra?'脂肪攝入':'脂肪目標'}</div><div class="target-val">${slot?.isExtra?Math.round(cons.f):tgt.f}g</div>${slot?.isExtra?'':remHTML(tgt.f-cons.f)}</div>
-    <div class="target-card"><div class="target-label">${slot?.isExtra?'熱量攝入':'熱量目標'}</div><div class="target-val kcal">${slot?.isExtra?consK:tgtK}</div>${slot?.isExtra?'<div class="target-remain remain-ok">kcal</div>':remHTML(tgtK-consK,' kcal')}</div>
-  </div>`;
 
   const md=getDiaryItems(selDate,slot?.key||'m1');
   dc.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
@@ -1679,21 +1723,18 @@ function renderDiaryContent(){
     <button class="btn btn-outline" style="font-size:12px;padding:6px 12px;" onclick="openApplyModal()"><i class="ti ti-template" style="font-size:13px;margin-right:4px;"></i>套用模板</button>
   </div>
   <div class="card" id="diary-top-bars">${barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal')}</div>
-  <div class="card"><div class="meal-tabs">${tabsHTML}</div>${extraPos}${tcHTML}${renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'diary')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'diary')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'diary')}</div>`;
+  <div class="card"><div class="meal-tabs">${tabsHTML}</div>${extraPos}${renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'diary')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'diary')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'diary')}</div>`;
 
   bindFoodEvents('diary',
     type=>getDiaryItems(selDate,slot.key)[type],
     (light)=>{
       saveDiary(selDate);
       if(light){
-        // 打字中:只更新頂部總進度條,不重建輸入框(避免游標跳走)
         updateDiaryBars(selDate,day);
       } else {
-        // 失焦或新增/刪除:完整重畫
         renderDiaryContent();
       }
-    },
-    (type)=>{const c=getDiaryTotals(selDate,slot.key);return type==='carb'?tgt.c-c.c:type==='prot'?tgt.p-c.p:tgt.f-c.f;}
+    }
   );
 }
 
