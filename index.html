@@ -577,8 +577,8 @@
           </div>
           <div class="collapsed-summary" id="collapsedSummary">
             <div class="collapsed-summary-grid">
-              <div class="collapsed-mini-card"><div class="collapsed-mini-title high">高碳日</div><div class="collapsed-mini-row"><span>一天 碳水</span><span id="cs-hdc">—</span></div><div class="collapsed-mini-row"><span>一天 蛋白質</span><span id="cs-hdp">—</span></div><div class="collapsed-mini-row"><span>一天 脂肪</span><span id="cs-hdf">—</span></div><div class="collapsed-mini-row kcal-row"><span>一天 熱量</span><span id="cs-hdk">—</span></div><div class="collapsed-mini-divider"></div><div class="collapsed-mini-row"><span>一餐 碳水</span><span id="cs-hmc">—</span></div><div class="collapsed-mini-row"><span>一餐 蛋白質</span><span id="cs-hmp">—</span></div><div class="collapsed-mini-row"><span>一餐 脂肪</span><span id="cs-hmf">—</span></div><div class="collapsed-mini-row kcal-row"><span>一餐 熱量</span><span id="cs-hmk">—</span></div></div>
-              <div class="collapsed-mini-card"><div class="collapsed-mini-title low">低碳日</div><div class="collapsed-mini-row"><span>一天 碳水</span><span id="cs-ldc">—</span></div><div class="collapsed-mini-row"><span>一天 蛋白質</span><span id="cs-ldp">—</span></div><div class="collapsed-mini-row"><span>一天 脂肪</span><span id="cs-ldf">—</span></div><div class="collapsed-mini-row kcal-row"><span>一天 熱量</span><span id="cs-ldk">—</span></div><div class="collapsed-mini-divider"></div><div class="collapsed-mini-row"><span>一餐 碳水</span><span id="cs-lmc">—</span></div><div class="collapsed-mini-row"><span>一餐 蛋白質</span><span id="cs-lmp">—</span></div><div class="collapsed-mini-row"><span>一餐 脂肪</span><span id="cs-lmf">—</span></div><div class="collapsed-mini-row kcal-row"><span>一餐 熱量</span><span id="cs-lmk">—</span></div></div>
+              <div class="collapsed-mini-card"><div class="collapsed-mini-title high">高碳日</div><div class="collapsed-mini-row"><span>碳水</span><span id="cs-hdc">—</span></div><div class="collapsed-mini-row"><span>蛋白質</span><span id="cs-hdp">—</span></div><div class="collapsed-mini-row"><span>脂肪</span><span id="cs-hdf">—</span></div><div class="collapsed-mini-row kcal-row"><span>熱量</span><span id="cs-hdk">—</span></div></div>
+              <div class="collapsed-mini-card"><div class="collapsed-mini-title low">低碳日</div><div class="collapsed-mini-row"><span>碳水</span><span id="cs-ldc">—</span></div><div class="collapsed-mini-row"><span>蛋白質</span><span id="cs-ldp">—</span></div><div class="collapsed-mini-row"><span>脂肪</span><span id="cs-ldf">—</span></div><div class="collapsed-mini-row kcal-row"><span>熱量</span><span id="cs-ldk">—</span></div></div>
             </div>
           </div>
           <div id="calcBody">
@@ -606,8 +606,8 @@
               <div style="margin-top:1rem;"><div class="sec-label">高低碳落差設定(週總量鎖定)</div><div class="slider-block"><div class="slider-header"><div><div class="slider-title">碳水化合物</div><div class="slider-focus" id="carbAvgHint">控制高碳日碳水倍數・週平均 — 倍</div></div><div class="slider-val">高碳日 <input type="number" id="carbHighInput" step="0.05" min="0" style="width:62px;text-align:center;padding:4px 6px;font-size:13px;" oninput="onCarbInput()" onblur="onCarbInputBlur()"/> 倍</div></div><input type="range" id="carbSlider" min="0" max="100" value="50" step="1" oninput="updateSliderBounds();recalc();" disabled/><div class="slider-ends"><span>← 無落差</span><span>最大落差 →</span></div></div><div class="slider-block"><div class="slider-header"><div><div class="slider-title">脂肪</div><div class="slider-focus" id="fatAvgHint">控制低碳日脂肪倍數・週平均 — 倍</div></div><div class="slider-val">低碳日 <input type="number" id="fatLowInput" step="0.05" min="0" style="width:62px;text-align:center;padding:4px 6px;font-size:13px;" oninput="onFatInput()" onblur="onFatInputBlur()"/> 倍</div></div><input type="range" id="fatSlider" min="0" max="100" value="50" step="1" oninput="updateSliderBounds();recalc();" disabled/><div class="slider-ends"><span>← 無落差</span><span>最大落差 →</span></div></div></div>
 
               <div class="result-cards" id="resultCards" style="display:none;">
-                <div class="result-day-card"><div class="result-day-card-title high">高碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span id="r-hdc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-hdp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-hdf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-hdk">—</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span id="r-hmc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-hmp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-hmf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-hmk">—</span></div></div>
-                <div class="result-day-card"><div class="result-day-card-title low">低碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span id="r-ldc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-ldp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-ldf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-ldk">—</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span id="r-lmc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-lmp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-lmf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-lmk">—</span></div></div>
+                <div class="result-day-card"><div class="result-day-card-title high">高碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span id="r-hdc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-hdp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-hdf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-hdk">—</span></div></div>
+                <div class="result-day-card"><div class="result-day-card-title low">低碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span id="r-ldc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-ldp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-ldf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-ldk">—</span></div></div>
               </div>
             </div>
 
@@ -1325,16 +1325,12 @@ window.recalc=function(){
 window.updateResultCards=function(){
   const rc=document.getElementById('resultCards'),cs=document.getElementById('collapsedSummary');
   if(!calcResult){rc.style.display='none';if(calcCollapsed)cs.style.display='none';return;}
-  const h=calcResult.high,l=calcResult.low,m=h.meals;rc.style.display='grid';
+  const h=calcResult.high,l=calcResult.low;rc.style.display='grid';
   const set=(id,v,unit)=>{const el=document.getElementById(id);if(el)el.textContent=v+(unit||'g');};
   set('r-hdc',h.carb);set('r-hdp',h.prot);set('r-hdf',h.fat);set('r-hdk',h.kcal,' kcal');
-  set('r-hmc',Math.round(h.carb/m));set('r-hmp',Math.round(h.prot/m));set('r-hmf',Math.round(h.fat/m));set('r-hmk',Math.round(h.kcal/m),' kcal');
   set('r-ldc',l.carb);set('r-ldp',l.prot);set('r-ldf',l.fat);set('r-ldk',l.kcal,' kcal');
-  set('r-lmc',Math.round(l.carb/m));set('r-lmp',Math.round(l.prot/m));set('r-lmf',Math.round(l.fat/m));set('r-lmk',Math.round(l.kcal/m),' kcal');
   set('cs-hdc',h.carb);set('cs-hdp',h.prot);set('cs-hdf',h.fat);set('cs-hdk',h.kcal,' kcal');
-  set('cs-hmc',Math.round(h.carb/m));set('cs-hmp',Math.round(h.prot/m));set('cs-hmf',Math.round(h.fat/m));set('cs-hmk',Math.round(h.kcal/m),' kcal');
   set('cs-ldc',l.carb);set('cs-ldp',l.prot);set('cs-ldf',l.fat);set('cs-ldk',l.kcal,' kcal');
-  set('cs-lmc',Math.round(l.carb/m));set('cs-lmp',Math.round(l.prot/m));set('cs-lmf',Math.round(l.fat/m));set('cs-lmk',Math.round(l.kcal/m),' kcal');
   if(calcCollapsed)cs.style.display='block';
 };
 window.toggleCalc=()=>{calcCollapsed=!calcCollapsed;document.getElementById('calcBody').style.display=calcCollapsed?'none':'block';document.getElementById('collapseBtn').innerHTML=calcCollapsed?'展開 <i class="ti ti-chevron-down" style="font-size:13px;vertical-align:-1px"></i>':'收合 <i class="ti ti-chevron-up" style="font-size:13px;vertical-align:-1px"></i>';document.getElementById('collapsedSummary').style.display=(calcCollapsed&&calcResult)?'block':'none';};
@@ -1367,7 +1363,22 @@ function applyCalcSettings(d){
   },100);
 }
 
-function resultSummaryHTML(){if(!calcResult)return'';const h=calcResult.high,l=calcResult.low,m=h.meals;return'<div class="result-cards" style="margin-bottom:1rem;"><div class="result-day-card"><div class="result-day-card-title high">高碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span>'+h.carb+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+h.prot+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+h.fat+'g</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span>'+h.kcal+' kcal</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span>'+Math.round(h.carb/m)+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+Math.round(h.prot/m)+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+Math.round(h.fat/m)+'g</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span>'+Math.round(h.kcal/m)+' kcal</span></div></div><div class="result-day-card"><div class="result-day-card-title low">低碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span>'+l.carb+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+l.prot+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+l.fat+'g</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span>'+l.kcal+' kcal</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span>'+Math.round(l.carb/m)+'g</span></div><div class="result-macro-row"><span>蛋白質</span><span>'+Math.round(l.prot/m)+'g</span></div><div class="result-macro-row"><span>脂肪</span><span>'+Math.round(l.fat/m)+'g</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span>'+Math.round(l.kcal/m)+' kcal</span></div></div></div>';}
+function resultSummaryHTML(){
+  if(!calcResult)return'';
+  const h=calcResult.high,l=calcResult.low;
+  return'<div class="result-cards" style="margin-bottom:1rem;">'
+    +'<div class="result-day-card"><div class="result-day-card-title high">高碳日</div>'
+    +'<div class="result-macro-row"><span>碳水</span><span>'+h.carb+'g</span></div>'
+    +'<div class="result-macro-row"><span>蛋白質</span><span>'+h.prot+'g</span></div>'
+    +'<div class="result-macro-row"><span>脂肪</span><span>'+h.fat+'g</span></div>'
+    +'<div class="result-macro-row kcal-row"><span>熱量</span><span>'+h.kcal+' kcal</span></div></div>'
+    +'<div class="result-day-card"><div class="result-day-card-title low">低碳日</div>'
+    +'<div class="result-macro-row"><span>碳水</span><span>'+l.carb+'g</span></div>'
+    +'<div class="result-macro-row"><span>蛋白質</span><span>'+l.prot+'g</span></div>'
+    +'<div class="result-macro-row"><span>脂肪</span><span>'+l.fat+'g</span></div>'
+    +'<div class="result-macro-row kcal-row"><span>熱量</span><span>'+l.kcal+' kcal</span></div></div>'
+    +'</div>';
+}
 
 function remHTML(rem,unit){const u=unit||'g';if(rem<0)return'<div class="target-remain remain-over">超出 '+Math.round(Math.abs(rem))+u+'</div>';return'<div class="target-remain remain-ok">剩 '+Math.round(rem)+u+'</div>';}
 
