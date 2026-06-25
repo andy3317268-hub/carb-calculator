@@ -623,12 +623,7 @@
                   <div class="result-macro-row"><span>蛋白質 (30%)</span><span id="n-dp">—</span></div>
                   <div class="result-macro-row"><span>脂肪 (30%)</span><span id="n-df">—</span></div>
                   <div class="result-macro-row kcal-row"><span>熱量 (TDEE)</span><span id="n-dk">—</span></div>
-                  <div class="result-divider"></div>
-                  <div class="result-section-label">一餐</div>
-                  <div class="result-macro-row"><span>碳水</span><span id="n-mc">—</span></div>
-                  <div class="result-macro-row"><span>蛋白質</span><span id="n-mp">—</span></div>
-                  <div class="result-macro-row"><span>脂肪</span><span id="n-mf">—</span></div>
-                  <div class="result-macro-row kcal-row"><span>熱量</span><span id="n-mk">—</span></div>
+
                 </div>
               </div>
             </div>
@@ -653,12 +648,7 @@
                   <div class="result-macro-row"><span>蛋白質 (30%)</span><span id="c532-dp">—</span></div>
                   <div class="result-macro-row"><span>脂肪 (20%)</span><span id="c532-df">—</span></div>
                   <div class="result-macro-row kcal-row"><span>熱量 (TDEE−缺口)</span><span id="c532-dk">—</span></div>
-                  <div class="result-divider"></div>
-                  <div class="result-section-label">一餐</div>
-                  <div class="result-macro-row"><span>碳水</span><span id="c532-mc">—</span></div>
-                  <div class="result-macro-row"><span>蛋白質</span><span id="c532-mp">—</span></div>
-                  <div class="result-macro-row"><span>脂肪</span><span id="c532-mf">—</span></div>
-                  <div class="result-macro-row kcal-row"><span>熱量</span><span id="c532-mk">—</span></div>
+
                 </div>
                 <div style="margin-top:10px;padding:10px 12px;background:#FFF3E0;border-radius:8px;font-size:12px;color:#7A5848;line-height:1.7;">
                   💡 <strong>碳水漸降操作說明：</strong>穩定吃 7~10 天後，若體重停滯不動，單次減少碳水 20~30g，蛋白質與脂肪保持不動。每次調整後再觀察 7 天。
@@ -1078,7 +1068,7 @@ window.switchSection=name=>{
   document.querySelectorAll('.sidebar-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('section-'+name).classList.add('active');
   const navBtn=document.getElementById('nav-'+name);if(navBtn)navBtn.classList.add('active');
-  if(name==='calc'){
+  if(name==='calc'&&calcMode==='cycle'){
     renderWeekdayGrid();
   }
   if(name==='diary'){
@@ -1207,8 +1197,6 @@ window.recalcBMR=function(){
     const df=Math.round(tdee*0.30/9);
     const set=(id,v,u)=>{const el=document.getElementById(id);if(el)el.textContent=v+(u||'g');};
     set('n-dc',dc);set('n-dp',dp);set('n-df',df);set('n-dk',tdee,' kcal');
-    set('n-mc',Math.round(dc/meals));set('n-mp',Math.round(dp/meals));
-    set('n-mf',Math.round(df/meals));set('n-mk',Math.round(tdee/meals),' kcal');
     document.getElementById('normalResultCard').style.display='block';
     window.bmrResult=window.bmrResult||{};
     window.bmrResult.normal={carb:dc,prot:dp,fat:df,kcal:tdee};
@@ -1222,8 +1210,6 @@ window.recalcBMR=function(){
     const df=Math.round(target*0.20/9);
     const set=(id,v,u)=>{const el=document.getElementById(id);if(el)el.textContent=v+(u||'g');};
     set('c532-dc',dc);set('c532-dp',dp);set('c532-df',df);set('c532-dk',target,' kcal');
-    set('c532-mc',Math.round(dc/meals));set('c532-mp',Math.round(dp/meals));
-    set('c532-mf',Math.round(df/meals));set('c532-mk',Math.round(target/meals),' kcal');
     document.getElementById('carb532ResultCard').style.display='block';
     window.bmrResult=window.bmrResult||{};
     window.bmrResult.carb532={carb:dc,prot:dp,fat:df,kcal:target};
@@ -1240,7 +1226,7 @@ function gatherCalcSettings(){
     age:document.getElementById('age').value,
     deficit:selDeficit,
     highDays:document.getElementById('highDays').value,
-    mealCount:document.getElementById('mealCount').value,
+    mealCount:3,
     carbSlider:document.getElementById('carbSlider').value,
     fatSlider:document.getElementById('fatSlider').value,
     customCarb:document.getElementById('customCarb').value,
@@ -1323,7 +1309,7 @@ window.onFatInputBlur=function(){
 window.recalc=function(){
   const weight=parseFloat(document.getElementById('weight').value);
   const hd=parseInt(document.getElementById('highDays').value)||2,ld=7-hd;
-  const meals=parseInt(document.getElementById('mealCount').value)||3;
+  const meals=3; // 固定 3 餐（餐數欄已移除）
   const t=getActiveTier();
   if(!t||!weight||weight<1){calcResult=null;updateResultCards();return;}
   updateSliderBounds();
@@ -1368,7 +1354,7 @@ function applyCalcSettings(d){
   const setVal=(id,v)=>{if(v){const el=document.getElementById(id);if(el)el.value=v;}};
   setVal('weight',d.weight);setVal('height',d.height);setVal('age',d.age);
   setVal('highDays',d.highDays);
-  setVal('mealCount',d.mealCount);
+  // mealCount 已固定為 3，不需恢復
   setVal('customCarb',d.customCarb);setVal('customProtein',d.customProtein);setVal('customFat',d.customFat);
   setVal('customActivity',d.customActivity);
   // 缺口
@@ -1695,11 +1681,23 @@ function getDiaryItems(dk,mk){const e=getDiaryEntry(dk);if(!e.meals[mk])e.meals[
 function getDiaryTotals(dk,mk){const md=getDiaryItems(dk,mk);const all=[...md.carb,...md.prot,...md.fat];return{c:all.reduce((s,f)=>s+f.grams*(f.food.c/100),0),p:all.reduce((s,f)=>s+f.grams*(f.food.p/100),0),f:all.reduce((s,f)=>s+f.grams*(f.food.f/100),0)};}
 function saveDiary(dk){scheduleSave('diary_'+dk,diaryEntries[dk]);if(typeof checkPetReward==='function'&&dk===todayKey())checkPetReward();}
 
+function hasDiaryData(){
+  // 只要有任何模式的計算結果就可以進入日記
+  if(calcMode==='cycle')return!!calcResult;
+  if(calcMode==='normal')return!!(window.bmrResult&&window.bmrResult.normal);
+  if(calcMode==='carb532')return!!(window.bmrResult&&window.bmrResult.carb532);
+  return false;
+}
 function renderDiary(){
-  if(!calcResult){document.getElementById('diary-no-calc').style.display='block';document.getElementById('diary-main').style.display='none';return;}
-  document.getElementById('diary-no-calc').style.display='none';document.getElementById('diary-main').style.display='block';
-  document.getElementById('diary-summary').innerHTML=resultSummaryHTML();
-  renderWeekdayGrid();renderCalendar();renderDiaryContent();
+  if(!hasDiaryData()){
+    document.getElementById('diary-no-calc').style.display='block';
+    document.getElementById('diary-main').style.display='none';
+    return;
+  }
+  document.getElementById('diary-no-calc').style.display='none';
+  document.getElementById('diary-main').style.display='block';
+  if(calcMode==='cycle'){renderWeekdayGrid();}
+  renderCalendar();renderDiaryContent();
 }
 function renderWeekdayGrid(){
   const g=document.getElementById('weekdayGrid');g.innerHTML='';
@@ -2172,7 +2170,7 @@ function collectAllData(){
     gender:selGender,tier:selTier,
     weight:document.getElementById('weight').value,
     highDays:document.getElementById('highDays').value,
-    mealCount:document.getElementById('mealCount').value,
+    mealCount:3,
     carbSlider:document.getElementById('carbSlider').value,
     fatSlider:document.getElementById('fatSlider').value,
     customCarb:document.getElementById('customCarb').value,
