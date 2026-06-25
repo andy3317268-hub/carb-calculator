@@ -949,8 +949,8 @@ function loadLocalData(){
     const pd=localStorage.getItem('local_petData');if(pd){petData=JSON.parse(pd);migratePetData();}
   }catch(e){console.error('local load',e);}
   updateMacroHints();clampDays();renderFoodLib();
-  // 初始化計算模式（若 applyCalcSettings 還沒設定就預設 normal）
-  switchCalcMode(calcMode||'normal');
+  // 若 applyCalcSettings 沒有執行（沒有 localStorage），手動初始化模式
+  if(!localStorage.getItem('local_calcSettings'))switchCalcMode('normal');
   if(typeof startRoaming==='function')setTimeout(startRoaming,300);
 }
 
@@ -972,7 +972,9 @@ async function loadCloudData(){
     const petDoc=await getDoc(doc(db,'users',currentUser.uid,'petData','data'));
     if(petDoc.exists()){petData=JSON.parse(petDoc.data().value);migratePetData();}
   }catch(e){console.error('cloud load',e);}
-  updateMacroHints();clampDays();renderFoodLib();renderWeekdayGrid();
+  updateMacroHints();clampDays();renderFoodLib();
+  // cloud 資料覆蓋後重新套用模式（applyCalcSettings 已在上方呼叫）
+  switchCalcMode(calcMode);
   if(typeof startRoaming==='function')setTimeout(startRoaming,300);
 }
 
@@ -1403,37 +1405,42 @@ window.updateResultCards=function(){
 };
 window.toggleCalc=()=>{calcCollapsed=!calcCollapsed;document.getElementById('calcBody').style.display=calcCollapsed?'none':'block';document.getElementById('collapseBtn').innerHTML=calcCollapsed?'展開 <i class="ti ti-chevron-down" style="font-size:13px;vertical-align:-1px"></i>':'收合 <i class="ti ti-chevron-up" style="font-size:13px;vertical-align:-1px"></i>';document.getElementById('collapsedSummary').style.display=(calcCollapsed&&calcResult)?'block':'none';};
 function applyCalcSettings(d){
-  // 恢復模式
+  // 1. 先切換模式（讓對應 DOM 顯示出來）
   if(d.mode)switchCalcMode(d.mode);
-  // 性別
+  // 2. 性別
   if(d.gender)selectGender(d.gender);
-  // 運動級距
+  // 3. 碳循環的運動級距（只在 cycle 模式有意義）
   if(d.tier){
     selTier=d.tier;
-    document.querySelectorAll('.tier-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('[data-tier]').forEach(b=>b.classList.remove('active'));
     const tb=document.querySelector('[data-tier="'+d.tier+'"]');if(tb)tb.classList.add('active');
-    document.getElementById('customInputs').style.display=d.tier===5?'block':'none';
+    const cycleCust=document.getElementById('customInputsCycle');
+    if(cycleCust)cycleCust.style.display=d.tier===5?'block':'none';
   }
-  // 共用欄位
-  const setVal=(id,v)=>{if(v){const el=document.getElementById(id);if(el)el.value=v;}};
+  // 4. 共用欄位填值
+  const setVal=(id,v)=>{if(v!==undefined&&v!==null&&v!==''){const el=document.getElementById(id);if(el)el.value=v;}};
   setVal('weight',d.weight);setVal('height',d.height);setVal('age',d.age);
-  // 恢復 BMR 活動強度
-  if(d.bmrTier)setTimeout(()=>selectTierBMR(d.bmrTier),50);
-  if(d.bmrCoeff)setTimeout(()=>{const inp=document.getElementById('bmrCoeffInput');if(inp){inp.value=d.bmrCoeff;const row=document.getElementById('bmrCoeffRow');if(row)row.style.display='block';}},60);
+  // 5. BMR 活動強度：同步恢復（switchCalcMode 已讓 tierBlockBMR 顯示）
+  if(d.bmrTier){
+    selectTierBMR(d.bmrTier);
+    // 若有手動微調係數，覆蓋 selectTierBMR 預填的值
+    if(d.bmrCoeff){
+      const inp=document.getElementById('bmrCoeffInput');
+      if(inp){inp.value=d.bmrCoeff;const row=document.getElementById('bmrCoeffRow');if(row)row.style.display='block';}
+    }
+  }
   setVal('highDays',d.highDays);
-  // mealCount 已固定為 3，不需恢復
   setVal('customCarb',d.customCarb);setVal('customProtein',d.customProtein);setVal('customFat',d.customFat);
-  setVal('customActivity',d.customActivity);
-  // 缺口
+  // 6. 缺口
   if(d.deficit)selectDeficit(d.deficit);
   clampDays();
+  // 7. 滑桿和最終重算（等 DOM settle）
   setTimeout(()=>{
     if(d.carbSlider)document.getElementById('carbSlider').value=d.carbSlider;
     if(d.fatSlider)document.getElementById('fatSlider').value=d.fatSlider;
     if(calcMode==='cycle')recalc(); else recalcBMR();
-  },100);
+  },80);
 }
-
 function resultSummaryHTML(){
   if(!calcResult)return'';
   const h=calcResult.high,l=calcResult.low;
