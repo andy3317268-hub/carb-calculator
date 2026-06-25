@@ -584,7 +584,57 @@
           <div id="calcBody">
             <!-- ── 共用欄位（三種模式都用）── -->
             <div style="margin-top:1rem;"><div class="sec-label">性別</div><div class="gender-grid"><button class="gender-btn" id="btnM" onclick="selectGender('m')">男生</button><button class="gender-btn" id="btnF" onclick="selectGender('f')">女生</button></div></div>
-            <div style="margin-top:1rem;"><div class="sec-label">運動級距</div><div class="tier-grid"><button class="tier-btn" data-tier="1" onclick="selectTier(1)"><div class="tn">第一級</div><div class="td">每週 2–3 小時</div><div class="tmacro" id="macro1"></div></button><button class="tier-btn" data-tier="2" onclick="selectTier(2)"><div class="tn">第二級</div><div class="td">每週 4–5 小時</div><div class="tmacro" id="macro2"></div></button><button class="tier-btn" data-tier="3" onclick="selectTier(3)"><div class="tn">第三級</div><div class="td">每週 6–7 小時</div><div class="tmacro" id="macro3"></div></button><button class="tier-btn" data-tier="4" onclick="selectTier(4)"><div class="tn">第四級</div><div class="td">每週 8–9 小時</div><div class="tmacro" id="macro4"></div></button><button class="tier-btn" data-tier="5" onclick="selectTier(5)" style="grid-column:span 2;"><div class="tn">自定義</div><div class="td">自行輸入三大營養素倍數（碳循環）或活動係數（其他模式）</div></button></div><div id="customInputs" style="display:none;"><div class="custom-grid" id="customInputsCycle"><div class="custom-field"><label>碳水倍數</label><input type="number" id="customCarb" placeholder="2.2" min="0.1" max="10" step="0.1" oninput="updateSliderBounds();recalc();"/></div><div class="custom-field"><label>蛋白質倍數</label><input type="number" id="customProtein" placeholder="1.4" min="0.1" max="10" step="0.1" oninput="recalc();"/></div><div class="custom-field"><label>脂肪倍數</label><input type="number" id="customFat" placeholder="0.8" min="0.1" max="10" step="0.1" oninput="updateSliderBounds();recalc();"/></div></div><div class="custom-grid" id="customInputsBMR" style="display:none;"><div class="custom-field" style="grid-column:span 3;"><label>活動係數</label><input type="number" id="customActivity" placeholder="1.55" min="1.0" max="2.5" step="0.01" oninput="recalcBMR();"/></div></div></div></div>
+            
+            <!-- ── 碳循環：四級運動級距（只在碳循環模式顯示）── -->
+            <div id="tierBlockCycle" style="margin-top:1rem;">
+              <div class="sec-label">運動級距</div>
+              <div class="tier-grid">
+                <button class="tier-btn" data-tier="1" onclick="selectTierCycle(1)"><div class="tn">第一級</div><div class="td">每週 2–3 小時</div><div class="tmacro" id="macro1"></div></button>
+                <button class="tier-btn" data-tier="2" onclick="selectTierCycle(2)"><div class="tn">第二級</div><div class="td">每週 4–5 小時</div><div class="tmacro" id="macro2"></div></button>
+                <button class="tier-btn" data-tier="3" onclick="selectTierCycle(3)"><div class="tn">第三級</div><div class="td">每週 6–7 小時</div><div class="tmacro" id="macro3"></div></button>
+                <button class="tier-btn" data-tier="4" onclick="selectTierCycle(4)"><div class="tn">第四級</div><div class="td">每週 8–9 小時</div><div class="tmacro" id="macro4"></div></button>
+                <button class="tier-btn" data-tier="5" onclick="selectTierCycle(5)" style="grid-column:span 2;"><div class="tn">自定義</div><div class="td">自行輸入三大營養素倍數</div></button>
+              </div>
+              <div id="customInputsCycle" style="display:none;">
+                <div class="custom-grid">
+                  <div class="custom-field"><label>碳水倍數</label><input type="number" id="customCarb" placeholder="2.2" min="0.1" max="10" step="0.1" oninput="updateSliderBounds();recalc();"/></div>
+                  <div class="custom-field"><label>蛋白質倍數</label><input type="number" id="customProtein" placeholder="1.4" min="0.1" max="10" step="0.1" oninput="recalc();"/></div>
+                  <div class="custom-field"><label>脂肪倍數</label><input type="number" id="customFat" placeholder="0.8" min="0.1" max="10" step="0.1" oninput="updateSliderBounds();recalc();"/></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── BMR模式：五級活動強度（一般/漸降模式顯示）── -->
+            <div id="tierBlockBMR" style="display:none;margin-top:1rem;">
+              <div class="sec-label">活動強度</div>
+              <div class="tier-grid" style="grid-template-columns:1fr 1fr;">
+                <button class="tier-btn" data-bmr-tier="1" onclick="selectTierBMR(1)">
+                  <div class="tn">久坐不動</div><div class="td">辦公室・走路 &lt;30分・幾乎不運動</div><div class="tmacro">係數 1.2</div>
+                </button>
+                <button class="tier-btn" data-bmr-tier="2" onclick="selectTierBMR(2)">
+                  <div class="tn">輕度活動</div><div class="td">走路30–60分・每週1–3次輕運動</div><div class="tmacro">係數 1.375</div>
+                </button>
+                <button class="tier-btn" data-bmr-tier="3" onclick="selectTierBMR(3)">
+                  <div class="tn">中度活動</div><div class="td">每週3–5次規律運動（慢跑・重訓）</div><div class="tmacro">係數 1.55</div>
+                </button>
+                <button class="tier-btn" data-bmr-tier="4" onclick="selectTierBMR(4)">
+                  <div class="tn">高度活動</div><div class="td">每週6–7次・體力勞動（工地・教練）</div><div class="tmacro">係數 1.725</div>
+                </button>
+                <button class="tier-btn" data-bmr-tier="5" onclick="selectTierBMR(5)" style="grid-column:span 2;">
+                  <div class="tn">極度活動</div><div class="td">每天2次訓練・重體能職業（職業選手）</div><div class="tmacro">係數 1.9</div>
+                </button>
+              </div>
+              <!-- 係數微調（選完自動帶入，可手動修改） -->
+              <div id="bmrCoeffRow" style="display:none;margin-top:10px;display:none;">
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F5E8DE;border-radius:8px;">
+                  <span style="font-size:13px;color:#6B5752;white-space:nowrap;">活動係數</span>
+                  <input type="number" id="bmrCoeffInput" placeholder="1.55" min="1.0" max="2.5" step="0.01"
+                    style="width:80px;text-align:center;padding:6px 8px;font-size:14px;font-weight:600;border:1.5px solid #B58A78;border-radius:8px;background:#FFFAF5;color:#3A2A26;"
+                    oninput="onBmrCoeffInput()"/>
+                  <span style="font-size:12px;color:#9C7E76;flex:1;">可微調（例：中度1.55 → 偏高可改1.60）</span>
+                </div>
+              </div>
+            </div>
             <div style="margin-top:1rem;">
               <div class="sec-label">體重</div>
               <div class="input-row"><input type="number" id="weight" placeholder="例如 75" min="30" max="200" oninput="recalc();recalcBMR();"/><span class="unit">公斤</span></div>
@@ -1049,6 +1099,8 @@ function getAllFoods(){return{carb:[...defaultFoods.carb,...customFoods.carb],pr
 let selGender=null,selTier=null,calcResult=null,calcCollapsed=false;
 let calcMode='normal'; // 'normal' | 'carb532' | 'cycle'
 let selDeficit=350;    // 碳水漸降缺口（300/350/400）
+let selBmrTier=null;   // BMR 模式的活動等級（1–5）
+const bmrActivityCoeff={1:1.2,2:1.375,3:1.55,4:1.725,5:1.9};
 let templates=[];
 let curTplId=null;
 let highDays=new Set([0,3]);
@@ -1098,18 +1150,35 @@ window.switchDiaryTab=name=>{
 };
 
 window.selectGender=g=>{selGender=g;document.getElementById('btnM').className='gender-btn'+(g==='m'?' active-m':'');document.getElementById('btnF').className='gender-btn'+(g==='f'?' active-f':'');updateMacroHints();if(calcMode==='cycle'){updateSliderBounds();recalc();}else{recalcBMR();}};
-window.updateMacroHints=function(){if(!selGender)return;const tiers=selGender==='f'?tiersF:tiersM;for(let i=1;i<=4;i++){const t=tiers[i];document.getElementById('macro'+i).innerHTML='碳水 '+t.carb+'x・蛋白質 '+t.protein+'x・脂肪 '+t.fat+'x';}};
-window.selectTier=t=>{
+window.updateMacroHints=function(){if(!selGender||calcMode!=='cycle')return;const tiers=selGender==='f'?tiersF:tiersM;for(let i=1;i<=4;i++){const el=document.getElementById('macro'+i);if(el){const t=tiers[i];el.innerHTML='碳水 '+t.carb+'x・蛋白質 '+t.protein+'x・脂肪 '+t.fat+'x';}}};
+// 碳循環專用的運動級距選擇
+window.selectTierCycle=t=>{
   selTier=t;
-  document.querySelectorAll('.tier-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelector('[data-tier="'+t+'"]').classList.add('active');
-  // 顯示自定義輸入欄：碳循環→倍數欄；其他模式→活動係數欄
-  document.getElementById('customInputs').style.display=t===5?'block':'none';
+  document.querySelectorAll('[data-tier]').forEach(b=>b.classList.remove('active'));
+  const tb=document.querySelector('[data-tier="'+t+'"]');if(tb)tb.classList.add('active');
   const cycleCust=document.getElementById('customInputsCycle');
-  const bmrCust=document.getElementById('customInputsBMR');
-  if(cycleCust)cycleCust.style.display=(calcMode==='cycle'&&t===5)?'grid':'none';
-  if(bmrCust)bmrCust.style.display=(calcMode!=='cycle'&&t===5)?'grid':'none';
-  if(calcMode==='cycle'){updateSliderBounds();recalc();}else{recalcBMR();}
+  if(cycleCust)cycleCust.style.display=t===5?'block':'none';
+  updateSliderBounds();recalc();
+};
+// 舊別名保留，切換碳循環時可能從 applyCalcSettings 呼叫
+window.selectTier=window.selectTierCycle;
+
+// BMR 模式（一般/漸降）的活動強度選擇
+window.selectTierBMR=function(t){
+  selBmrTier=t;
+  document.querySelectorAll('[data-bmr-tier]').forEach(b=>b.classList.remove('active'));
+  const tb=document.querySelector('[data-bmr-tier="'+t+'"]');if(tb)tb.classList.add('active');
+  // 把選中的係數預填到微調框
+  const coeff=bmrActivityCoeff[t];
+  const inp=document.getElementById('bmrCoeffInput');
+  if(inp){inp.value=coeff.toFixed(3).replace(/\.?0+$/,'');}
+  // 顯示係數微調列
+  const row=document.getElementById('bmrCoeffRow');
+  if(row)row.style.display='block';
+  recalcBMR();
+};
+window.onBmrCoeffInput=function(){
+  recalcBMR();
 };
 window.getActiveTier=function(){if(!selGender)return null;if(selTier===5){const c=parseFloat(document.getElementById('customCarb').value),p=parseFloat(document.getElementById('customProtein').value),f=parseFloat(document.getElementById('customFat').value);if(!c||!p||!f)return null;return{carb:c,protein:p,fat:f};}if(!selTier)return null;return selGender==='f'?tiersF[selTier]:tiersM[selTier];};
 window.adjustDays=d=>{const el=document.getElementById('highDays');el.value=Math.max(1,Math.min(6,parseInt(el.value)+d));clampDays();};
@@ -1131,21 +1200,23 @@ window.switchCalcMode=function(mode){
   // 顯示/隱藏身高年齡欄位
   const bmrFields=document.getElementById('bmrExtraFields');
   if(bmrFields)bmrFields.style.display=(mode==='cycle')?'none':'block';
-  // 自定義輸入切換（碳循環用倍數，其他用活動係數）
-  const cycleCustInp=document.getElementById('customInputsCycle');
-  const bmrCustInp=document.getElementById('customInputsBMR');
-  if(cycleCustInp)cycleCustInp.style.display=(mode==='cycle'&&selTier===5)?'grid':'none';
-  if(bmrCustInp)bmrCustInp.style.display=(mode!=='cycle'&&selTier===5)?'grid':'none';
+  // 顯示/隱藏對應的活動強度區塊
+  const tierCycle=document.getElementById('tierBlockCycle');
+  const tierBMR=document.getElementById('tierBlockBMR');
+  if(tierCycle)tierCycle.style.display=(mode==='cycle')?'':'none';
+  if(tierBMR)tierBMR.style.display=(mode!=='cycle')?'':'none';
   // 顯示/隱藏各模式區塊
   document.getElementById('calcModeCycle').style.display=(mode==='cycle')?'':'none';
   document.getElementById('calcModeNormal').style.display=(mode==='normal')?'':'none';
   document.getElementById('calcModeCarb532').style.display=(mode==='carb532')?'':'none';
+  // 碳循環：確保高碳日格線即時顯示
+  if(mode==='cycle')renderWeekdayGrid();
   // 觸發重算
   if(mode==='cycle')recalc(); else recalcBMR();
 };
 
 // ── BMR / TDEE 計算（一般模式 & 碳水漸降共用）────────────
-const activityCoeff={1:1.375,2:1.55,3:1.725,4:1.9};
+// activityCoeff 已由 bmrActivityCoeff 取代（見上方狀態變數）
 window.selectDeficit=function(val){
   selDeficit=val;
   [300,350,400].forEach(v=>{
@@ -1169,14 +1240,10 @@ window.recalcBMR=function(){
   const bmr=selGender==='m'
     ?(10*weight+6.25*height-5*age+5)
     :(10*weight+6.25*height-5*age-161);
-  // 活動係數
-  let coeff;
-  if(selTier===5){
-    coeff=parseFloat(document.getElementById('customActivity').value)||1.55;
-  } else {
-    coeff=selTier?activityCoeff[selTier]:null;
-  }
-  if(!coeff){
+  // 活動係數：從微調輸入框取（selectTierBMR 會預填，使用者可覆寫）
+  const coeffInp=document.getElementById('bmrCoeffInput');
+  const coeff=coeffInp?parseFloat(coeffInp.value):null;
+  if(!coeff||coeff<1.0){
     document.getElementById('bmrInfoRow').style.display='none';
     document.getElementById('normalResultCard').style.display='none';
     document.getElementById('carb532ResultCard').style.display='none';
@@ -1232,7 +1299,8 @@ function gatherCalcSettings(){
     customCarb:document.getElementById('customCarb').value,
     customProtein:document.getElementById('customProtein').value,
     customFat:document.getElementById('customFat').value,
-    customActivity:document.getElementById('customActivity')?document.getElementById('customActivity').value:'',
+    bmrTier:selBmrTier,
+    bmrCoeff:document.getElementById('bmrCoeffInput')?document.getElementById('bmrCoeffInput').value:'',
   };
 }
 window.updateSliderBounds=function(){
@@ -1349,6 +1417,9 @@ function applyCalcSettings(d){
   // 共用欄位
   const setVal=(id,v)=>{if(v){const el=document.getElementById(id);if(el)el.value=v;}};
   setVal('weight',d.weight);setVal('height',d.height);setVal('age',d.age);
+  // 恢復 BMR 活動強度
+  if(d.bmrTier)setTimeout(()=>selectTierBMR(d.bmrTier),50);
+  if(d.bmrCoeff)setTimeout(()=>{const inp=document.getElementById('bmrCoeffInput');if(inp){inp.value=d.bmrCoeff;const row=document.getElementById('bmrCoeffRow');if(row)row.style.display='block';}},60);
   setVal('highDays',d.highDays);
   // mealCount 已固定為 3，不需恢復
   setVal('customCarb',d.customCarb);setVal('customProtein',d.customProtein);setVal('customFat',d.customFat);
