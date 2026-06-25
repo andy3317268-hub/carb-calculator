@@ -1822,9 +1822,10 @@ function renderCalendar(){
       const isFuture=date>new Date(todayObj.getFullYear(),todayObj.getMonth(),todayObj.getDate());
       const hasData=diaryEntries[dk]&&Object.values(diaryEntries[dk].meals||{}).some(md=>['carb','prot','fat'].some(t=>(md[t]||[]).length>0));
       const btn=document.createElement('button');
-      let cls='cal-day'+(dk===today?' today':'')+(selDate===dk?' selected':'')+(isH?' is-high':' is-low')+(hasData?' has-data':'')+(isPast?' is-past':'')+(isFuture?' is-future':'');
+      const showHiLo=(calcMode==='cycle');
+      let cls='cal-day'+(dk===today?' today':'')+(selDate===dk?' selected':'')+(showHiLo?(isH?' is-high':' is-low'):'')+(hasData?' has-data':'')+(isPast?' is-past':'')+(isFuture?' is-future':'');
       btn.className=cls;
-      btn.innerHTML=d+'<div class="cal-day-type">'+(isH?'高碳':'低碳')+'</div>';
+      btn.innerHTML=d+(showHiLo?'<div class="cal-day-type">'+(isH?'高碳':'低碳')+'</div>':'');
       btn.onclick=()=>{selDate=dk;curDiaryMeal=null;renderCalendar();renderDiaryContent();};
       grid.appendChild(btn);
     }
@@ -1849,9 +1850,10 @@ function renderCalendar(){
       const isFuture=date>new Date(todayObj.getFullYear(),todayObj.getMonth(),todayObj.getDate());
       const hasData=diaryEntries[dk]&&Object.values(diaryEntries[dk].meals||{}).some(md=>['carb','prot','fat'].some(t=>(md[t]||[]).length>0));
       const btn=document.createElement('button');
-      let cls='cal-day'+(dk===today?' today':'')+(selDate===dk?' selected':'')+(isH?' is-high':' is-low')+(hasData?' has-data':'')+(isPast?' is-past':'')+(isFuture?' is-future':'');
+      const showHiLo2=(calcMode==='cycle');
+      let cls='cal-day'+(dk===today?' today':'')+(selDate===dk?' selected':'')+(showHiLo2?(isH?' is-high':' is-low'):'')+(hasData?' has-data':'')+(isPast?' is-past':'')+(isFuture?' is-future':'');
       btn.className=cls;
-      btn.innerHTML=date.getDate()+'<div class="cal-day-type">'+(isH?'高碳':'低碳')+'</div>';
+      btn.innerHTML=date.getDate()+(showHiLo2?'<div class="cal-day-type">'+(isH?'高碳':'低碳')+'</div>':'');
       btn.onclick=()=>{selDate=dk;curDiaryMeal=null;renderCalendar();renderDiaryContent();};
       grid.appendChild(btn);
     }
