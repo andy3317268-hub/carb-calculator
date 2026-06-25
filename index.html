@@ -604,7 +604,7 @@
             <div id="calcModeCycle">
               <div style="margin-top:1rem;"><div class="sec-label">高低碳日天數</div><div class="day-row"><span class="badge badge-high">高碳日</span><div class="day-controls"><button class="day-btn" onclick="adjustDays(-1)"><i class="ti ti-minus" style="font-size:14px"></i></button><input type="number" id="highDays" value="2" min="1" max="6" oninput="clampDays()" style="width:48px;text-align:center;"/><button class="day-btn" onclick="adjustDays(1)"><i class="ti ti-plus" style="font-size:14px"></i></button></div></div><div class="day-row" style="margin-bottom:0;"><span class="badge badge-low">低碳日</span><span id="lowDaysDisplay" style="font-size:14px;font-weight:500;">5 天</span></div><div class="week-setup" style="margin-top:10px;"><div class="sec-label">設定高碳日(點選切換)</div><div class="weekday-grid" id="weekdayGrid"></div></div></div>
               <div style="margin-top:1rem;"><div class="sec-label">高低碳落差設定(週總量鎖定)</div><div class="slider-block"><div class="slider-header"><div><div class="slider-title">碳水化合物</div><div class="slider-focus" id="carbAvgHint">控制高碳日碳水倍數・週平均 — 倍</div></div><div class="slider-val">高碳日 <input type="number" id="carbHighInput" step="0.05" min="0" style="width:62px;text-align:center;padding:4px 6px;font-size:13px;" oninput="onCarbInput()" onblur="onCarbInputBlur()"/> 倍</div></div><input type="range" id="carbSlider" min="0" max="100" value="50" step="1" oninput="updateSliderBounds();recalc();" disabled/><div class="slider-ends"><span>← 無落差</span><span>最大落差 →</span></div></div><div class="slider-block"><div class="slider-header"><div><div class="slider-title">脂肪</div><div class="slider-focus" id="fatAvgHint">控制低碳日脂肪倍數・週平均 — 倍</div></div><div class="slider-val">低碳日 <input type="number" id="fatLowInput" step="0.05" min="0" style="width:62px;text-align:center;padding:4px 6px;font-size:13px;" oninput="onFatInput()" onblur="onFatInputBlur()"/> 倍</div></div><input type="range" id="fatSlider" min="0" max="100" value="50" step="1" oninput="updateSliderBounds();recalc();" disabled/><div class="slider-ends"><span>← 無落差</span><span>最大落差 →</span></div></div></div>
-              <div style="margin-top:1rem;"><div class="sec-label">每日餐數</div><div class="input-row"><button class="day-btn" onclick="adjustMeals(-1)"><i class="ti ti-minus" style="font-size:14px"></i></button><input type="number" id="mealCount" value="3" min="1" max="8" style="width:60px;text-align:center;" oninput="recalc()"/><button class="day-btn" onclick="adjustMeals(1)"><i class="ti ti-plus" style="font-size:14px"></i></button><span class="unit">餐</span></div></div>
+
               <div class="result-cards" id="resultCards" style="display:none;">
                 <div class="result-day-card"><div class="result-day-card-title high">高碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span id="r-hdc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-hdp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-hdf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-hdk">—</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span id="r-hmc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-hmp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-hmf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-hmk">—</span></div></div>
                 <div class="result-day-card"><div class="result-day-card-title low">低碳日</div><div class="result-section-label">一天</div><div class="result-macro-row"><span>碳水</span><span id="r-ldc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-ldp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-ldf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-ldk">—</span></div><div class="result-divider"></div><div class="result-section-label">一餐</div><div class="result-macro-row"><span>碳水</span><span id="r-lmc">—</span></div><div class="result-macro-row"><span>蛋白質</span><span id="r-lmp">—</span></div><div class="result-macro-row"><span>脂肪</span><span id="r-lmf">—</span></div><div class="result-macro-row kcal-row"><span>熱量</span><span id="r-lmk">—</span></div></div>
@@ -613,7 +613,7 @@
 
             <!-- ── 一般模式結果區塊 ── -->
             <div id="calcModeNormal" style="display:none;">
-              <div style="margin-top:1rem;"><div class="sec-label">每日餐數</div><div class="input-row"><button class="day-btn" onclick="adjustMeals(-1)"><i class="ti ti-minus" style="font-size:14px"></i></button><input type="number" id="mealCountBMR" value="3" min="1" max="8" style="width:60px;text-align:center;" oninput="recalcBMR()"/><button class="day-btn" onclick="adjustMeals(1)"><i class="ti ti-plus" style="font-size:14px"></i></button><span class="unit">餐</span></div></div>
+
               <div id="normalResultCard" style="display:none;margin-top:1rem;">
                 <div style="font-size:12px;color:#8B6F66;margin-bottom:8px;">每日建議攝取（4:3:3 比例 · 維持熱量）</div>
                 <div class="result-day-card" style="background:#F0EDE6;">
@@ -643,7 +643,7 @@
                   <button class="tier-btn" id="deficitBtn400" onclick="selectDeficit(400)" style="flex:1;min-width:80px;text-align:center;"><div class="tn">積極</div><div class="td">−400 大卡</div></button>
                 </div>
               </div>
-              <div style="margin-top:1rem;"><div class="sec-label">每日餐數</div><div class="input-row"><button class="day-btn" onclick="adjustMeals(-1)"><i class="ti ti-minus" style="font-size:14px"></i></button><input type="number" id="mealCount532" value="3" min="1" max="8" style="width:60px;text-align:center;" oninput="recalcBMR()"/><button class="day-btn" onclick="adjustMeals(1)"><i class="ti ti-plus" style="font-size:14px"></i></button><span class="unit">餐</span></div></div>
+
               <div id="carb532ResultCard" style="display:none;margin-top:1rem;">
                 <div style="font-size:12px;color:#8B6F66;margin-bottom:8px;">初始配置（5:3:2 比例 · 減脂熱量）</div>
                 <div class="result-day-card">
@@ -745,7 +745,7 @@
   <div class="modal">
     <div class="modal-title">新增模板</div>
     <div class="custom-food-field"><label>模板名稱</label><input type="text" id="newTplName" placeholder="例如:高碳訓練日"/></div>
-    <div class="custom-food-field" style="margin-top:8px;"><label>類型</label><select id="newTplType"><option value="high">高碳日</option><option value="low">低碳日</option></select></div>
+    <div class="custom-food-field" style="margin-top:8px;"><label>類型</label><select id="newTplType"><option value="normal">一般模式</option><option value="carb532">碳水漸降</option><option value="high">碳循環・高碳日</option><option value="low">碳循環・低碳日</option></select></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeNewTplModal()">取消</button>
       <button class="btn btn-green" onclick="createTemplate()">建立</button>
@@ -1126,10 +1126,7 @@ window.adjustDays=d=>{const el=document.getElementById('highDays');el.value=Math
 window.clampDays=function(){const el=document.getElementById('highDays');el.value=Math.max(1,Math.min(6,parseInt(el.value)||1));document.getElementById('lowDaysDisplay').textContent=(7-parseInt(el.value))+' 天';updateSliderBounds();recalc();};
 window.adjustMeals=d=>{
   // 根據目前模式操作對應的餐數欄位
-  const idMap={normal:'mealCountBMR',carb532:'mealCount532',cycle:'mealCount'};
-  const id=idMap[calcMode]||'mealCount';
-  const el=document.getElementById(id);
-  if(el)el.value=Math.max(1,Math.min(8,parseInt(el.value)+d));
+  // 餐數控制列已移除，直接觸發重算
   if(calcMode==='cycle')recalc(); else recalcBMR();
 };
 
@@ -1204,7 +1201,7 @@ window.recalcBMR=function(){
 
   if(calcMode==='normal'){
     // 433：碳水40% 蛋白30% 脂肪30%
-    const meals=parseInt(document.getElementById('mealCountBMR').value)||3;
+    const meals=3;
     const dc=Math.round(tdee*0.40/4);
     const dp=Math.round(tdee*0.30/4);
     const df=Math.round(tdee*0.30/9);
@@ -1213,10 +1210,12 @@ window.recalcBMR=function(){
     set('n-mc',Math.round(dc/meals));set('n-mp',Math.round(dp/meals));
     set('n-mf',Math.round(df/meals));set('n-mk',Math.round(tdee/meals),' kcal');
     document.getElementById('normalResultCard').style.display='block';
+    window.bmrResult=window.bmrResult||{};
+    window.bmrResult.normal={carb:dc,prot:dp,fat:df,kcal:tdee};
     scheduleSave('calcSettings',gatherCalcSettings());
   } else if(calcMode==='carb532'){
     // 532：碳水50% 蛋白30% 脂肪20%，扣缺口
-    const meals=parseInt(document.getElementById('mealCount532').value)||3;
+    const meals=3;
     const target=tdee-selDeficit;
     const dc=Math.round(target*0.50/4);
     const dp=Math.round(target*0.30/4);
@@ -1226,6 +1225,8 @@ window.recalcBMR=function(){
     set('c532-mc',Math.round(dc/meals));set('c532-mp',Math.round(dp/meals));
     set('c532-mf',Math.round(df/meals));set('c532-mk',Math.round(target/meals),' kcal');
     document.getElementById('carb532ResultCard').style.display='block';
+    window.bmrResult=window.bmrResult||{};
+    window.bmrResult.carb532={carb:dc,prot:dp,fat:df,kcal:target};
     scheduleSave('calcSettings',gatherCalcSettings());
   }
 };
@@ -1240,8 +1241,6 @@ function gatherCalcSettings(){
     deficit:selDeficit,
     highDays:document.getElementById('highDays').value,
     mealCount:document.getElementById('mealCount').value,
-    mealCountBMR:document.getElementById('mealCountBMR').value,
-    mealCount532:document.getElementById('mealCount532').value,
     carbSlider:document.getElementById('carbSlider').value,
     fatSlider:document.getElementById('fatSlider').value,
     customCarb:document.getElementById('customCarb').value,
@@ -1369,7 +1368,7 @@ function applyCalcSettings(d){
   const setVal=(id,v)=>{if(v){const el=document.getElementById(id);if(el)el.value=v;}};
   setVal('weight',d.weight);setVal('height',d.height);setVal('age',d.age);
   setVal('highDays',d.highDays);
-  setVal('mealCount',d.mealCount);setVal('mealCountBMR',d.mealCountBMR);setVal('mealCount532',d.mealCount532);
+  setVal('mealCount',d.mealCount);
   setVal('customCarb',d.customCarb);setVal('customProtein',d.customProtein);setVal('customFat',d.customFat);
   setVal('customActivity',d.customActivity);
   // 缺口
@@ -1518,9 +1517,10 @@ window.createTemplate=()=>{
   const name=document.getElementById('newTplName').value.trim();
   if(!name)return alert('請輸入模板名稱');
   const type=document.getElementById('newTplType').value;
-  const meals=calcResult?calcResult[type].meals:3;
+  // 固定 3 個正餐（移除餐數選擇後統一預設 3）
+  const MEAL_COUNT=3;
   const tpl={id:'tpl_'+Date.now(),name,type,meals:{},dayType:type};
-  for(let i=1;i<=meals;i++)tpl.meals['m'+i]={carb:[],prot:[],fat:[]};
+  for(let i=1;i<=MEAL_COUNT;i++)tpl.meals['m'+i]={carb:[],prot:[],fat:[]};
   templates.push(tpl);
   scheduleSave('templates',templates);
   closeNewTplModal();
@@ -1528,9 +1528,16 @@ window.createTemplate=()=>{
   renderTemplateSection();
 };
 
+function tplTypeLabel(type){
+  if(type==='normal')return'一般模式';
+  if(type==='carb532')return'碳水漸降';
+  if(type==='high')return'碳循環・高碳日';
+  if(type==='low')return'碳循環・低碳日';
+  return type;
+}
 function renderTemplateSection(){
-  if(!calcResult){document.getElementById('tpl-no-calc').style.display='block';document.getElementById('tpl-main').style.display='none';return;}
-  document.getElementById('tpl-no-calc').style.display='none';document.getElementById('tpl-main').style.display='block';
+  document.getElementById('tpl-no-calc').style.display='none';
+  document.getElementById('tpl-main').style.display='block';
   document.getElementById('tpl-summary').innerHTML=resultSummaryHTML();
   const listEl=document.getElementById('tpl-list');
   if(templates.length===0){listEl.innerHTML='<div class="empty-track" style="padding:1rem 0;">還沒有模板,點右上角新增</div>';}
@@ -1538,13 +1545,12 @@ function renderTemplateSection(){
     listEl.innerHTML='<div class="tpl-list">'+templates.map(t=>{
       const nMeals=Object.keys(t.meals).filter(k=>k.startsWith('m')).length;
       const nExtras=(t.extras||[]).length;
-      const meta=(t.dayType==='high'?'高碳日':'低碳日')+'・'+nMeals+' 餐'+(nExtras>0?' +'+nExtras+' 額外':'');
-      return '<div class="tpl-card"><div class="tpl-card-header"><div><div class="tpl-card-name">'+t.name+'</div><div class="tpl-card-meta">'+meta+'</div></div><div class="tpl-card-actions"><button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="editTemplate(\''+t.id+'\')">編輯</button><button class="btn btn-red" style="font-size:12px;padding:5px 10px;" onclick="deleteTemplate(\''+t.id+'\')">刪除</button></div></div></div>';
+      const meta=tplTypeLabel(t.dayType)+'・'+nMeals+' 餐'+(nExtras>0?' +'+nExtras+' 額外':'');
+      return '<div class="tpl-card"><div class="tpl-card-header"><div><div class="tpl-card-name">'+t.name+'</div><div class="tpl-card-meta">'+meta+'</div></div><div class="tpl-card-actions"><button class="btn btn-outline" style="font-size:12px;padding:5px 10px;" onclick="editTemplate(\'+t.id+\')">編輯</button><button class="btn btn-red" style="font-size:12px;padding:5px 10px;" onclick="deleteTemplate(\'+t.id+\')">刪除</button></div></div></div>';
     }).join('')+'</div>';
   }
   if(curTplId)renderTplEditor();else document.getElementById('tpl-editor').innerHTML='';
 }
-
 window.editTemplate=id=>{curTplId=id;renderTplEditor();};
 window.deleteTemplate=id=>{if(!confirm('確定要刪除這個模板?'))return;templates=templates.filter(t=>t.id!==id);if(curTplId===id){curTplId=null;document.getElementById('tpl-editor').innerHTML='';}scheduleSave('templates',templates);renderTemplateSection();};
 
@@ -1553,7 +1559,20 @@ function renderTplEditor(){
   // 確保 extras 結構存在(舊資料相容)
   if(!tpl.extras)tpl.extras=[];
   if(typeof tpl.extraCount!=='number')tpl.extraCount=0;
-  const day=calcResult[tpl.dayType];const meals=Object.keys(tpl.meals).filter(k=>k.startsWith('m')).length;
+  // 取得當前模板對應的每日目標（碳循環用 calcResult；其他模式用 bmrResult）
+  let day;
+  if(tpl.dayType==='high'||tpl.dayType==='low'){
+    if(!calcResult)return;
+    day=calcResult[tpl.dayType];
+  } else if(tpl.dayType==='normal'&&window.bmrResult){
+    day=window.bmrResult.normal;
+  } else if(tpl.dayType==='carb532'&&window.bmrResult){
+    day=window.bmrResult.carb532;
+  } else {
+    // 沒有對應計算結果，給空殼讓 UI 還是能顯示
+    day={carb:0,prot:0,fat:0,kcal:0};
+  }
+  const meals=Object.keys(tpl.meals).filter(k=>k.startsWith('m')).length;
   // 組合 allSlots:早餐前 extras + 各正餐(後接該餐後 extras)
   const allSlots=[];
   (tpl.extras||[]).filter(e=>e.after===0).forEach(e=>allSlots.push({key:e.key,label:e.label,isExtra:true}));
@@ -1760,8 +1779,19 @@ function renderCalendar(){
 }
 
 function computeDiaryTargets(dk){
-  const date=new Date(dk),dayType=isHighDay(date)?'high':'low',day=calcResult[dayType];
-  const entry=getDiaryEntry(dk);let remC=day.carb,remP=day.prot,remF=day.fat,remM=day.meals;
+  let day;
+  if(calcMode==='cycle'){
+    if(!calcResult)return{targets:{},allSlots:[{key:'m1',label:'第 1 餐',isExtra:false}],day:{carb:0,prot:0,fat:0,kcal:0,meals:3}};
+    const dayType=isHighDay(new Date(dk))?'high':'low';
+    day=calcResult[dayType];
+  } else if(calcMode==='normal'&&window.bmrResult?.normal){
+    day={...window.bmrResult.normal,meals:3};
+  } else if(calcMode==='carb532'&&window.bmrResult?.carb532){
+    day={...window.bmrResult.carb532,meals:3};
+  } else {
+    day={carb:0,prot:0,fat:0,kcal:0,meals:3};
+  }
+  const entry=getDiaryEntry(dk);let remC=day.carb,remP=day.prot,remF=day.fat,remM=day.meals||3;
   const allSlots=[];
   // 早餐前的額外餐
   (entry.extras||[]).filter(e=>e.after===0).forEach(e=>allSlots.push({key:e.key,label:e.label,isExtra:true}));
@@ -1776,17 +1806,26 @@ function computeDiaryTargets(dk){
 
 window.openApplyModal=()=>{
   if(templates.length===0){alert('還沒有建立任何模板');return;}
-  const date=new Date(selDate),dayType=isHighDay(date)?'high':'low';
-  const matched=templates.filter(t=>t.dayType===dayType);
+  let matched;
+  if(calcMode==='cycle'&&selDate){
+    const date=new Date(selDate),dayType=isHighDay(date)?'high':'low';
+    matched=templates.filter(t=>t.dayType===dayType);
+  } else {
+    matched=templates.filter(t=>t.dayType===calcMode);
+  }
   const listEl=document.getElementById('applyTplList');
-  if(matched.length===0){listEl.innerHTML='<div style="color:#9C7E76;font-size:13px;padding:8px 0;">沒有符合今天類型('+(dayType==='high'?'高碳日':'低碳日')+')的模板</div>';}
-  else{listEl.innerHTML=matched.map(t=>{
-    const nMeals=Object.keys(t.meals).filter(k=>k.startsWith('m')).length;
-    const nExtras=(t.extras||[]).length;
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid #EFDED2;"><div><div style="font-size:13px;font-weight:500;">'+t.name+'</div><div style="font-size:12px;color:#9C7E76;">'+nMeals+' 餐'+(nExtras>0?' +'+nExtras+' 額外':'')+'</div></div><button class="btn btn-green" style="font-size:12px;padding:5px 12px;" onclick="applyTemplate(\''+t.id+'\')">套用</button></div>';
-  }).join('');}
+  if(matched.length===0){
+    const modeLabel=calcMode==='cycle'?'碳循環':calcMode==='normal'?'一般模式':'碳水漸降';
+    listEl.innerHTML='<div style="color:#9C7E76;font-size:13px;padding:8px 0;">沒有符合「'+modeLabel+'」的模板</div>';
+  } else {
+    listEl.innerHTML=matched.map(t=>{
+      const nMeals=Object.keys(t.meals).filter(k=>k.startsWith('m')).length;
+      const nExtras=(t.extras||[]).length;
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid #EFDED2;"><div><div style="font-size:13px;font-weight:500;">'+t.name+'</div><div style="font-size:12px;color:#9C7E76;">'+tplTypeLabel(t.dayType)+'・'+nMeals+' 餐'+(nExtras>0?' +'+nExtras+' 額外':'')+'</div></div><button class="btn btn-green" style="font-size:12px;padding:5px 12px;" onclick="applyTemplate(\'+t.id+\')">套用</button></div>';
+    }).join('');
+  }
   document.getElementById('applyTplModal').classList.add('show');
-};
+}
 window.closeApplyModal=()=>document.getElementById('applyTplModal').classList.remove('show');
 window.applyTemplate=id=>{
   const tpl=templates.find(t=>t.id===id);if(!tpl||!selDate)return;
@@ -1893,8 +1932,8 @@ window.moveDiaryExtra=(key,delta)=>{
   if(!calcResult)return;
   const [y,m,d]=selDate.split('-').map(Number);
   const dateObj=new Date(y,m-1,d);
-  const dayInfo=isHighDay(dateObj)?calcResult.high:calcResult.low;
-  const meals=dayInfo.meals;
+  let meals;
+  if(calcMode==='cycle'){const dayInfo=isHighDay(dateObj)?calcResult.high:calcResult.low;meals=dayInfo.meals;}else{meals=3;}
   const cur=ex.after??1;
   const newPos=cur+delta;
   if(newPos<0||newPos>meals)return;
@@ -1912,6 +1951,23 @@ window.removeDiaryExtra=key=>{
   saveDiary(selDate);renderDiaryContent();
 };
 
+function getModeBadgeHTML(dk){
+  let label='',sub='';
+  if(calcMode==='cycle'){
+    const isH=isHighDay(new Date(dk));
+    label=isH?'碳循環・高碳日':'碳循環・低碳日';
+    sub=isH?'高碳水、低脂肪':'低碳水、高脂肪';
+  } else if(calcMode==='normal'){
+    label='一般模式';sub='每天固定攝取・4:3:3 比例';
+  } else if(calcMode==='carb532'){
+    label='碳水漸降';sub='熱量缺口 '+selDeficit+' kcal・5:3:2 比例';
+  }
+  if(!label)return'';
+  return'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 10px;background:#F5E8DE;border-radius:8px;">'
+    +'<span style="font-size:12px;font-weight:600;color:#7A5848;">📊 '+label+'</span>'
+    +'<span style="font-size:11px;color:#9C7E76;">'+sub+'</span>'
+    +'</div>';
+}
 function updateDiaryBars(dk,day){
   const el=document.getElementById('diary-top-bars');
   if(!el)return;
@@ -1921,7 +1977,7 @@ function updateDiaryBars(dk,day){
     ['carb','prot','fat'].forEach(t=>{(md[t]||[]).forEach(item=>{tC+=item.grams*(item.food.c/100);tP+=item.grams*(item.food.p/100);tF+=item.grams*(item.food.f/100);});});
   });
   const tK=kcalFromMacros(tC,tP,tF);
-  el.innerHTML=barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal');
+  el.innerHTML=getModeBadgeHTML(dk)+barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal');
 }
 
 function renderDiaryContent(){
@@ -1936,7 +1992,8 @@ function renderDiaryContent(){
     ['carb','prot','fat'].forEach(t=>{(md[t]||[]).forEach(item=>{tC+=item.grams*(item.food.c/100);tP+=item.grams*(item.food.p/100);tF+=item.grams*(item.food.f/100);});});
   });
   const tK=kcalFromMacros(tC,tP,tF);
-  const dateObj=new Date(selDate),dayType=isHighDay(dateObj)?'high':'low';
+  const dateObj=new Date(selDate);
+  const dayType=(calcMode==='cycle'&&isHighDay(dateObj))?'high':'low';
 
   let tabsHTML='';
   allSlots.forEach(s=>{
@@ -1967,7 +2024,7 @@ function renderDiaryContent(){
 
   const md=getDiaryItems(selDate,slot?.key||'m1');
   dc.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-    <div style="font-size:14px;font-weight:500;">${selDate.replace(/-/g,'/')}(${dayType==='high'?'高碳日':'低碳日'})</div>
+    <div style="font-size:14px;font-weight:500;">${selDate.replace(/-/g,'/')}${calcMode==='cycle'?'('+( dayType==='high'?'高碳日':'低碳日')+')':''}</div>
     <button class="btn btn-outline" style="font-size:12px;padding:6px 12px;" onclick="openApplyModal()"><i class="ti ti-template" style="font-size:13px;margin-right:4px;"></i>套用模板</button>
   </div>
   <div class="card" id="diary-top-bars">${barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal')}</div>
