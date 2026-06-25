@@ -181,17 +181,17 @@
     .weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px;}
     .weekday-btn{border:0.5px solid #E5D2C5;border-radius:8px;padding:8px 4px;cursor:pointer;text-align:center;font-size:12px;font-weight:500;color:#9C7E76;background:#FFFAF5;font-family:inherit;}
     .weekday-btn.is-high{border:1.5px solid #A89878;background:#E6DDD0;color:#7A5848;}
-    .cal-day.is-past{opacity:0.45;}
-    .cal-day.is-future{opacity:0.85;}
+    .cal-day.is-past{opacity:0.4;background:#F5EEE8;}
+    .cal-day.is-future{background:#FDFAF7;border-style:dashed;border-color:#DDD0C4;color:#B8A096;}
     .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
     .cal-title{font-size:16px;font-weight:500;color:#3A2A26;}
     .cal-nav{background:none;border:0.5px solid #C8AFA0;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;}
     .cal-nav:hover{background:#F5E8DE;}
     .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:1rem;}
     .cal-day-label{text-align:center;font-size:11px;color:#B8A096;padding:4px 0;}
-    .cal-day{border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;font-size:13px;color:#9C7E76;background:#FFFAF5;border:0.5px solid transparent;font-family:inherit;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;}
+    .cal-day{border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;font-size:13px;color:#9C7E76;background:#FFFAF5;border:0.5px solid #E5D2C5;font-family:inherit;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;}
     .cal-day:hover{background:#F5E8DE;}
-    .cal-day.today{font-weight:600;color:#3A2A26;}
+    .cal-day.today{font-weight:600;color:#3A2A26;border-color:#C8AFA0;}
     .cal-day.selected{border:1.5px solid #B58A78;background:#F2DEDC;color:#946A58;}
     .cal-day.is-high{border-color:#A89878;}
     .cal-day.is-high.selected{border:1.5px solid #A89878;background:#E6DDD0;color:#7A5848;}
@@ -362,6 +362,107 @@
     .settings-hint{font-size:11px;color:#9C7E76;margin-top:6px;line-height:1.6;}
     body.theme-matcha .settings-hint{color:#82876F;}
     body.theme-maple .settings-hint{color:#937555;}
+
+    /* ============ 健身模組 ============ */
+    .workout-tab-bar{display:flex;gap:6px;margin-bottom:1rem;}
+    .workout-tab{flex:1;padding:9px 6px;border:0.5px solid #C8AFA0;border-radius:8px;background:#FFFAF5;cursor:pointer;font-size:13px;font-weight:500;color:#9C7E76;font-family:inherit;transition:all 0.15s;}
+    .workout-tab:hover{background:#F5E8DE;color:#3A2A26;}
+    .workout-tab.active{background:#B58A78;color:#FFFAF5;border-color:#B58A78;}
+    /* 日誌 */
+    .wlog-date-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+    .wlog-date-label{font-size:15px;font-weight:500;color:#3A2A26;}
+    .wlog-mode-toggle{display:flex;gap:6px;margin-bottom:1rem;}
+    .wlog-mode-btn{flex:1;padding:8px;border:0.5px solid #C8AFA0;border-radius:8px;background:#FFFAF5;cursor:pointer;font-size:13px;color:#9C7E76;font-family:inherit;transition:all 0.15s;}
+    .wlog-mode-btn.active{background:#B58A78;color:#FFFAF5;border-color:#B58A78;}
+    .wlog-plan-select{margin-bottom:1rem;}
+    .wlog-plan-select select{width:100%;}
+    .wlog-exercise-block{background:#FFFAF5;border:0.5px solid #EFDED2;border-radius:10px;padding:1rem;margin-bottom:10px;}
+    .wlog-exercise-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+    .wlog-exercise-name{font-size:14px;font-weight:500;color:#3A2A26;}
+    .wlog-exercise-meta{font-size:11px;color:#9C7E76;margin-top:2px;}
+    .wlog-set-row{display:grid;grid-template-columns:28px 1fr 1fr 1fr 28px;gap:6px;align-items:center;margin-bottom:6px;}
+    .wlog-set-num{font-size:12px;color:#B8A096;text-align:center;}
+    .wlog-set-label{font-size:11px;color:#9C7E76;text-align:center;margin-bottom:2px;}
+    .wlog-set-input-wrap{display:flex;flex-direction:column;}
+    .wlog-set-input-wrap input{text-align:center;padding:6px 4px;font-size:13px;}
+    .wlog-add-set-btn{background:#F5E8DE;border:0.5px dashed #C8AFA0;border-radius:8px;padding:6px;width:100%;cursor:pointer;font-size:12px;color:#9C7E76;font-family:inherit;margin-top:4px;}
+    .wlog-add-set-btn:hover{background:#EFDFD0;color:#3A2A26;}
+    .wlog-add-exercise-btn{background:#FFFAF5;border:0.5px dashed #B58A78;border-radius:10px;padding:12px;width:100%;cursor:pointer;font-size:13px;color:#B58A78;font-family:inherit;margin-bottom:10px;}
+    .wlog-add-exercise-btn:hover{background:#F5E8DE;}
+    .wlog-note-input{width:100%;font-size:12px;padding:6px 8px;border:0.5px solid #EFDED2;border-radius:6px;background:#FAF2EC;color:#3A2A26;font-family:inherit;resize:none;margin-top:4px;}
+    .wlog-note-input:focus{border-color:#B58A78;outline:none;}
+    .wlog-save-btn{width:100%;margin-top:4px;}
+    .wlog-summary-card{background:#F5E8DE;border-radius:10px;padding:12px;margin-bottom:10px;}
+    .wlog-summary-title{font-size:12px;color:#9C7E76;margin-bottom:6px;}
+    .wlog-summary-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;}
+    .wlog-summary-row span:first-child{color:#9C7E76;}
+    .wlog-summary-row span:last-child{font-weight:500;color:#3A2A26;}
+    /* 動作庫 */
+    .exlib-search{margin-bottom:1rem;}
+    .exlib-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;}
+    .exlib-filter-btn{background:#EFDFD0;border:0.5px solid #EFDED2;border-radius:20px;padding:5px 12px;cursor:pointer;font-size:12px;color:#8B6F66;font-family:inherit;transition:all 0.15s;}
+    .exlib-filter-btn.active{background:#B58A78;color:#FFFAF5;border-color:#B58A78;}
+    .exlib-item{background:#FFFAF5;border:0.5px solid #EFDED2;border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer;transition:background 0.12s;}
+    .exlib-item:hover{background:#F5E8DE;}
+    .exlib-item-header{display:flex;align-items:center;justify-content:space-between;}
+    .exlib-item-name{font-size:14px;font-weight:500;color:#3A2A26;}
+    .exlib-item-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+    .exlib-tag{font-size:10px;padding:1px 7px;border-radius:4px;background:#EFDFD0;color:#9C7E76;}
+    .exlib-tag.muscle{background:#E6DDD0;color:#7A5848;}
+    .exlib-tag.equip{background:#EFE8D8;color:#6B5038;}
+    .exlib-item-actions{display:flex;gap:6px;}
+    .exlib-edit-btn,.exlib-del-btn{background:none;border:0.5px solid #C8AFA0;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit;color:#8B6F66;}
+    .exlib-edit-btn:hover{background:#F5E8DE;}
+    .exlib-del-btn:hover{background:#F5DDD7;color:#B85040;border-color:#B85040;}
+    .exlib-machine-row{display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap;}
+    .exlib-machine-tag{font-size:11px;background:#F5E8DE;border-radius:5px;padding:2px 8px;color:#8B6F66;}
+    /* 訓練計畫 */
+    .wplan-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;}
+    .wplan-card{background:#FFFAF5;border:0.5px solid #EFDED2;border-radius:10px;padding:1rem;}
+    .wplan-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+    .wplan-card-name{font-size:14px;font-weight:500;color:#3A2A26;}
+    .wplan-card-meta{font-size:12px;color:#9C7E76;}
+    .wplan-card-actions{display:flex;gap:6px;}
+    .wplan-day-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid #EFDED2;}
+    .wplan-day-row:last-child{border-bottom:none;}
+    .wplan-day-label{font-size:12px;font-weight:500;color:#8B6F66;min-width:40px;}
+    .wplan-day-exercises{font-size:12px;color:#3A2A26;flex:1;}
+    .wplan-day-exercises.rest{color:#B8A096;font-style:italic;}
+    /* 主題：抹茶 */
+    body.theme-matcha .workout-tab{background:#FCFBF6;border-color:#D8DCC5;color:#82876F;}
+    body.theme-matcha .workout-tab:hover{background:#EDEEE0;color:#2A2E22;}
+    body.theme-matcha .workout-tab.active{background:#8FA876;color:#FCFBF6;border-color:#8FA876;}
+    body.theme-matcha .wlog-mode-btn{background:#FCFBF6;border-color:#D8DCC5;color:#82876F;}
+    body.theme-matcha .wlog-mode-btn.active{background:#8FA876;color:#FCFBF6;border-color:#8FA876;}
+    body.theme-matcha .wlog-exercise-block,.wlog-exercise-block,.body.theme-matcha .wplan-card,.body.theme-matcha .exlib-item{background:#FCFBF6;border-color:#E3E5D5;}
+    body.theme-matcha .wlog-exercise-block{background:#FCFBF6;border-color:#E3E5D5;}
+    body.theme-matcha .wplan-card{background:#FCFBF6;border-color:#E3E5D5;}
+    body.theme-matcha .exlib-item{background:#FCFBF6;border-color:#E3E5D5;}
+    body.theme-matcha .exlib-item:hover{background:#EDEEE0;}
+    body.theme-matcha .wlog-summary-card{background:#EDEEE0;}
+    body.theme-matcha .exlib-filter-btn{background:#E5E5D2;color:#6D7560;border-color:#D8DCC5;}
+    body.theme-matcha .exlib-filter-btn.active{background:#8FA876;color:#FCFBF6;border-color:#8FA876;}
+    body.theme-matcha .wlog-add-exercise-btn{background:#FCFBF6;color:#8FA876;border-color:#8FA876;}
+    body.theme-matcha .wlog-add-exercise-btn:hover{background:#EDEEE0;}
+    body.theme-matcha .wlog-add-set-btn{background:#EDEEE0;border-color:#D8DCC5;}
+    body.theme-matcha .wlog-note-input{background:#F5F3EC;border-color:#D8DCC5;color:#2A2E22;}
+    /* 主題：楓糖 */
+    body.theme-maple .workout-tab{background:#FFFCF5;border-color:#DDC9A0;color:#937555;}
+    body.theme-maple .workout-tab:hover{background:#F5ECD8;color:#3A2A1A;}
+    body.theme-maple .workout-tab.active{background:#D69E5C;color:#FFFCF5;border-color:#D69E5C;}
+    body.theme-maple .wlog-mode-btn{background:#FFFCF5;border-color:#DDC9A0;color:#937555;}
+    body.theme-maple .wlog-mode-btn.active{background:#D69E5C;color:#FFFCF5;border-color:#D69E5C;}
+    body.theme-maple .wlog-exercise-block{background:#FFFCF5;border-color:#EBDDC2;}
+    body.theme-maple .wplan-card{background:#FFFCF5;border-color:#EBDDC2;}
+    body.theme-maple .exlib-item{background:#FFFCF5;border-color:#EBDDC2;}
+    body.theme-maple .exlib-item:hover{background:#F5ECD8;}
+    body.theme-maple .wlog-summary-card{background:#F5ECD8;}
+    body.theme-maple .exlib-filter-btn{background:#EFDFC2;color:#806848;border-color:#EBDDC2;}
+    body.theme-maple .exlib-filter-btn.active{background:#D69E5C;color:#FFFCF5;border-color:#D69E5C;}
+    body.theme-maple .wlog-add-exercise-btn{background:#FFFCF5;color:#D69E5C;border-color:#D69E5C;}
+    body.theme-maple .wlog-add-exercise-btn:hover{background:#F5ECD8;}
+    body.theme-maple .wlog-add-set-btn{background:#F5ECD8;border-color:#DDC9A0;}
+    body.theme-maple .wlog-note-input{background:#FAF6EE;border-color:#DDC9A0;color:#3A2A1A;}
 
   </style>
 </head>
@@ -539,6 +640,7 @@
     <button class="sidebar-btn active" id="nav-calc" onclick="switchSection('calc')"><i class="ti ti-calculator"></i><span class="tooltip">營養計算</span></button>
     <button class="sidebar-btn" id="nav-diary" onclick="switchSection('diary')"><i class="ti ti-calendar-week"></i><span class="tooltip">飲食日記</span></button>
     <button class="sidebar-btn" id="nav-pet" onclick="switchSection('pet')"><i class="ti ti-paw"></i><span class="tooltip">寵物</span></button>
+    <button class="sidebar-btn" id="nav-workout" onclick="switchSection('workout')"><i class="ti ti-barbell"></i><span class="tooltip">健身紀錄</span></button>
     <button class="sidebar-btn" onclick="openSettings()"><i class="ti ti-settings"></i><span class="tooltip">設定</span></button>
     <div class="sidebar-spacer"></div>
     <div id="userAvatarWrap" style="position:relative;">
@@ -776,8 +878,123 @@
         <div id="pet-content"></div>
       </div>
 
+      <!-- SECTION 6: Workout (健身紀錄) -->
+      <div class="section" id="section-workout">
+        <div class="section-title">健身紀錄</div>
+        <!-- 子分頁列 -->
+        <div class="workout-tab-bar">
+          <button class="workout-tab active" id="wtab-log" onclick="switchWorkoutTab('log')">📅 訓練日誌</button>
+          <button class="workout-tab" id="wtab-exlib" onclick="switchWorkoutTab('exlib')">🏋️ 動作庫</button>
+          <button class="workout-tab" id="wtab-plan" onclick="switchWorkoutTab('plan')">📋 訓練計畫</button>
+        </div>
+        <!-- 子分頁內容 -->
+        <div id="workout-tab-content"></div>
+      </div>
+
     </div>
   </main>
+</div>
+
+<!-- ===== 健身模組 Modals ===== -->
+
+<!-- 新增/編輯動作 Modal -->
+<div class="modal-overlay" id="exModal">
+  <div class="modal wide">
+    <div class="modal-title" id="exModalTitle">新增動作</div>
+    <div class="custom-food-field"><label>動作名稱</label><input type="text" id="ex-name" placeholder="例如：槓鈴深蹲"/></div>
+    <div class="custom-food-field" style="margin-top:8px;"><label>主要肌群</label>
+      <select id="ex-muscle">
+        <option value="胸">胸</option><option value="背">背</option><option value="肩">肩</option>
+        <option value="手臂">手臂</option><option value="腿">腿</option><option value="臀">臀</option>
+        <option value="核心">核心</option><option value="有氧">有氧</option>
+      </select>
+    </div>
+    <div class="custom-food-field" style="margin-top:8px;"><label>器材類型</label>
+      <select id="ex-equip">
+        <option value="自由重量">自由重量（槓鈴／啞鈴／壺鈴／自重）</option>
+        <option value="固定器械">固定器械（機械／繩索）</option>
+      </select>
+    </div>
+    <div class="custom-food-field" style="margin-top:8px;"><label>器械設定（選填，例如「坐姿」「握距」等）</label>
+      <div id="ex-machine-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px;"></div>
+      <button class="wlog-add-set-btn" onclick="addMachineSetting()">＋ 新增設定項目</button>
+    </div>
+    <div class="custom-food-field" style="margin-top:8px;"><label>備註</label><input type="text" id="ex-note" placeholder="選填"/></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeExModal()">取消</button>
+      <button class="btn btn-green" onclick="saveExercise()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 新增/編輯計畫 Modal -->
+<div class="modal-overlay" id="planModal" onclick="if(event.target===this)closePlanModal()">
+  <div class="modal wide">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div class="modal-title" id="planModalTitle" style="margin-bottom:0;">新增訓練計畫</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline" onclick="closePlanModal()">取消</button>
+        <button class="btn btn-green" onclick="savePlan()">儲存</button>
+      </div>
+    </div>
+    <div class="custom-food-field"><label>計畫名稱</label><input type="text" id="plan-name" placeholder="例如：增肌三分化"/></div>
+    <div class="custom-food-field" style="margin-top:8px;"><label>計畫類型</label>
+      <select id="plan-type" onchange="renderPlanDayEditor()">
+        <option value="week">週計畫（週一～週日）</option>
+        <option value="cycle">N 日循環（不綁定星期）</option>
+        <option value="list">純清單（無排程）</option>
+      </select>
+    </div>
+    <div id="plan-cycle-n-row" style="display:none;margin-top:8px;" class="custom-food-field">
+      <label>循環天數</label>
+      <div class="input-row">
+        <input type="number" id="plan-cycle-n" value="4" min="2" max="14" oninput="renderPlanDayEditor()"/>
+        <span class="unit">天</span>
+      </div>
+    </div>
+    <div style="margin-top:12px;" class="custom-food-field">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <label style="margin-bottom:0;">課表內容</label>
+      </div>
+      <!-- 篩選器 -->
+      <div id="plan-editor-filter-muscle" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px;"></div>
+      <div id="plan-editor-filter-equip" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;"></div>
+      <div id="plan-day-editor" style="margin-top:0;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 從動作庫選動作 Modal（日誌用） -->
+<div class="modal-overlay" id="pickExModal">
+  <div class="modal">
+    <div class="modal-title">選擇動作</div>
+    <div class="food-lib-search"><input type="search" id="pickExSearch" placeholder="搜尋動作名稱…" oninput="renderPickExList()"/></div>
+    <div class="exlib-filter" id="pickExFilter"></div>
+    <div id="pickExList" style="max-height:300px;overflow-y:auto;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closePickExModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 選組數 Modal（選完動作後） -->
+<div class="modal-overlay" id="pickSetsModal">
+  <div class="modal">
+    <div class="modal-title">設定組數</div>
+    <div style="font-size:14px;font-weight:500;color:#3A2A26;margin-bottom:1rem;" id="pickSetsExName"></div>
+    <div class="custom-food-field">
+      <label>要做幾組？</label>
+      <div class="input-row">
+        <input type="number" id="pickSetsInput" min="1" max="20" value="3" style="font-size:18px;text-align:center;"/>
+        <span class="unit">組</span>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#9C7E76;margin-top:8px;">每組可以填入不同的重量與次數</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeSetsModal()">取消</button>
+      <button class="btn btn-green" onclick="confirmSets()">確認，開始記錄</button>
+    </div>
+  </div>
 </div>
 
 <!-- New Template Modal -->
@@ -1442,22 +1659,38 @@ function applyCalcSettings(d){
   },80);
 }
 function resultSummaryHTML(){
-  if(!calcResult)return'';
-  const h=calcResult.high,l=calcResult.low;
-  return'<div class="result-cards" style="margin-bottom:1rem;">'
-    +'<div class="result-day-card"><div class="result-day-card-title high">高碳日</div>'
-    +'<div class="result-macro-row"><span>碳水</span><span>'+h.carb+'g</span></div>'
-    +'<div class="result-macro-row"><span>蛋白質</span><span>'+h.prot+'g</span></div>'
-    +'<div class="result-macro-row"><span>脂肪</span><span>'+h.fat+'g</span></div>'
-    +'<div class="result-macro-row kcal-row"><span>熱量</span><span>'+h.kcal+' kcal</span></div></div>'
-    +'<div class="result-day-card"><div class="result-day-card-title low">低碳日</div>'
-    +'<div class="result-macro-row"><span>碳水</span><span>'+l.carb+'g</span></div>'
-    +'<div class="result-macro-row"><span>蛋白質</span><span>'+l.prot+'g</span></div>'
-    +'<div class="result-macro-row"><span>脂肪</span><span>'+l.fat+'g</span></div>'
-    +'<div class="result-macro-row kcal-row"><span>熱量</span><span>'+l.kcal+' kcal</span></div></div>'
-    +'</div>';
+  if(calcMode==='cycle'){
+    if(!calcResult)return'';
+    const h=calcResult.high,l=calcResult.low;
+    return'<div class="result-cards" style="margin-bottom:1rem;">'
+      +'<div class="result-day-card"><div class="result-day-card-title high">高碳日</div>'
+      +'<div class="result-macro-row"><span>碳水</span><span>'+h.carb+'g</span></div>'
+      +'<div class="result-macro-row"><span>蛋白質</span><span>'+h.prot+'g</span></div>'
+      +'<div class="result-macro-row"><span>脂肪</span><span>'+h.fat+'g</span></div>'
+      +'<div class="result-macro-row kcal-row"><span>熱量</span><span>'+h.kcal+' kcal</span></div></div>'
+      +'<div class="result-day-card"><div class="result-day-card-title low">低碳日</div>'
+      +'<div class="result-macro-row"><span>碳水</span><span>'+l.carb+'g</span></div>'
+      +'<div class="result-macro-row"><span>蛋白質</span><span>'+l.prot+'g</span></div>'
+      +'<div class="result-macro-row"><span>脂肪</span><span>'+l.fat+'g</span></div>'
+      +'<div class="result-macro-row kcal-row"><span>熱量</span><span>'+l.kcal+' kcal</span></div></div>'
+      +'</div>';
+  } else if(calcMode==='normal'&&window.bmrResult&&window.bmrResult.normal){
+    const r=window.bmrResult.normal;
+    return'<div class="result-day-card" style="margin-bottom:1rem;"><div class="result-day-card-title" style="color:#5A6A4A;">一般模式・每日目標</div>'
+      +'<div class="result-macro-row"><span>碳水</span><span>'+r.carb+'g</span></div>'
+      +'<div class="result-macro-row"><span>蛋白質</span><span>'+r.prot+'g</span></div>'
+      +'<div class="result-macro-row"><span>脂肪</span><span>'+r.fat+'g</span></div>'
+      +'<div class="result-macro-row kcal-row"><span>熱量</span><span>'+r.kcal+' kcal</span></div></div>';
+  } else if(calcMode==='carb532'&&window.bmrResult&&window.bmrResult.carb532){
+    const r=window.bmrResult.carb532;
+    return'<div class="result-day-card" style="margin-bottom:1rem;"><div class="result-day-card-title" style="color:#7A5848;">碳水漸降・每日目標</div>'
+      +'<div class="result-macro-row"><span>碳水</span><span>'+r.carb+'g</span></div>'
+      +'<div class="result-macro-row"><span>蛋白質</span><span>'+r.prot+'g</span></div>'
+      +'<div class="result-macro-row"><span>脂肪</span><span>'+r.fat+'g</span></div>'
+      +'<div class="result-macro-row kcal-row"><span>熱量</span><span>'+r.kcal+' kcal</span></div></div>';
+  }
+  return'';
 }
-
 function remHTML(rem,unit){const u=unit||'g';if(rem<0)return'<div class="target-remain remain-over">超出 '+Math.round(Math.abs(rem))+u+'</div>';return'<div class="target-remain remain-ok">剩 '+Math.round(rem)+u+'</div>';}
 
 function barHTML(used,total,base,label,unit){
@@ -3233,6 +3466,643 @@ window.cancelChoose=function(){
 };
 
 updateMacroHints();clampDays();
+
+/* ================================================================
+   健身紀錄模組
+   ================================================================ */
+
+// -------- 資料 --------
+let workoutTab = 'log';
+let wlogDate = todayKey();
+let wlogMode = 'free';
+let workoutLogs  = {};
+let exercises    = [];
+let workoutPlans = [];
+let exFilterMuscle = 'all';
+let editExId = null;
+let editPlanId = null;
+
+// -------- 工具 --------
+function wlogDateLabel(dk){
+  const d=new Date(dk+'T00:00:00');
+  const wd=['日','一','二','三','四','五','六'][d.getDay()];
+  const suffix=dk===todayKey()?' (今天)':'';
+  return (d.getMonth()+1)+'月'+d.getDate()+'日 週'+wd+suffix;
+}
+window.wlogShiftDate=function(delta){
+  const d=new Date(wlogDate+'T00:00:00');
+  d.setDate(d.getDate()+delta);
+  wlogDate=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  renderWorkoutTab();
+};
+
+// -------- 預設動作庫 --------
+const BUILTIN_EXERCISES=[
+  // ── 胸 ──────────────────────────────
+  // 胸・自由重量
+  {id:'c01',name:'槓鈴臥推（平板）',muscle:'胸',equip:'自由重量',machineSettings:[],note:'',builtin:true},
+  {id:'c02',name:'槓鈴臥推（上斜）',muscle:'胸',equip:'自由重量',machineSettings:[],note:'',builtin:true},
+  {id:'c03',name:'槓鈴臥推（下斜）',muscle:'胸',equip:'自由重量',machineSettings:[],note:'',builtin:true},
+  {id:'c04',name:'啞鈴臥推（平板）',muscle:'胸',equip:'自由重量',machineSettings:[],note:'',builtin:true},
+  {id:'c05',name:'啞鈴臥推（上斜）',muscle:'胸',equip:'自由重量',machineSettings:[],note:'',builtin:true},
+  {id:'c06',name:'啞鈴飛鳥（平板）',muscle:'胸',equip:'自由重量',machineSettings:[],note:'水平擴胸，主練胸大肌延伸',builtin:true},
+  {id:'c07',name:'啞鈴飛鳥（上斜）',muscle:'胸',equip:'自由重量',machineSettings:[],note:'上胸延伸',builtin:true},
+  {id:'c08',name:'伏地挺身（標準）',muscle:'胸',equip:'自由重量',machineSettings:[],note:'',builtin:true},
+  {id:'c09',name:'伏地挺身（窄距）',muscle:'胸',equip:'自由重量',machineSettings:[],note:'強調三頭與內胸',builtin:true},
+  {id:'c10',name:'壺鈴臥推',muscle:'胸',equip:'自由重量',machineSettings:[],note:'',builtin:true},
+  // 胸・固定器械
+  {id:'c11',name:'坐姿胸推機',muscle:'胸',equip:'固定器械',machineSettings:[{label:'座位高度',val:''}],note:'',builtin:true},
+  {id:'c12',name:'上斜胸推機',muscle:'胸',equip:'固定器械',machineSettings:[{label:'座位高度',val:''}],note:'',builtin:true},
+  {id:'c13',name:'蝴蝶機（夾胸機）',muscle:'胸',equip:'固定器械',machineSettings:[{label:'座位高度',val:''},{label:'起始角度',val:''}],note:'',builtin:true},
+  {id:'c14',name:'滑輪夾胸（高繩索）',muscle:'胸',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'下胸內側',builtin:true},
+  {id:'c15',name:'滑輪夾胸（中繩索）',muscle:'胸',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'中胸內側',builtin:true},
+  {id:'c16',name:'滑輪夾胸（低繩索）',muscle:'胸',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'上胸內側',builtin:true},
+  {id:'c17',name:'立式滑輪交叉飛鳥',muscle:'胸',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'',builtin:true},
+  // ── 背 ──────────────────────────────
+  // 背・自由重量
+  {id:'d01',name:'引體向上（自重）',muscle:'背',equip:'自由重量',machineSettings:[],note:'闊背主力動作',builtin:true},
+  {id:'d02',name:'槓鈴俯身划船',muscle:'背',equip:'自由重量',machineSettings:[],note:'中背、厚背',builtin:true},
+  {id:'d03',name:'單手啞鈴划船',muscle:'背',equip:'自由重量',machineSettings:[],note:'闊背、後三角',builtin:true},
+  {id:'d04',name:'T槓划船',muscle:'背',equip:'自由重量',machineSettings:[],note:'中背、厚度',builtin:true},
+  {id:'d05',name:'硬舉（傳統）',muscle:'背',equip:'自由重量',machineSettings:[],note:'下背、豎脊肌、全身',builtin:true},
+  {id:'d06',name:'羅馬尼亞硬舉',muscle:'背',equip:'自由重量',machineSettings:[],note:'下背、膕繩肌',builtin:true},
+  {id:'d07',name:'羅馬椅挺身',muscle:'背',equip:'自由重量',machineSettings:[],note:'下背、豎脊肌',builtin:true},
+  {id:'d08',name:'啞鈴直臂下拉',muscle:'背',equip:'自由重量',machineSettings:[],note:'闊背下束',builtin:true},
+  // 背・固定器械
+  {id:'d09',name:'高位下拉機（寬握）',muscle:'背',equip:'固定器械',machineSettings:[{label:'握把',val:'寬握'}],note:'闊背上束',builtin:true},
+  {id:'d10',name:'高位下拉機（窄握）',muscle:'背',equip:'固定器械',machineSettings:[{label:'握把',val:'窄握'}],note:'闊背下束',builtin:true},
+  {id:'d11',name:'高位下拉機（反握）',muscle:'背',equip:'固定器械',machineSettings:[{label:'握把',val:'反握'}],note:'二頭輔助、下束',builtin:true},
+  {id:'d12',name:'坐姿划船機',muscle:'背',equip:'固定器械',machineSettings:[{label:'握把',val:''}],note:'中背、厚度',builtin:true},
+  {id:'d13',name:'單臂滑輪划船',muscle:'背',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'',builtin:true},
+  {id:'d14',name:'器械輔助引體向上機',muscle:'背',equip:'固定器械',machineSettings:[{label:'輔助重量',val:''}],note:'',builtin:true},
+  {id:'d15',name:'器械面拉（滑輪）',muscle:'背',equip:'固定器械',machineSettings:[{label:'把手',val:''},{label:'阻力',val:''}],note:'後三角、中背菱形肌',builtin:true},
+  {id:'d16',name:'反向蝴蝶機（後三角）',muscle:'背',equip:'固定器械',machineSettings:[{label:'座位高度',val:''}],note:'後三角、菱形肌',builtin:true},
+  {id:'d17',name:'低滑輪直臂下拉',muscle:'背',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'闊背下束',builtin:true},
+  {id:'d18',name:'器械背伸機',muscle:'背',equip:'固定器械',machineSettings:[],note:'下背、豎脊肌',builtin:true},
+  // ── 肩 ──────────────────────────────
+  // 肩・自由重量
+  {id:'s01',name:'站姿槓鈴肩推',muscle:'肩',equip:'自由重量',machineSettings:[],note:'前束為主',builtin:true},
+  {id:'s02',name:'坐姿啞鈴肩推',muscle:'肩',equip:'自由重量',machineSettings:[],note:'前束、中束',builtin:true},
+  {id:'s03',name:'啞鈴側平舉',muscle:'肩',equip:'自由重量',machineSettings:[],note:'中束，肩寬關鍵',builtin:true},
+  {id:'s04',name:'啞鈴前平舉',muscle:'肩',equip:'自由重量',machineSettings:[],note:'前束',builtin:true},
+  {id:'s05',name:'啞鈴俯身後側平舉',muscle:'肩',equip:'自由重量',machineSettings:[],note:'後束',builtin:true},
+  {id:'s06',name:'槓鈴聳肩',muscle:'肩',equip:'自由重量',machineSettings:[],note:'斜方肌上束',builtin:true},
+  {id:'s07',name:'啞鈴聳肩',muscle:'肩',equip:'自由重量',machineSettings:[],note:'斜方肌上束',builtin:true},
+  {id:'s08',name:'壺鈴肩推',muscle:'肩',equip:'自由重量',machineSettings:[],note:'',builtin:true},
+  // 肩・固定器械
+  {id:'s09',name:'坐姿器械肩推機',muscle:'肩',equip:'固定器械',machineSettings:[{label:'座位高度',val:''}],note:'',builtin:true},
+  {id:'s10',name:'側平舉專用機',muscle:'肩',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'中束孤立',builtin:true},
+  {id:'s11',name:'前平舉機',muscle:'肩',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'前束孤立',builtin:true},
+  {id:'s12',name:'滑輪側平舉',muscle:'肩',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'中束',builtin:true},
+  {id:'s13',name:'滑輪後側平舉',muscle:'肩',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'後束',builtin:true},
+  {id:'s14',name:'器械聳肩機',muscle:'肩',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'斜方肌上束',builtin:true},
+  // ── 手臂 ─────────────────────────────
+  // 手臂・自由重量
+  {id:'a01',name:'槓鈴彎舉',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'二頭，全範圍',builtin:true},
+  {id:'a02',name:'啞鈴交替彎舉',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'二頭，旋後發力',builtin:true},
+  {id:'a03',name:'啞鈴集中彎舉',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'二頭孤立',builtin:true},
+  {id:'a04',name:'錘式彎舉',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'肱肌＋前臂',builtin:true},
+  {id:'a05',name:'教堂彎舉（EZ槓）',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'二頭，減少代償',builtin:true},
+  {id:'a06',name:'窄握槓鈴臥推',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'三頭為主',builtin:true},
+  {id:'a07',name:'俯身啞鈴三頭伸展',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'三頭孤立',builtin:true},
+  {id:'a08',name:'過頭單啞鈴三頭伸展',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'三頭長頭',builtin:true},
+  {id:'a09',name:'法式推舉（EZ槓）',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'三頭長頭、全頭',builtin:true},
+  {id:'a10',name:'槓鈴腕彎舉',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'前臂屈肌',builtin:true},
+  {id:'a11',name:'反向腕彎舉',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'前臂伸肌',builtin:true},
+  {id:'a12',name:'農夫走路',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'前臂、握力、全身',builtin:true},
+  // 手臂・固定器械
+  {id:'a13',name:'器械二頭彎舉機',muscle:'手臂',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'二頭孤立',builtin:true},
+  {id:'a14',name:'低滑輪彎舉',muscle:'手臂',equip:'固定器械',machineSettings:[{label:'把手',val:''},{label:'阻力',val:''}],note:'二頭，張力持續',builtin:true},
+  {id:'a15',name:'高位滑輪繩索下壓',muscle:'手臂',equip:'固定器械',machineSettings:[{label:'把手',val:''},{label:'阻力',val:''}],note:'三頭孤立',builtin:true},
+  {id:'a16',name:'單臂滑輪三頭伸展',muscle:'手臂',equip:'固定器械',machineSettings:[{label:'把手',val:''},{label:'阻力',val:''}],note:'三頭孤立',builtin:true},
+  {id:'a17',name:'器械三頭伸展機',muscle:'手臂',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'',builtin:true},
+  // ── 腿 ──────────────────────────────
+  // 腿・自由重量
+  {id:'l01',name:'背蹲舉（槓鈴深蹲）',muscle:'腿',equip:'自由重量',machineSettings:[],note:'股四頭、臀、全腿複合',builtin:true},
+  {id:'l02',name:'前蹲舉',muscle:'腿',equip:'自由重量',machineSettings:[],note:'股四頭為主',builtin:true},
+  {id:'l03',name:'啞鈴分腿蹲（箭步蹲）',muscle:'腿',equip:'自由重量',machineSettings:[],note:'股四頭、臀',builtin:true},
+  {id:'l04',name:'保加利亞分腿蹲',muscle:'腿',equip:'自由重量',machineSettings:[],note:'股四頭、臀、平衡',builtin:true},
+  {id:'l05',name:'羅馬尼亞硬舉（腿）',muscle:'腿',equip:'自由重量',machineSettings:[],note:'膕繩肌、臀',builtin:true},
+  {id:'l06',name:'單腿啞鈴硬舉',muscle:'腿',equip:'自由重量',machineSettings:[],note:'膕繩肌、臀、平衡',builtin:true},
+  {id:'l07',name:'啞鈴側弓步',muscle:'腿',equip:'自由重量',machineSettings:[],note:'臀中肌、大腿內側',builtin:true},
+  {id:'l08',name:'站姿槓鈴提踵',muscle:'腿',equip:'自由重量',machineSettings:[],note:'小腿腓腸肌',builtin:true},
+  {id:'l09',name:'坐姿啞鈴提踵',muscle:'腿',equip:'自由重量',machineSettings:[],note:'小腿比目魚肌',builtin:true},
+  // 腿・固定器械
+  {id:'l10',name:'腿推機',muscle:'腿',equip:'固定器械',machineSettings:[{label:'腳掌位置',val:''},{label:'阻力',val:''}],note:'股四頭、臀，腳位決定重心',builtin:true},
+  {id:'l11',name:'腿伸展機（坐姿）',muscle:'腿',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'股四頭孤立',builtin:true},
+  {id:'l12',name:'臥式腿彎舉',muscle:'腿',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'膕繩肌孤立',builtin:true},
+  {id:'l13',name:'坐姿腿彎舉',muscle:'腿',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'膕繩肌',builtin:true},
+  {id:'l14',name:'站姿提踵機',muscle:'腿',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'小腿腓腸肌',builtin:true},
+  {id:'l15',name:'坐姿小腿訓練機',muscle:'腿',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'比目魚肌',builtin:true},
+  // ── 臀 ──────────────────────────────
+  // 臀・自由重量
+  {id:'g01',name:'槓鈴臀推',muscle:'臀',equip:'自由重量',machineSettings:[],note:'臀大肌主力動作',builtin:true},
+  {id:'g02',name:'啞鈴臀橋（單腿）',muscle:'臀',equip:'自由重量',machineSettings:[],note:'臀大肌單側',builtin:true},
+  {id:'g03',name:'羅馬尼亞單腿硬舉',muscle:'臀',equip:'自由重量',machineSettings:[],note:'臀大肌、膕繩肌、平衡',builtin:true},
+  {id:'g04',name:'啞鈴側弓步（臀）',muscle:'臀',equip:'自由重量',machineSettings:[],note:'臀中肌',builtin:true},
+  // 臀・固定器械
+  {id:'g05',name:'器械臀推機',muscle:'臀',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'臀大肌孤立',builtin:true},
+  {id:'g06',name:'滑輪後踢臀機',muscle:'臀',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'臀大肌孤立',builtin:true},
+  {id:'g07',name:'外展機（臀中肌）',muscle:'臀',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'臀中肌、外側',builtin:true},
+  {id:'g08',name:'內收機（大腿內側）',muscle:'臀',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'大腿內收肌群',builtin:true},
+  // ── 核心 ─────────────────────────────
+  // 核心・自由重量
+  {id:'co01',name:'捲腹',muscle:'核心',equip:'自由重量',machineSettings:[],note:'腹直肌上腹',builtin:true},
+  {id:'co02',name:'平板支撐（棒式）',muscle:'核心',equip:'自由重量',machineSettings:[],note:'深核心穩定',builtin:true},
+  {id:'co03',name:'側棒式',muscle:'核心',equip:'自由重量',machineSettings:[],note:'側腹、腰方肌',builtin:true},
+  {id:'co04',name:'啞鈴俄羅斯轉體',muscle:'核心',equip:'自由重量',machineSettings:[],note:'側腹斜肌',builtin:true},
+  {id:'co05',name:'懸垂舉腿',muscle:'核心',equip:'自由重量',machineSettings:[],note:'下腹、髂腰肌',builtin:true},
+  {id:'co06',name:'啞鈴伐木（俯身轉體）',muscle:'核心',equip:'自由重量',machineSettings:[],note:'旋轉核心',builtin:true},
+  // 核心・固定器械
+  {id:'co07',name:'器械捲腹機',muscle:'核心',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'腹直肌孤立',builtin:true},
+  {id:'co08',name:'滑輪伐木機（高滑輪）',muscle:'核心',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'旋轉核心、斜肌',builtin:true},
+  {id:'co09',name:'滑輪伐木機（低滑輪）',muscle:'核心',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'旋轉核心、斜肌',builtin:true},
+  {id:'co10',name:'懸垂輔助舉腿機',muscle:'核心',equip:'固定器械',machineSettings:[],note:'下腹',builtin:true},
+  // ── 有氧 ─────────────────────────────
+  {id:'cv01',name:'SkiErg',muscle:'有氧',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'全身有氧，上肢拉力',builtin:true},
+  {id:'cv02',name:'划船機',muscle:'有氧',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'全身有氧',builtin:true},
+  {id:'cv03',name:'跑步機',muscle:'有氧',equip:'固定器械',machineSettings:[{label:'速度(km/h)',val:''},{label:'坡度(%)',val:''}],note:'',builtin:true},
+  {id:'cv04',name:'飛輪（踩腳踏車）',muscle:'有氧',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'下肢有氧',builtin:true},
+  {id:'cv05',name:'壺鈴擺盪',muscle:'有氧',equip:'自由重量',machineSettings:[],note:'全身複合、心肺',builtin:true},
+  {id:'cv06',name:'農夫走路（有氧版）',muscle:'有氧',equip:'自由重量',machineSettings:[],note:'握力、全身耐力',builtin:true},
+];
+function getAllExercises(){return [...BUILTIN_EXERCISES,...exercises];}
+function findEx(id){return getAllExercises().find(e=>e.id===id);}
+
+// -------- escH（若無）--------
+if(!window.escH){window.escH=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// -------- showToast（若無）--------
+if(!window.showToast){
+  window.showToast=function(msg){
+    let t=document.getElementById('_toast');
+    if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#3A2A26;color:#FFFAF5;font-size:13px;padding:8px 18px;border-radius:20px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;';document.body.appendChild(t);}
+    t.textContent=msg;t.style.opacity='1';clearTimeout(t._tid);t._tid=setTimeout(()=>{t.style.opacity='0';},2000);
+  };
+}
+
+// -------- Firebase 同步 --------
+async function saveWorkoutData(){
+  saveWorkoutLocal();
+  const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?firebase.auth().currentUser.uid:null;
+  if(!uid)return;
+  try{const db=firebase.firestore();await db.collection('users').doc(uid).collection('workoutData').doc('meta').set({exercises,workoutPlans,updatedAt:Date.now()});}catch(e){console.warn('workout save err',e);}
+}
+async function saveWorkoutLog(dk){
+  const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?firebase.auth().currentUser.uid:null;
+  if(!uid)return;
+  try{const db=firebase.firestore();if(workoutLogs[dk])await db.collection('users').doc(uid).collection('workoutLogs').doc(dk).set(workoutLogs[dk]);}catch(e){console.warn('wlog save err',e);}
+}
+async function loadWorkoutData(){
+  const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?firebase.auth().currentUser.uid:null;
+  if(!uid){loadWorkoutLocal();return;}
+  try{const db=firebase.firestore();const snap=await db.collection('users').doc(uid).collection('workoutData').doc('meta').get();if(snap.exists){const d=snap.data();exercises=d.exercises||[];workoutPlans=d.workoutPlans||[];}}
+  catch(e){console.warn('workout load err',e);loadWorkoutLocal();}
+}
+async function loadWorkoutLog(dk){
+  const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?firebase.auth().currentUser.uid:null;
+  if(!uid)return;
+  try{const db=firebase.firestore();const snap=await db.collection('users').doc(uid).collection('workoutLogs').doc(dk).get();if(snap.exists)workoutLogs[dk]=snap.data();}catch(e){console.warn('wlog load err',e);}
+}
+function loadWorkoutLocal(){try{const d=JSON.parse(localStorage.getItem('workoutMeta')||'{}');exercises=d.exercises||[];workoutPlans=d.workoutPlans||[];}catch(e){}}
+function saveWorkoutLocal(){try{localStorage.setItem('workoutMeta',JSON.stringify({exercises,workoutPlans,logs:workoutLogs}));}catch(e){}}
+
+// -------- 子分頁切換 --------
+window.switchWorkoutTab=function(tab){
+  workoutTab=tab;
+  ['log','exlib','plan'].forEach(t=>{document.getElementById('wtab-'+t)?.classList.toggle('active',t===tab);});
+  renderWorkoutTab();
+};
+function renderWorkoutTab(){
+  const el=document.getElementById('workout-tab-content');
+  if(!el||!document.getElementById('section-workout')?.classList.contains('active'))return;
+  if(workoutTab==='log')renderWorkoutLog(el);
+  else if(workoutTab==='exlib')renderExLib(el);
+  else if(workoutTab==='plan')renderPlanList(el);
+}
+
+// ======== 訓練日誌 ========
+function renderWorkoutLog(el){
+  if(!workoutLogs[wlogDate]){
+    const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?firebase.auth().currentUser.uid:null;
+    if(uid)loadWorkoutLog(wlogDate).then(()=>{if(workoutTab==='log'&&document.getElementById('section-workout')?.classList.contains('active'))renderWorkoutTab();});
+  }
+  const log=workoutLogs[wlogDate]||{planId:null,exercises:[],note:''};
+  let h='';
+
+  // ── 日曆區 ──────────────────────────────────────
+  const today=todayKey();
+  // 計算本週週一
+  function getWeekMon(dk){
+    const d=new Date(dk+'T00:00:00');
+    const dow=d.getDay();// 0=日
+    const diff=dow===0?-6:1-dow;
+    const m=new Date(d);m.setDate(d.getDate()+diff);
+    return m;
+  }
+  const weekMon=wlogCalMon||(()=>{const m=getWeekMon(wlogDate);wlogCalMon=m;return m;})();
+  const dayLabels=['一','二','三','四','五','六','日'];
+  h+=`<div class="card" style="margin-bottom:1rem;padding:1rem;">`;
+  // 日曆頭：週導航
+  const monStr=weekMon.getFullYear()+'年 '+(weekMon.getMonth()+1)+'月';
+  h+=`<div class="cal-header" style="margin-bottom:8px;">
+    <button class="cal-nav" onclick="wlogCalPrev()"><i class="ti ti-chevron-left" style="font-size:14px;"></i></button>
+    <div class="cal-title">${monStr}</div>
+    <button class="cal-nav" onclick="wlogCalNext()"><i class="ti ti-chevron-right" style="font-size:14px;"></i></button>
+  </div>`;
+  // 日標題列
+  h+=`<div class="cal-grid" style="grid-template-columns:repeat(7,1fr);gap:4px;">${dayLabels.map(d=>`<div class="cal-day-label">${d}</div>`).join('')}</div>`;
+  // 一週格
+  h+=`<div class="cal-grid" style="grid-template-columns:repeat(7,1fr);gap:4px;">`;
+  for(let i=0;i<7;i++){
+    const d=new Date(weekMon);d.setDate(weekMon.getDate()+i);
+    const dk=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const isPast=dk<today,isToday=dk===today,isFuture=dk>today;
+    const isSelected=dk===wlogDate;
+    const hasData=workoutLogs[dk]&&(workoutLogs[dk].exercises||[]).length>0;
+    let cls='cal-day'+(isToday?' today':'')+(isSelected?' selected':'')+(isPast?' is-past':'')+(isFuture?' is-future':'')+(hasData?' has-data':'');
+    h+=`<button class="${cls}" onclick="wlogSelectDate('${dk}')">${d.getDate()}</button>`;
+  }
+  h+=`</div></div>`;
+
+  // ── 當日標題 + 帶入計畫按鈕 ─────────────────────
+  h+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+    <div class="wlog-date-label">${wlogDateLabel(wlogDate)}</div>
+    <div style="display:flex;gap:6px;align-items:center;">`;
+  if(workoutPlans.length){
+    h+=`<select id="wlog-plan-sel" style="font-size:12px;padding:5px 8px;border:0.5px solid #C8AFA0;border-radius:8px;background:#FFFAF5;color:#3A2A26;font-family:inherit;" onchange="selectWlogPlan(this.value)">
+      <option value="">帶入訓練計畫…</option>
+      ${workoutPlans.map(p=>`<option value="${p.id}">${escH(p.name)}</option>`).join('')}
+    </select>`;
+  }
+  h+=`<button class="wlog-add-exercise-btn" style="margin:0;padding:6px 12px;font-size:12px;" onclick="openPickExModal()"><i class="ti ti-plus"></i> 新增動作</button>`;
+  h+=`</div></div>`;
+
+  // ── 動作清單 ────────────────────────────────────
+  const exBlocks=log.exercises||[];
+  if(!exBlocks.length){
+    h+=`<div class="empty-track">今天還沒有訓練紀錄</div>`;
+  } else {
+    exBlocks.forEach((eb,ei)=>{
+      const exInfo=findEx(eb.exId)||{name:eb.name||'未知動作',muscle:'',equip:''};
+      h+=`<div class="wlog-exercise-block"><div class="wlog-exercise-header"><div><div class="wlog-exercise-name">${escH(exInfo.name)}</div><div class="wlog-exercise-meta">${exInfo.muscle?'<span class="exlib-tag muscle">'+escH(exInfo.muscle)+'</span>':''} ${exInfo.equip?'<span class="exlib-tag equip">'+escH(exInfo.equip)+'</span>':''}</div></div><button class="exlib-del-btn" onclick="removeWlogExercise(${ei})"><i class="ti ti-trash"></i></button></div>`;
+      h+=`<div style="display:grid;grid-template-columns:28px 1fr 1fr 1fr 28px;gap:6px;margin-bottom:4px;"><div></div><div class="wlog-set-label">重量 (kg)</div><div class="wlog-set-label">次數</div><div class="wlog-set-label">備註</div><div></div></div>`;
+      (eb.sets||[]).forEach((s,si)=>{
+        h+=`<div class="wlog-set-row"><div class="wlog-set-num">${si+1}</div><div class="wlog-set-input-wrap"><input type="number" min="0" step="0.5" value="${s.weight||''}" placeholder="kg" onchange="updateSet(${ei},${si},'weight',this.value)"/></div><div class="wlog-set-input-wrap"><input type="number" min="0" step="1" value="${s.reps||''}" placeholder="次" onchange="updateSet(${ei},${si},'reps',this.value)"/></div><div class="wlog-set-input-wrap"><input type="text" value="${escH(s.note||'')}" placeholder="備註" onchange="updateSet(${ei},${si},'note',this.value)"/></div><button class="food-remove" onclick="removeSet(${ei},${si})"><i class="ti ti-x"></i></button></div>`;
+      });
+      h+=`<button class="wlog-add-set-btn" onclick="addSet(${ei})">＋ 新增一組</button></div>`;
+    });
+  }
+
+  h+=`<div class="card" style="margin-top:10px;"><label class="sec-label">訓練備註</label><textarea class="wlog-note-input" rows="2" placeholder="今天的感受、特殊事項…" onchange="updateWlogNote(this.value)">${escH(log.note||'')}</textarea></div>`;
+  h+=`<button class="btn wlog-save-btn" onclick="saveWlogForDate()"><i class="ti ti-device-floppy" style="vertical-align:-2px;margin-right:4px;"></i>儲存今日訓練</button>`;
+  el.innerHTML=h;
+}
+let wlogCalMon=null; // 目前日曆顯示的週一（Date 物件）
+window.setWlogMode=function(m){wlogMode=m;renderWorkoutTab();};
+window.wlogSelectDate=function(dk){
+  wlogDate=dk;renderWorkoutTab();
+};
+window.wlogCalPrev=function(){
+  if(!wlogCalMon)return;
+  wlogCalMon=new Date(wlogCalMon);wlogCalMon.setDate(wlogCalMon.getDate()-7);
+  renderWorkoutTab();
+};
+window.wlogCalNext=function(){
+  if(!wlogCalMon)return;
+  wlogCalMon=new Date(wlogCalMon);wlogCalMon.setDate(wlogCalMon.getDate()+7);
+  renderWorkoutTab();
+};
+// 切換日期時同步日曆週
+window.wlogShiftDate=function(delta){
+  const d=new Date(wlogDate+'T00:00:00');
+  d.setDate(d.getDate()+delta);
+  wlogDate=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  wlogCalMon=null; // 重算週一
+  renderWorkoutTab();
+};
+window.selectWlogPlan=function(planId){
+  if(!planId)return;
+  if(!workoutLogs[wlogDate])workoutLogs[wlogDate]={planId:null,exercises:[],note:''};
+  workoutLogs[wlogDate].planId=planId;
+  const plan=workoutPlans.find(p=>p.id===planId);
+  if(plan&&plan.type==='list'){
+    workoutLogs[wlogDate].exercises=(plan.exercises||[]).map(eid=>{const ex=findEx(eid);return{exId:eid,name:ex?ex.name:eid,sets:[{weight:'',reps:'',note:''}]};});
+  } else if(plan&&plan.type==='week'){
+    const d=new Date(wlogDate+'T00:00:00');const k=['sun','mon','tue','wed','thu','fri','sat'][d.getDay()];
+    const ids=plan.days?plan.days[k]||[]:[];
+    workoutLogs[wlogDate].exercises=ids.map(eid=>{const ex=findEx(eid);return{exId:eid,name:ex?ex.name:eid,sets:[{weight:'',reps:'',note:''}]};});
+  } else if(plan&&plan.type==='cycle'){
+    workoutLogs[wlogDate].exercises=[];
+  }
+  renderWorkoutTab();
+};
+window.updateSet=function(ei,si,field,val){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei]||!log.exercises[ei].sets[si])return;log.exercises[ei].sets[si][field]=val;};
+window.addSet=function(ei){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei])return;log.exercises[ei].sets.push({weight:'',reps:'',note:''});renderWorkoutTab();};
+window.removeSet=function(ei,si){const log=workoutLogs[wlogDate];if(!log)return;log.exercises[ei].sets.splice(si,1);renderWorkoutTab();};
+window.removeWlogExercise=function(ei){const log=workoutLogs[wlogDate];if(!log)return;log.exercises.splice(ei,1);renderWorkoutTab();};
+window.updateWlogNote=function(val){if(!workoutLogs[wlogDate])workoutLogs[wlogDate]={planId:null,exercises:[],note:''};workoutLogs[wlogDate].note=val;};
+window.saveWlogForDate=async function(){
+  if(!workoutLogs[wlogDate])workoutLogs[wlogDate]={planId:null,exercises:[],note:''};
+  saveWorkoutLocal();await saveWorkoutLog(wlogDate);showToast('訓練紀錄已儲存 ✓');
+};
+
+// ======== 選動作 Modal ========
+window.openPickExModal=function(){
+  document.getElementById('pickExModal').classList.add('show');
+  document.getElementById('pickExSearch').value='';
+  exFilterMuscle='all';renderPickExFilter();renderPickExList();
+};
+window.closePickExModal=function(){document.getElementById('pickExModal').classList.remove('show');};
+let exFilterEquip='all';
+window.renderPickExFilter=function(){
+  const muscles=['all','胸','背','肩','手臂','腿','臀','核心','有氧'];
+  const equips=['all','自由重量','固定器械'];
+  let h='<div id="pef-muscle" style="margin-bottom:4px;">'+muscles.map(m=>`<button class="exlib-filter-btn${exFilterMuscle===m?' active':''}" data-val="${m}" onclick="setPickExFilter('${m}')" style="margin-bottom:4px;">${m==='all'?'全部部位':m}</button>`).join('')+'</div>';
+  h+='<div id="pef-equip">'+equips.map(e=>`<button class="exlib-filter-btn${exFilterEquip===e?' active':''}" data-val="${e}" onclick="setPickExEquip('${e}')" style="margin-bottom:4px;">${e==='all'?'全部器材':e}</button>`).join('')+'</div>';
+  document.getElementById('pickExFilter').innerHTML=h;
+};
+window.setPickExEquip=function(e){
+  exFilterEquip=e;
+  document.querySelectorAll('#pef-equip .exlib-filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===e));
+  renderPickExList();
+};
+window.setPickExFilter=function(m){
+  exFilterMuscle=m;
+  document.querySelectorAll('#pef-muscle .exlib-filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===m));
+  renderPickExList();
+};
+window.renderPickExList=function(){
+  const q=(document.getElementById('pickExSearch')?.value||'').toLowerCase();
+  const all=getAllExercises().filter(e=>
+    (exFilterEquip==='all'||e.equip===exFilterEquip)&&
+    (exFilterMuscle==='all'||e.muscle===exFilterMuscle)&&
+    (!q||e.name.toLowerCase().includes(q))
+  );
+  const el=document.getElementById('pickExList');
+  if(!all.length){el.innerHTML='<div class="food-search-empty">找不到動作</div>';return;}
+  el.innerHTML=all.map(e=>`<div class="food-search-item" onclick="pickExercise('${e.id}')"><div><div class="food-search-item-name">${escH(e.name)}</div><div class="food-search-item-macros">${e.muscle} · ${e.equip}${e.builtin?' · 內建':''}</div></div><i class="ti ti-plus" style="color:#B58A78;"></i></div>`).join('');
+};
+let _pendingExId=null;
+window.pickExercise=function(exId){
+  // 第一步：記住選的動作，顯示組數輸入
+  _pendingExId=exId;
+  const ex=findEx(exId);
+  document.getElementById('pickExModal').classList.remove('show');
+  document.getElementById('pickSetsModal').classList.add('show');
+  document.getElementById('pickSetsExName').textContent=ex?ex.name:exId;
+  document.getElementById('pickSetsInput').value='3';
+  document.getElementById('pickSetsInput').focus();
+  document.getElementById('pickSetsInput').select();
+};
+window.closeSetsModal=function(){document.getElementById('pickSetsModal').classList.remove('show');_pendingExId=null;};
+window.confirmSets=function(){
+  const n=parseInt(document.getElementById('pickSetsInput').value)||1;
+  if(!_pendingExId)return;
+  if(!workoutLogs[wlogDate])workoutLogs[wlogDate]={planId:null,exercises:[],note:''};
+  const ex=findEx(_pendingExId);
+  const sets=Array.from({length:Math.min(n,20)},()=>({weight:'',reps:'',note:''}));
+  workoutLogs[wlogDate].exercises.push({exId:_pendingExId,name:ex?ex.name:_pendingExId,sets});
+  document.getElementById('pickSetsModal').classList.remove('show');
+  _pendingExId=null;
+  renderWorkoutTab();
+};
+
+// ======== 動作庫 ========
+function renderExLib(el){
+  const muscles=['all','胸','背','肩','手臂','腿','臀','核心','有氧'];
+  const equips=['all','自由重量','固定器械'];
+  let h='';
+  h+=`<div class="exlib-search food-lib-search"><input type="search" id="exlibQ" placeholder="搜尋動作…" oninput="filterExLib(this.value)"/></div>`;
+  h+=`<div class="exlib-filter" id="exlib-filter-muscle" style="margin-bottom:4px;">${muscles.map(m=>`<button class="exlib-filter-btn${exFilterMuscle===m?' active':''}" data-val="${m}" onclick="setExFilter('${m}')">${m==='all'?'全部部位':m}</button>`).join('')}</div>`;
+  h+=`<div class="exlib-filter" id="exlib-filter-equip">${equips.map(e=>`<button class="exlib-filter-btn${exFilterEquip===e?' active':''}" data-val="${e}" onclick="setExEquip('${e}')">${e==='all'?'全部器材':e}</button>`).join('')}</div>`;
+  h+=`<button class="wlog-add-exercise-btn" onclick="openExModal(null)"><i class="ti ti-plus"></i> 新增自訂動作</button>`;
+  h+=`<div id="exlib-list"></div>`;
+  el.innerHTML=h;
+  renderExLibList('');
+}
+window.filterExLib=function(q){renderExLibList(q);};
+window.setExEquip=function(e){
+  exFilterEquip=e;
+  const q=document.getElementById('exlibQ')?.value||'';
+  // 直接更新兩排按鈕的 active class
+  document.querySelectorAll('#exlib-filter-equip .exlib-filter-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.val===e);
+  });
+  renderExLibList(q);
+};
+window.setExFilter=function(m){
+  exFilterMuscle=m;
+  const q=document.getElementById('exlibQ')?.value||'';
+  document.querySelectorAll('#exlib-filter-muscle .exlib-filter-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.val===m);
+  });
+  renderExLibList(q);
+};
+function renderExLibList(q){
+  const el=document.getElementById('exlib-list');if(!el)return;
+  const all=getAllExercises().filter(e=>
+    (exFilterEquip==='all'||e.equip===exFilterEquip)&&
+    (exFilterMuscle==='all'||e.muscle===exFilterMuscle)&&
+    (!q||e.name.toLowerCase().includes(q.toLowerCase()))
+  );
+  if(!all.length){el.innerHTML='<div class="empty-track">找不到動作</div>';return;}
+  el.innerHTML=all.map(e=>`<div class="exlib-item"><div class="exlib-item-header"><div>
+    <div class="exlib-item-name">${escH(e.name)}</div>
+    <div class="exlib-item-tags"><span class="exlib-tag muscle">${escH(e.muscle)}</span><span class="exlib-tag equip">${escH(e.equip)}</span>${e.builtin?'<span class="exlib-tag">內建</span>':''}</div>
+    ${e.machineSettings&&e.machineSettings.length?'<div class="exlib-machine-row">'+e.machineSettings.map(s=>`<span class="exlib-machine-tag">⚙ ${escH(s.label)}${s.val?' '+escH(s.val):''}</span>`).join('')+'</div>':''}
+    ${e.note?`<div style="font-size:11px;color:#9C7E76;margin-top:3px;">${escH(e.note)}</div>`:''}
+  </div><div class="exlib-item-actions">${!e.builtin?`<button class="exlib-edit-btn" onclick="openExModal('${e.id}')">編輯</button><button class="exlib-del-btn" onclick="deleteExercise('${e.id}')">刪除</button>`:''}</div></div></div>`).join('');
+}
+
+// ---- 動作 Modal ----
+window.openExModal=function(id){
+  editExId=id;const ex=id?exercises.find(e=>e.id===id):null;
+  document.getElementById('exModalTitle').textContent=id?'編輯動作':'新增動作';
+  document.getElementById('ex-name').value=ex?ex.name:'';
+  document.getElementById('ex-muscle').value=ex?ex.muscle:'胸';
+  document.getElementById('ex-equip').value=ex?ex.equip:'槓鈴';
+  document.getElementById('ex-note').value=ex?ex.note:'';
+  renderMachineList(ex?ex.machineSettings:[]);
+  document.getElementById('exModal').classList.add('show');
+};
+window.closeExModal=function(){document.getElementById('exModal').classList.remove('show');};
+function renderMachineList(settings){
+  const el=document.getElementById('ex-machine-list');
+  el.innerHTML=settings.map((s,i)=>`<div style="display:flex;gap:6px;align-items:center;" data-ms="${i}"><input type="text" placeholder="項目名稱（如：握距）" value="${escH(s.label)}" style="flex:1;" class="ms-label"/><input type="text" placeholder="預設值（選填）" value="${escH(s.val||'')}" style="flex:1;" class="ms-val"/><button class="food-remove" onclick="this.closest('[data-ms]').remove()"><i class="ti ti-x"></i></button></div>`).join('');
+}
+window.addMachineSetting=function(){
+  document.getElementById('ex-machine-list').insertAdjacentHTML('beforeend',`<div style="display:flex;gap:6px;align-items:center;" data-ms="new"><input type="text" placeholder="項目名稱（如：握距）" style="flex:1;" class="ms-label"/><input type="text" placeholder="預設值（選填）" style="flex:1;" class="ms-val"/><button class="food-remove" onclick="this.closest('[data-ms]').remove()"><i class="ti ti-x"></i></button></div>`);
+};
+window.saveExercise=function(){
+  const name=document.getElementById('ex-name').value.trim();if(!name){alert('請輸入動作名稱');return;}
+  const muscle=document.getElementById('ex-muscle').value;const equip=document.getElementById('ex-equip').value;const note=document.getElementById('ex-note').value.trim();
+  const machineSettings=Array.from(document.getElementById('ex-machine-list').querySelectorAll('[data-ms]')).map(r=>({label:r.querySelector('.ms-label')?.value?.trim()||'',val:r.querySelector('.ms-val')?.value?.trim()||''})).filter(s=>s.label);
+  if(editExId){const idx=exercises.findIndex(e=>e.id===editExId);if(idx>=0)exercises[idx]={...exercises[idx],name,muscle,equip,note,machineSettings};}
+  else{exercises.push({id:'u'+Date.now(),name,muscle,equip,note,machineSettings,builtin:false});}
+  closeExModal();saveWorkoutLocal();saveWorkoutData();renderWorkoutTab();
+};
+window.deleteExercise=function(id){if(!confirm('確定刪除此動作？'))return;exercises=exercises.filter(e=>e.id!==id);saveWorkoutLocal();saveWorkoutData();renderWorkoutTab();};
+
+// ======== 訓練計畫 ========
+function renderPlanList(el){
+  let h=`<button class="wlog-add-exercise-btn" onclick="openPlanModal(null)"><i class="ti ti-plus"></i> 新增訓練計畫</button>`;
+  if(!workoutPlans.length){h+='<div class="empty-track">尚未建立任何訓練計畫</div>';}
+  else{
+    const typeLabel={'week':'週計畫','cycle':'N日循環','list':'純清單'};
+    h+='<div class="wplan-list">'+workoutPlans.map(p=>{
+      let dayRows='';
+      if(p.type==='week'){[['mon','週一'],['tue','週二'],['wed','週三'],['thu','週四'],['fri','週五'],['sat','週六'],['sun','週日']].forEach(([k,label])=>{const ids=p.days?p.days[k]||[]:[];const names=ids.map(id=>{const e=findEx(id);return e?e.name:id;});dayRows+=`<div class="wplan-day-row"><div class="wplan-day-label">${label}</div><div class="wplan-day-exercises${!names.length?' rest':''}">${names.length?names.join('、'):'休息'}</div></div>`;});}
+      else if(p.type==='cycle'){const n=p.cycleN||4;Array.from({length:n},(_,i)=>'d'+(i+1)).forEach((k,i)=>{const ids=p.days?p.days[k]||[]:[];const names=ids.map(id=>{const e=findEx(id);return e?e.name:id;});dayRows+=`<div class="wplan-day-row"><div class="wplan-day-label">第${i+1}天</div><div class="wplan-day-exercises${!names.length?' rest':''}">${names.length?names.join('、'):'休息'}</div></div>`;});}
+      else{const ids=p.exercises||[];const names=ids.map(id=>{const e=findEx(id);return e?e.name:id;});dayRows=`<div class="wplan-day-row"><div class="wplan-day-exercises">${names.length?names.join('、'):'（尚未設定動作）'}</div></div>`;}
+      return `<div class="wplan-card"><div class="wplan-card-header"><div><div class="wplan-card-name">${escH(p.name)}</div><div class="wplan-card-meta">${typeLabel[p.type]||p.type}</div></div><div class="wplan-card-actions"><button class="exlib-edit-btn" onclick="openPlanModal('${p.id}')">編輯</button><button class="exlib-del-btn" onclick="deletePlan('${p.id}')">刪除</button></div></div>${dayRows}</div>`;
+    }).join('')+'</div>';
+  }
+  el.innerHTML=h;
+}
+window.openPlanModal=function(id){
+  editPlanId=id;const plan=id?workoutPlans.find(p=>p.id===id):null;
+  document.getElementById('planModalTitle').textContent=id?'編輯訓練計畫':'新增訓練計畫';
+  document.getElementById('plan-name').value=plan?plan.name:'';
+  document.getElementById('plan-type').value=plan?plan.type:'week';
+  document.getElementById('plan-cycle-n').value=plan?.cycleN||4;
+  // 重置篩選狀態
+  planEditorMuscle='all';planEditorEquip='all';planEditorChecked={};
+  document.getElementById('planModal').classList.add('show');
+  renderPlanDayEditor(plan||null);
+};
+window.closePlanModal=function(){document.getElementById('planModal').classList.remove('show');};
+// 計畫 editor 篩選狀態
+let planEditorMuscle='all';
+let planEditorEquip='all';
+let planEditorChecked={}; // { 'pd-mon': Set([id,...]), 'pd-list': Set([...]), ... }
+
+function _collectPlanChecked(){
+  // 把目前 DOM 裡可見的 checkbox 狀態同步回暫存
+  document.querySelectorAll('#plan-day-editor [id^="pd-"]').forEach(container=>{
+    const k=container.id;
+    if(!planEditorChecked[k])planEditorChecked[k]=new Set();
+    container.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+      if(cb.checked)planEditorChecked[k].add(cb.value);
+      else planEditorChecked[k].delete(cb.value);
+    });
+  });
+}
+
+window.renderPlanDayEditor=function(existPlan){
+  // 先收集目前 DOM 狀態（避免篩選切換時丟失）
+  _collectPlanChecked();
+
+  const type=document.getElementById('plan-type')?.value||'week';
+  const cycleNRow=document.getElementById('plan-cycle-n-row');
+  if(cycleNRow)cycleNRow.style.display=type==='cycle'?'block':'none';
+  const el=document.getElementById('plan-day-editor');if(!el)return;
+  const plan=typeof existPlan==='object'&&existPlan!==null?existPlan:(editPlanId?workoutPlans.find(p=>p.id===editPlanId):null);
+
+  // 初次開啟（existPlan 傳入）時，從 plan 資料初始化暫存
+  if(typeof existPlan==='object'&&existPlan!==null){
+    planEditorChecked={};
+    if(plan?.type==='week'){
+      ['mon','tue','wed','thu','fri','sat','sun'].forEach(k=>{planEditorChecked['pd-'+k]=new Set(plan.days?plan.days[k]||[]:[]); });
+    } else if(plan?.type==='cycle'){
+      const n=plan.cycleN||4;
+      Array.from({length:n},(_,i)=>'d'+(i+1)).forEach(k=>{planEditorChecked['pd-'+k]=new Set(plan.days?plan.days[k]||[]:[]); });
+    } else {
+      planEditorChecked['pd-list']=new Set(plan?.exercises||[]);
+    }
+  } else if(Object.keys(planEditorChecked).length===0){
+    // 全新計畫，初始化空暫存
+    if(type==='week') ['mon','tue','wed','thu','fri','sat','sun'].forEach(k=>{planEditorChecked['pd-'+k]=new Set();});
+    else if(type==='cycle'){const n=parseInt(document.getElementById('plan-cycle-n')?.value)||4;Array.from({length:n},(_,i)=>'d'+(i+1)).forEach(k=>{planEditorChecked['pd-'+k]=new Set();});}
+    else planEditorChecked['pd-list']=new Set();
+  }
+
+  // 渲染篩選器
+  _renderPlanEditorFilters();
+
+  // 取得篩選後動作清單
+  const allEx=getAllExercises().filter(e=>
+    (planEditorMuscle==='all'||e.muscle===planEditorMuscle)&&
+    (planEditorEquip==='all'||e.equip===planEditorEquip)
+  );
+
+  function exCheckboxes(containerId){
+    const checkedSet=planEditorChecked[containerId]||new Set();
+    if(!allEx.length) return `<div id="${containerId}"><div class="food-search-empty" style="padding:8px 0;font-size:12px;">此篩選條件下沒有動作</div></div>`;
+    return `<div id="${containerId}">`+allEx.map(e=>`<label style="display:flex;align-items:center;gap:6px;font-size:13px;padding:4px 0;cursor:pointer;"><input type="checkbox" value="${e.id}" ${checkedSet.has(e.id)?'checked':''} style="width:auto;" onchange="_onPlanCheckChange('${containerId}',this)"/>${escH(e.name)}<span style="font-size:11px;color:#9C7E76;">${e.muscle}・${e.equip}</span></label>`).join('')+'</div>';
+  }
+
+  if(type==='week'){
+    el.innerHTML=[['mon','週一'],['tue','週二'],['wed','週三'],['thu','週四'],['fri','週五'],['sat','週六'],['sun','週日']].map(([k,label])=>`<div class="card" style="margin-bottom:8px;padding:10px 12px;"><div class="sec-label" style="margin-bottom:6px;">${label}</div>${exCheckboxes('pd-'+k)}</div>`).join('');
+  } else if(type==='cycle'){
+    const n=parseInt(document.getElementById('plan-cycle-n')?.value)||4;
+    el.innerHTML=Array.from({length:n},(_,i)=>{const k='d'+(i+1);return `<div class="card" style="margin-bottom:8px;padding:10px 12px;"><div class="sec-label" style="margin-bottom:6px;">第${i+1}天</div>${exCheckboxes('pd-'+k)}</div>`;}).join('');
+  } else {
+    el.innerHTML=`<div class="card" style="padding:10px 12px;">${exCheckboxes('pd-list')}</div>`;
+  }
+};
+
+window._onPlanCheckChange=function(containerId,cb){
+  if(!planEditorChecked[containerId])planEditorChecked[containerId]=new Set();
+  if(cb.checked)planEditorChecked[containerId].add(cb.value);
+  else planEditorChecked[containerId].delete(cb.value);
+};
+
+function _renderPlanEditorFilters(){
+  const muscles=['all','胸','背','肩','手臂','腿','臀','核心','有氧'];
+  const equips=['all','自由重量','固定器械'];
+  const mEl=document.getElementById('plan-editor-filter-muscle');
+  const eEl=document.getElementById('plan-editor-filter-equip');
+  if(mEl) mEl.innerHTML=muscles.map(m=>`<button class="exlib-filter-btn${planEditorMuscle===m?' active':''}" style="padding:3px 10px;font-size:12px;margin-bottom:2px;" data-val="${m}" onclick="setPlanEditorMuscle('${m}')">${m==='all'?'全部部位':m}</button>`).join('');
+  if(eEl) eEl.innerHTML=equips.map(e=>`<button class="exlib-filter-btn${planEditorEquip===e?' active':''}" style="padding:3px 10px;font-size:12px;margin-bottom:2px;" data-val="${e}" onclick="setPlanEditorEquip('${e}')">${e==='all'?'全部器材':e}</button>`).join('');
+}
+window.setPlanEditorMuscle=function(m){
+  _collectPlanChecked();
+  planEditorMuscle=m;
+  document.querySelectorAll('#plan-editor-filter-muscle .exlib-filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===m));
+  renderPlanDayEditor();
+};
+window.setPlanEditorEquip=function(e){
+  _collectPlanChecked();
+  planEditorEquip=e;
+  document.querySelectorAll('#plan-editor-filter-equip .exlib-filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===e));
+  renderPlanDayEditor();
+};
+window.savePlan=function(){
+  _collectPlanChecked(); // 最後一次同步 DOM → 暫存
+  const name=document.getElementById('plan-name').value.trim();if(!name){alert('請輸入計畫名稱');return;}
+  const type=document.getElementById('plan-type').value;const cycleN=parseInt(document.getElementById('plan-cycle-n')?.value)||4;
+  function getIds(k){return Array.from(planEditorChecked[k]||new Set());}
+  let days={};let exList=[];
+  if(type==='week'){['mon','tue','wed','thu','fri','sat','sun'].forEach(k=>{days[k]=getIds('pd-'+k);});}
+  else if(type==='cycle'){Array.from({length:cycleN},(_,i)=>'d'+(i+1)).forEach(k=>{days[k]=getIds('pd-'+k);});}
+  else{exList=getIds('pd-list');}
+  const payload={name,type,days,exercises:exList,cycleN};
+  if(editPlanId){const idx=workoutPlans.findIndex(p=>p.id===editPlanId);if(idx>=0)workoutPlans[idx]={...workoutPlans[idx],...payload};}
+  else{workoutPlans.push({id:'p'+Date.now(),...payload});}
+  closePlanModal();saveWorkoutLocal();saveWorkoutData();renderWorkoutTab();
+};
+window.deletePlan=function(id){if(!confirm('確定刪除此計畫？'))return;workoutPlans=workoutPlans.filter(p=>p.id!==id);saveWorkoutLocal();saveWorkoutData();renderWorkoutTab();};
+
+// -------- switchSection 補丁 --------
+(function(){
+  const orig=window.switchSection;
+  window.switchSection=function(name){
+    orig(name);
+    if(name==='workout'){
+      // 1. 先用 local 資料立刻渲染（不卡）
+      renderWorkoutTab();
+      // 2. 若已登入，背景從 firebase 更新後再重繪
+      const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?firebase.auth().currentUser.uid:null;
+      if(uid){
+        loadWorkoutData().then(()=>{if(workoutTab&&document.getElementById('section-workout')?.classList.contains('active'))renderWorkoutTab();});
+      }
+    }
+  };
+})();
+
+// 初始化
+loadWorkoutLocal();
 </script>
 <!-- 桌寵 (浮在所有頁面的寵物) -->
 <div id="roamingPet" style="position:fixed;left:50%;top:60%;width:100px;height:100px;pointer-events:none;z-index:100;display:none;transition:left 10s linear, top 10s linear;">
