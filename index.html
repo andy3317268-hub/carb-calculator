@@ -2766,14 +2766,16 @@ function renderDiaryContent(){
       <div id="diary-c532-result" style="margin-top:${adjResult?'10px':'0'};${adjResult?'':'display:none;'}">${adjResult}</div>
     </div>`;
   } else {
-    // 非碳水漸降：只顯示簡單體重輸入
-    weightCard=`<div class="card" style="margin-bottom:1rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <span style="font-size:13px;color:#8B6F66;white-space:nowrap;">⚖️ 今日體重</span>
-      <div class="input-row" style="flex:0 0 160px;margin:0;">
-        <input type="number" id="diary-weight-input" placeholder="公斤" min="20" max="300" step="0.1" value="${wVal}" style="font-size:14px;text-align:center;" oninput="saveDiaryWeight('${wdk}',this.value)"/>
-        <span class="unit">kg</span>
+    // 非碳水漸降：顯示本週體重（含上週參考）
+    weightCard=`<div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:13px;font-weight:500;color:#8B6F66;white-space:nowrap;">本週體重</span>
+        <div class="input-row" style="flex:0 0 140px;margin:0;">
+          <input type="number" id="diary-weight-input" placeholder="公斤" min="20" max="300" step="0.1" value="${wVal}" style="font-size:14px;text-align:center;" oninput="saveDiaryWeight('${wdk}',this.value)"/>
+          <span class="unit">kg</span>
+        </div>
+        <span style="font-size:13px;color:#9C7E76;white-space:nowrap;">${prevWLabel}</span>
       </div>
-      ${wVal?`<span style="font-size:12px;color:#B58A78;font-weight:500;">${wVal} kg ✓</span>`:''}
     </div>`;
   }
 
