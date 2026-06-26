@@ -498,6 +498,17 @@
     body.theme-maple .wplan-tag{background:#FFFCF5;border-color:#DDC9A0;}
     body.theme-maple .wplan-ex-tag{background:#EAD9BB;color:#5A4020;}
 
+    /* 體重紀錄分頁 */
+    .weight-log-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid #EFDED2;}
+    .weight-log-row:last-child{border-bottom:none;}
+    .weight-log-date{font-size:13px;color:#3A2A26;}
+    .weight-log-val{font-size:15px;font-weight:600;color:#B58A78;}
+    .weight-log-change{font-size:12px;margin-left:8px;}
+    .weight-log-change.down{color:#6AAF6A;}
+    .weight-log-change.up{color:#D07070;}
+    .weight-chart-bar{height:6px;border-radius:3px;background:#E8D8CE;margin-top:3px;}
+    .weight-chart-bar-fill{height:100%;border-radius:3px;background:#B58A78;transition:width 0.3s;}
+
   </style>
 </head>
 <body>
@@ -828,17 +839,17 @@
               <div id="carb532ResultCard" style="display:none;margin-top:1rem;">
                 <div style="font-size:12px;color:#8B6F66;margin-bottom:8px;">初始配置（5:3:2 比例 · 減脂熱量）</div>
                 <div class="result-day-card">
-                  <div class="result-day-card-title high">碳水漸降 初始值</div>
-                  <div class="result-section-label">一天</div>
-                  <div class="result-macro-row"><span>碳水 (50%)</span><span id="c532-dc">—</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                    <div class="result-day-card-title high" style="margin-bottom:0;">碳水漸降 · 目前目標</div>
+                    <div id="c532-adjust-count" style="font-size:11px;color:#9C7E76;"></div>
+                  </div>
+                  <div class="result-macro-row"><span>碳水</span><span id="c532-dc">—</span></div>
                   <div class="result-macro-row"><span>蛋白質 (30%)</span><span id="c532-dp">—</span></div>
                   <div class="result-macro-row"><span>脂肪 (20%)</span><span id="c532-df">—</span></div>
-                  <div class="result-macro-row kcal-row"><span>熱量 (TDEE−缺口)</span><span id="c532-dk">—</span></div>
+                  <div class="result-macro-row kcal-row"><span>熱量</span><span id="c532-dk">—</span></div>
+                </div>
 
-                </div>
-                <div style="margin-top:10px;padding:10px 12px;background:#FFF3E0;border-radius:8px;font-size:12px;color:#7A5848;line-height:1.7;">
-                  💡 <strong>碳水漸降操作說明：</strong>穩定吃 7~10 天後，若體重停滯不動，單次減少碳水 20~30g，蛋白質與脂肪保持不動。每次調整後再觀察 7 天。
-                </div>
+                <!-- 碳水調整區已移至飲食日記 -->
               </div>
             </div>
 
@@ -1352,23 +1363,24 @@ window.switchSection=name=>{
 
 window.switchDiaryTab=name=>{
   diaryTab=name;
-  // 切換分頁按鈕 active 狀態
   document.querySelectorAll('#diaryTabBar .diary-tab').forEach(b=>{
     if(b.dataset.tab===name)b.classList.add('active');
     else b.classList.remove('active');
   });
-  // 切換內容顯示
   document.querySelectorAll('.diary-tab-content').forEach(c=>c.style.display='none');
   const target=document.getElementById('diary-tab-'+name);
   if(target)target.style.display='';
-  // 渲染對應內容
   if(name==='diary')renderDiary();
   else if(name==='template')renderTemplateSection();
   else if(name==='foods')renderFoodLib();
 };
 
 window.selectGender=g=>{selGender=g;document.getElementById('btnM').className='gender-btn'+(g==='m'?' active-m':'');document.getElementById('btnF').className='gender-btn'+(g==='f'?' active-f':'');updateMacroHints();if(calcMode==='cycle'){updateSliderBounds();recalc();}else{recalcBMR();}};
-window.updateMacroHints=function(){if(!selGender||calcMode!=='cycle')return;const tiers=selGender==='f'?tiersF:tiersM;for(let i=1;i<=4;i++){const el=document.getElementById('macro'+i);if(el){const t=tiers[i];el.innerHTML='碳水 '+t.carb+'x・蛋白質 '+t.protein+'x・脂肪 '+t.fat+'x';}}};
+window.updateMacroHints=function(){
+  const tiers=(selGender==='f')?tiersF:tiersM; // 未選性別預設顯示男性倍率
+  if(calcMode!=='cycle')return;
+  for(let i=1;i<=4;i++){const el=document.getElementById('macro'+i);if(el){const t=tiers[i];el.innerHTML='碳水 '+t.carb+'x・蛋白質 '+t.protein+'x・脂肪 '+t.fat+'x';}}
+};
 // 碳循環專用的運動級距選擇
 window.selectTierCycle=t=>{
   selTier=t;
@@ -1428,7 +1440,7 @@ window.switchCalcMode=function(mode){
   document.getElementById('calcModeNormal').style.display=(mode==='normal')?'':'none';
   document.getElementById('calcModeCarb532').style.display=(mode==='carb532')?'':'none';
   // 碳循環：確保高碳日格線即時顯示
-  if(mode==='cycle')renderWeekdayGrid();
+  if(mode==='cycle'){renderWeekdayGrid();updateMacroHints();}
   // 觸發重算
   if(mode==='cycle')recalc(); else recalcBMR();
 };
@@ -1498,8 +1510,376 @@ window.recalcBMR=function(){
     document.getElementById('carb532ResultCard').style.display='block';
     window.bmrResult=window.bmrResult||{};
     window.bmrResult.carb532={carb:dc,prot:dp,fat:df,kcal:target};
+    // 儲存初始碳水和蛋白質脂肪供調整用
+    window.c532BaseCarb=dc;
+    window.c532Prot=dp;
+    window.c532Fat=df;
+    window.c532Kcal=target;
+    // 重置調整次數（重新設定基礎值時歸零）
+    window.bmrResult.carb532.adjustCount=0;
+    const elN=document.getElementById('c532-adjust-count');
+    if(elN)elN.textContent='';
+    // 清除上次調整結果
+    const adjEl=document.getElementById('c532-adjust-result');
+    if(adjEl)adjEl.style.display='none';
+    // 自動更新體重顯示區（不觸發完整計算）
+    setTimeout(()=>{
+      if(typeof calc532Adjust==='function'){
+        const displayEl=document.getElementById('c532-weight-display');
+        if(displayEl&&Object.keys(weightLogs||{}).length>0){
+          // 只更新顯示，不觸發 adjEl
+          const today=new Date();
+          const dow=today.getDay();
+          const diffToMon=dow===0?-6:1-dow;
+          const thisMonday=new Date(today);thisMonday.setDate(today.getDate()+diffToMon);thisMonday.setHours(0,0,0,0);
+          const lastMonday=new Date(thisMonday);lastMonday.setDate(thisMonday.getDate()-7);
+          function findW(from,to){const fs=from.toISOString().slice(0,10),ts=to.toISOString().slice(0,10);const e=Object.entries(weightLogs||{}).filter(([dk])=>dk>=fs&&dk<=ts).sort((a,b)=>b[0].localeCompare(a[0]));return e.length?e[0]:null;}
+          const lastWkEnd=new Date(thisMonday);lastWkEnd.setDate(thisMonday.getDate()-1);
+          const tw=findW(thisMonday,today);const lw=findW(lastMonday,lastWkEnd);
+          const fmt=e=>e?`${e[0]} <strong>${e[1]}kg</strong>`:'<span style="color:#B8A096;">未記錄</span>';
+          displayEl.innerHTML=`<div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#8B6F66;"><div>本週體重：${fmt(tw)}</div><div>上週體重：${fmt(lw)}</div></div>`;
+        }
+      }
+    },100);
     scheduleSave('calcSettings',gatherCalcSettings());
   }
+};
+
+
+/* ── 體重紀錄模組 ── */
+let weightLogs = {}; // { 'YYYY-MM-DD': kg }
+
+async function saveWeightLogs(){
+  try{localStorage.setItem('weightLogs',JSON.stringify(weightLogs));}catch(e){}
+  const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?.uid;
+  if(!uid)return;
+  try{await firebase.firestore().collection('users').doc(uid).collection('weightLogs').doc('data').set(weightLogs);}catch(e){}
+}
+async function loadWeightLogs(){
+  try{const d=JSON.parse(localStorage.getItem('weightLogs')||'{}');weightLogs=d;}catch(e){}
+  const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?.uid;
+  if(!uid)return;
+  try{const snap=await firebase.firestore().collection('users').doc(uid).collection('weightLogs').doc('data').get();if(snap.exists)weightLogs=snap.data();}catch(e){}
+}
+
+window.renderWeightTab=function(){
+  const el=document.getElementById('weight-tab-content');if(!el)return;
+  _renderWeightTabInner(el);
+  loadWeightLogs().then(()=>{_renderWeightTabInner(el);});
+};
+
+function _renderWeightTabInner(el){
+  const today=todayKey();
+  const entries=Object.entries(weightLogs).sort((a,b)=>b[0].localeCompare(a[0]));
+  const vals=entries.map(([,v])=>v);
+  const maxW=vals.length?Math.max(...vals):100;
+  const minW=vals.length?Math.min(...vals):50;
+  const range=maxW-minW||1;
+
+  let h='';
+  h+=`<div class="card" style="margin-bottom:1rem;">
+    <div class="sec-label" style="margin-bottom:10px;">記錄體重</div>
+    <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+      <div style="flex:1;min-width:120px;">
+        <div style="font-size:12px;color:#8B6F66;margin-bottom:4px;">日期</div>
+        <input type="date" id="wlog-date-input" value="${today}" style="width:100%;padding:8px;border:0.5px solid #C8AFA0;border-radius:8px;font-size:13px;font-family:inherit;background:#FFFAF5;"/>
+      </div>
+      <div style="flex:1;min-width:100px;">
+        <div style="font-size:12px;color:#8B6F66;margin-bottom:4px;">體重（公斤）</div>
+        <div class="input-row"><input type="number" id="wlog-kg-input" placeholder="例如 74.5" min="30" max="200" step="0.1"/><span class="unit">kg</span></div>
+      </div>
+      <button class="btn btn-green" style="white-space:nowrap;" onclick="addWeightLog()">記錄</button>
+    </div>
+  </div>`;
+
+  if(!entries.length){
+    h+='<div class="empty-track">尚無體重紀錄，開始記錄你的第一筆吧！</div>';
+  } else {
+    h+='<div class="card">';
+    h+=`<div class="sec-label" style="margin-bottom:12px;">體重紀錄（共 ${entries.length} 筆）</div>`;
+    entries.forEach(([dk,kg],i)=>{
+      const prev=entries[i+1]?entries[i+1][1]:null;
+      const diff=prev!=null?(kg-prev):null;
+      const diffStr=diff!=null?(diff>0?'+'+diff.toFixed(1):diff.toFixed(1)):null;
+      const diffCls=diff!=null?(diff<0?'down':'up'):'';
+      const d=new Date(dk+'T00:00:00');
+      const label=(d.getMonth()+1)+'月'+d.getDate()+'日';
+      const barPct=Math.max(4,Math.round(((kg-minW)/range)*100));
+      h+=`<div class="weight-log-row">
+        <div style="flex:1;">
+          <div class="weight-log-date">${label}</div>
+          <div class="weight-chart-bar"><div class="weight-chart-bar-fill" style="width:${barPct}%;"></div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-left:12px;">
+          <span class="weight-log-val">${kg} kg</span>
+          ${diffStr?`<span class="weight-log-change ${diffCls}">${diffStr}kg</span>`:''}
+          <button class="food-remove" onclick="deleteWeightLog('${dk}')"><i class="ti ti-x"></i></button>
+        </div>
+      </div>`;
+    });
+    h+='</div>';
+  }
+  el.innerHTML=h;
+}
+
+window.saveDiaryWeight=function(dk,val){
+  const kg=parseFloat(val);
+  if(isNaN(kg)||val===''){
+    delete weightLogs[dk];
+  } else if(kg>=20&&kg<=300){
+    weightLogs[dk]=Math.round(kg*10)/10;
+  }
+  saveWeightLogs();
+  // 更新已記錄提示
+  const hint=document.querySelector('#diary-content .card span[style*="B58A78"]');
+  // 不重繪整個日記，只更新 input 旁的提示文字
+};
+
+window.addWeightLog=function(){
+  const dk=document.getElementById('wlog-date-input')?.value||todayKey();
+  const kg=parseFloat(document.getElementById('wlog-kg-input')?.value);
+  if(isNaN(kg)||kg<20||kg>300){alert('請輸入合理的體重（20–300 kg）');return;}
+  weightLogs[dk]=Math.round(kg*10)/10;
+  saveWeightLogs();
+  renderWeightTab();
+  showToast('體重已記錄 ✓');
+};
+window.deleteWeightLog=function(dk){
+  if(!confirm('確定刪除此筆體重記錄？'))return;
+  delete weightLogs[dk];
+  saveWeightLogs();
+  renderWeightTab();
+};
+
+loadWeightLogs();
+
+
+window.calc532AdjustInDiary=function(){
+  // 從日記體重欄抓本週值
+  const curW=parseFloat(document.getElementById('diary-weight-input')?.value);
+  const wdk=selDate||todayKey();
+
+  // 找上週體重
+  function findPrevW(){
+    const base=new Date(wdk+'T00:00:00');
+    for(let i=7;i<=14;i++){
+      const d=new Date(base);d.setDate(base.getDate()-i);
+      const dk=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      if(weightLogs[dk]!=null)return weightLogs[dk];
+    }
+    return null;
+  }
+  const prevW=findPrevW();
+  const resultEl=document.getElementById('diary-c532-result');
+
+  if(!resultEl)return;
+
+  if(!curW||isNaN(curW)){
+    resultEl.innerHTML='<div style="font-size:12px;color:#9C7E76;">請先輸入本週體重</div>';
+    resultEl.style.display='block';
+    window._c532AdjResult=resultEl.innerHTML;
+    return;
+  }
+  if(!prevW){
+    resultEl.innerHTML='<div style="font-size:12px;color:#9C7E76;">找不到上週體重紀錄，請確認飲食日記有記錄上週體重</div>';
+    resultEl.style.display='block';
+    window._c532AdjResult=resultEl.innerHTML;
+    return;
+  }
+
+  const lossKg=prevW-curW;
+  const lossPct=(lossKg/prevW)*100;
+  const baseCarb=window.c532BaseCarb||0;
+  const bodyWeight=parseFloat(document.getElementById('weight')?.value)||curW;
+  const minCarb=Math.round(bodyWeight*1.8);
+
+  let color,icon,title,body,newCarb=null;
+
+  if(lossPct>=0.5&&lossPct<=1.2){
+    color='#E8F5E9';icon='✅';title='進度良好，維持現況';
+    body=`減少 ${lossKg.toFixed(2)}kg（${lossPct.toFixed(2)}%），在理想範圍內。碳水維持 <strong>${baseCarb}g</strong>，蛋白質脂肪不動。`;
+  } else if(lossPct>1.2){
+    color='#FFF8E1';icon='⚠️';title='減脂速度偏快';
+    body=`減少 ${lossKg.toFixed(2)}kg（${lossPct.toFixed(2)}%），速度偏快，建議增加碳水 10–20g 或確保蛋白質充足。`;
+  } else if(lossPct>=0&&lossPct<0.5){
+    const proposed=baseCarb-20;
+    newCarb=Math.max(minCarb,proposed);
+    if(proposed<=minCarb){
+      color='#FFF3E0';icon='🔔';title='已達最低安全碳水';
+      body=`減少 ${lossKg.toFixed(2)}kg（${lossPct.toFixed(2)}%），建議降碳水但已達最低安全值 <strong>${minCarb}g</strong>（體重×1.8）。建議增加活動量或重新評估缺口。`;
+      newCarb=null;
+    } else {
+      color='#FFF3E0';icon='📉';title='建議降低碳水 20g';
+      body=`減少 ${lossKg.toFixed(2)}kg（${lossPct.toFixed(2)}%），未達標準。碳水 <strong>${baseCarb}g → ${newCarb}g</strong>，蛋白質脂肪不變。最低安全碳水：${minCarb}g`;
+    }
+  } else {
+    color='#FCE4EC';icon='📊';title='體重上升，請檢視飲食';
+    body=`體重上升 ${Math.abs(lossKg).toFixed(2)}kg，請確認飲食記錄是否準確，並排除水腫因素。`;
+  }
+
+  let applyBtn='';
+  if(newCarb!==null){
+    applyBtn=`<button class="btn btn-green" id="diary-c532-apply-btn" style="margin-top:8px;font-size:12px;padding:5px 12px;" onclick="apply532CarbFromDiary(${newCarb})">
+      套用新碳水 ${newCarb}g
+    </button>`;
+  }
+
+  const html=`<div style="background:${color};border-radius:8px;padding:8px 12px;font-size:12px;color:#3A2A26;line-height:1.7;">
+    <div style="font-weight:600;margin-bottom:2px;">${icon} ${title}</div>
+    <div>${body}</div>
+    ${applyBtn}
+  </div>`;
+  resultEl.innerHTML=html;
+  resultEl.style.display='block';
+  window._c532AdjResult=html;
+};
+
+window.apply532CarbFromDiary=function(newCarb){
+  if(!window.bmrResult||!window.bmrResult.carb532){showToast('請先完成碳水漸降計算');return;}
+  const old=window.bmrResult.carb532;
+  const newKcal=Math.round(newCarb*4+old.prot*4+old.fat*9);
+  const newCount=(old.adjustCount||0)+1;
+  // 更新 bmrResult（含計數）
+  window.bmrResult.carb532={...old,carb:newCarb,kcal:newKcal,adjustCount:newCount};
+  window.c532BaseCarb=newCarb;
+  // 同步更新計算頁顯示
+  const elC=document.getElementById('c532-dc');if(elC)elC.textContent=newCarb+'g';
+  const elK=document.getElementById('c532-dk');if(elK)elK.textContent=newKcal+' kcal';
+  // 更新次數顯示
+  const elN=document.getElementById('c532-adjust-count');
+  if(elN)elN.textContent='已降低碳水 '+newCount+' 次';
+  // 重繪日記（更新目標欄）
+  if(typeof renderDiaryContent==='function')renderDiaryContent();
+  // 套用後按鈕變灰
+  setTimeout(()=>{
+    const btn=document.getElementById('diary-c532-apply-btn');
+    if(btn){btn.textContent='✓ 已套用（'+newCarb+'g）';btn.disabled=true;btn.style.opacity='0.6';}
+  },50);
+  showToast('碳水目標已更新為 '+newCarb+'g（第 '+newCount+' 次調整）✓');
+};
+
+
+window.calc532Adjust=function(){
+  const adjEl=document.getElementById('c532-adjust-result');
+  const displayEl=document.getElementById('c532-weight-display');
+  if(!adjEl)return;
+
+  // 從 weightLogs 自動抓最近兩筆（本週 vs 上週）
+  const today=new Date();
+  // 找本週一
+  const dow=today.getDay();
+  const diffToMon=dow===0?-6:1-dow;
+  const thisMonday=new Date(today);thisMonday.setDate(today.getDate()+diffToMon);thisMonday.setHours(0,0,0,0);
+  const lastMonday=new Date(thisMonday);lastMonday.setDate(thisMonday.getDate()-7);
+
+  // 找本週（週一到今天）最後一筆體重
+  function findWeightInRange(from,to){
+    const fromStr=from.toISOString().slice(0,10);
+    const toStr=to.toISOString().slice(0,10);
+    const entries=Object.entries(weightLogs||{})
+      .filter(([dk])=>dk>=fromStr&&dk<=toStr)
+      .sort((a,b)=>b[0].localeCompare(a[0]));
+    return entries.length?entries[0]:null;
+  }
+
+  const todayStr=today.toISOString().slice(0,10);
+  const thisWkEntry=findWeightInRange(thisMonday,today);
+  const lastWkEnd=new Date(thisMonday);lastWkEnd.setDate(thisMonday.getDate()-1);
+  const lastWkEntry=findWeightInRange(lastMonday,lastWkEnd);
+
+  // 顯示抓到的體重
+  if(displayEl){
+    const fmt=(entry)=>entry?`${entry[0]} <strong>${entry[1]}kg</strong>`:'<span style="color:#B8A096;">未記錄</span>';
+    displayEl.innerHTML=`<div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#8B6F66;">
+      <div>本週體重：${fmt(thisWkEntry)}</div>
+      <div>上週體重：${fmt(lastWkEntry)}</div>
+    </div>`;
+  }
+
+  if(!thisWkEntry||!lastWkEntry){
+    adjEl.innerHTML=`<div style="background:#F5EEE8;border-radius:8px;padding:10px 12px;font-size:12px;color:#8B6F66;">
+      ${!thisWkEntry&&!lastWkEntry?'本週和上週都沒有體重紀錄，請先在飲食日記中記錄體重。':
+        !thisWkEntry?'本週尚無體重紀錄，請在飲食日記記錄今日體重後再試。':
+        '上週無體重紀錄，無法比較。請確保每週都有記錄。'}
+    </div>`;
+    adjEl.style.display='block';
+    return;
+  }
+
+  const curW=thisWkEntry[1];
+  const prevW=lastWkEntry[1];
+  const lossKg=prevW-curW;
+  const lossPct=(lossKg/prevW)*100;
+  const baseCarb=window.c532BaseCarb||0;
+  const bodyWeight=parseFloat(document.getElementById('weight')?.value)||curW;
+  const minCarb=Math.round(bodyWeight*1.8);
+
+  let color,icon,title,body,newCarb=null;
+
+  if(lossPct>=0.5&&lossPct<=1.2){
+    color='#E8F5E9';icon='✅';title='進度良好，維持現況';
+    body=`本週減少 ${lossKg.toFixed(2)}kg（${lossPct.toFixed(2)}%），在理想範圍 0.5%–1.2% 內。<br>繼續維持目前碳水 <strong>${baseCarb}g</strong>，蛋白質脂肪不動。`;
+  } else if(lossPct>1.2){
+    color='#FFF8E1';icon='⚠️';title='減脂速度偏快';
+    body=`本週減少 ${lossKg.toFixed(2)}kg（${lossPct.toFixed(2)}%），速度稍快，可能流失肌肉。<br>建議適度增加碳水 10–20g 或確保蛋白質充足。`;
+  } else if(lossPct>=0&&lossPct<0.5){
+    const proposed=baseCarb-20;
+    newCarb=Math.max(minCarb,proposed);
+    if(proposed<=minCarb){
+      color='#FFF3E0';icon='🔔';title='已達碳水最低安全值';
+      body=`本週減少 ${lossKg.toFixed(2)}kg（${lossPct.toFixed(2)}%），建議降碳水，但已達最低安全值 <strong>${minCarb}g</strong>（體重×1.8）。<br>建議增加活動量或重新評估熱量缺口。`;
+      newCarb=null; // 不更新
+    } else {
+      color='#FFF3E0';icon='📉';title='建議降低碳水 20g';
+      body=`本週減少 ${lossKg.toFixed(2)}kg（${lossPct.toFixed(2)}%），未達標準。<br>
+        碳水：<strong>${baseCarb}g → ${newCarb}g</strong>，蛋白質脂肪不變。<br>
+        最低安全碳水：${minCarb}g（體重×1.8）`;
+    }
+  } else {
+    color='#FCE4EC';icon='📊';title='體重上升，請檢視飲食';
+    body=`本週體重上升 ${Math.abs(lossKg).toFixed(2)}kg，請確認飲食記錄是否準確，並排除水腫等因素。`;
+  }
+
+  // 自動套用新碳水到日記目標
+  let applyBtn='';
+  if(newCarb!==null){
+    applyBtn=`<button class="btn btn-green" style="margin-top:8px;font-size:12px;padding:6px 14px;" onclick="apply532CarbAdjust(${newCarb})">
+      <i class="ti ti-check" style="font-size:12px;margin-right:4px;"></i>套用新碳水 ${newCarb}g 到日記目標
+    </button>`;
+  }
+
+  adjEl.innerHTML=`<div style="background:${color};border-radius:8px;padding:10px 12px;font-size:12px;color:#3A2A26;line-height:1.8;">
+    <div style="font-weight:600;margin-bottom:4px;">${icon} ${title}</div>
+    <div>${body}</div>
+    ${applyBtn}
+  </div>`;
+  adjEl.style.display='block';
+};
+
+window.apply532CarbAdjust=function(newCarb){
+  if(!window.bmrResult||!window.bmrResult.carb532){
+    showToast('請先完成碳水漸降計算');return;
+  }
+  const old=window.bmrResult.carb532;
+  // 更新碳水，蛋白質脂肪不動
+  window.bmrResult.carb532={...old,carb:newCarb};
+  // 更新 c532BaseCarb 供下次比較
+  window.c532BaseCarb=newCarb;
+  // 更新計算頁顯示
+  const el=document.getElementById('c532-dc');
+  if(el)el.textContent=newCarb+'g';
+  // 重算 kcal
+  const newKcal=Math.round(newCarb*4+old.prot*4+old.fat*9);
+  window.bmrResult.carb532.kcal=newKcal;
+  const elk=document.getElementById('c532-dk');
+  if(elk)elk.textContent=newKcal+' kcal';
+  // 重繪日記（若目前在日記頁）
+  if(typeof renderDiaryContent==='function')renderDiaryContent();
+  if(typeof renderTemplateSection==='function'&&diaryTab==='template')renderTemplateSection();
+  // 更新結果按鈕文字
+  const btn=document.querySelector('#c532-adjust-result .btn-green');
+  if(btn){btn.textContent='✓ 已套用（'+newCarb+'g）';btn.disabled=true;btn.style.opacity='0.6';}
+  showToast('碳水目標已更新為 '+newCarb+'g ✓');
 };
 
 function gatherCalcSettings(){
@@ -2299,7 +2679,9 @@ function diaryModeSummaryHTML(day,dayType){
   } else if(calcMode==='normal'){
     modeTag='<span style="background:#E0E5EC;color:#3D4658;font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px;margin-right:6px;">一般模式</span>';
   } else if(calcMode==='carb532'){
-    modeTag='<span style="background:#F4E0C8;color:#8B5E3C;font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px;margin-right:6px;">碳水漸降 −'+selDeficit+' kcal</span>';
+    const _cnt=window.bmrResult?.carb532?.adjustCount||0;
+    const _cntTag=_cnt?(' <span style="background:#D4A884;color:#FFF8F0;font-size:10px;padding:1px 6px;border-radius:4px;margin-left:2px;">已降低 '+_cnt+' 次</span>'):'';
+    modeTag='<span style="background:#F4E0C8;color:#8B5E3C;font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px;margin-right:6px;">碳水漸降 −'+selDeficit+' kcal'+_cntTag+'</span>';
   }
   // 今日目標數字
   const c=day.carb||0,p=day.prot||0,f=day.fat||0,k=day.kcal||0;
@@ -2331,7 +2713,59 @@ function updateDiaryBars(dk,day){
 
 function renderDiaryContent(){
   const dc=document.getElementById('diary-content');
-  if(!selDate){dc.innerHTML='<div class="card"><div class="empty-track">請選擇日期查看飲食記錄</div></div>';return;}
+  // ── 體重卡 ──────────────────────────────────────────
+  const wdk=selDate||todayKey();
+  const wVal=weightLogs[wdk]||'';
+
+  // 找上週同天體重（往前7天最近一筆）
+  function findPrevWeekWeight(){
+    const base=new Date((selDate||todayKey())+'T00:00:00');
+    for(let i=7;i<=14;i++){
+      const d=new Date(base);d.setDate(base.getDate()-i);
+      const dk=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      if(weightLogs[dk]!=null)return{dk,val:weightLogs[dk]};
+    }
+    return null;
+  }
+  const prevWEntry=findPrevWeekWeight();
+  const prevWVal=prevWEntry?prevWEntry.val:null;
+  const prevWLabel=prevWEntry?`上週體重 ${prevWEntry.val}kg`:'上週體重 ──';
+
+  // 碳水漸降模式才顯示完整調整列
+  const isCarb532=calcMode==='carb532';
+  let weightCard='';
+  if(isCarb532){
+    const adjResult=window._c532AdjResult||'';
+    weightCard=`<div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:13px;font-weight:500;color:#8B6F66;white-space:nowrap;">本週體重</span>
+        <div class="input-row" style="flex:0 0 140px;margin:0;">
+          <input type="number" id="diary-weight-input" placeholder="公斤" min="20" max="300" step="0.1" value="${wVal}" style="font-size:14px;text-align:center;" oninput="saveDiaryWeight('${wdk}',this.value)"/>
+          <span class="unit">kg</span>
+        </div>
+        <span style="font-size:13px;color:#9C7E76;white-space:nowrap;">${prevWLabel}</span>
+        <button class="btn btn-outline" style="font-size:12px;padding:5px 12px;white-space:nowrap;" onclick="calc532AdjustInDiary()">
+          <i class="ti ti-refresh" style="font-size:12px;margin-right:3px;"></i>重新計算
+        </button>
+      </div>
+      <div id="diary-c532-result" style="margin-top:${adjResult?'10px':'0'};${adjResult?'':'display:none;'}">${adjResult}</div>
+    </div>`;
+  } else {
+    // 非碳水漸降：只顯示簡單體重輸入
+    weightCard=`<div class="card" style="margin-bottom:1rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span style="font-size:13px;color:#8B6F66;white-space:nowrap;">⚖️ 今日體重</span>
+      <div class="input-row" style="flex:0 0 160px;margin:0;">
+        <input type="number" id="diary-weight-input" placeholder="公斤" min="20" max="300" step="0.1" value="${wVal}" style="font-size:14px;text-align:center;" oninput="saveDiaryWeight('${wdk}',this.value)"/>
+        <span class="unit">kg</span>
+      </div>
+      ${wVal?`<span style="font-size:12px;color:#B58A78;font-weight:500;">${wVal} kg ✓</span>`:''}
+    </div>`;
+  }
+
+  if(!selDate){
+    dc.innerHTML=weightCard+'<div class="card"><div class="empty-track">請選擇日期查看飲食記錄</div></div>';
+    return;
+  }
   const{targets,allSlots,day}=computeDiaryTargets(selDate);
   if(!curDiaryMeal)curDiaryMeal=allSlots[0]?.key||'m1';
   const slot=allSlots.find(s=>s.key===curDiaryMeal)||allSlots[0];
@@ -2372,8 +2806,8 @@ function renderDiaryContent(){
   }
 
   const md=getDiaryItems(selDate,slot?.key||'m1');
-  dc.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-    <div style="font-size:14px;font-weight:500;">${selDate.replace(/-/g,'/')}${calcMode==='cycle'?'('+( dayType==='high'?'高碳日':'低碳日')+')':''}</div>
+  dc.innerHTML=weightCard+`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+    <div style="font-size:14px;font-weight:500;">${selDate.replace(/-/g,'/')}${calcMode==='cycle'?'('+(dayType==='high'?'高碳日':'低碳日')+')':''}</div>
     <button class="btn btn-outline" style="font-size:12px;padding:6px 12px;" onclick="openApplyModal()"><i class="ti ti-template" style="font-size:13px;margin-right:4px;"></i>套用模板</button>
   </div>
   <div class="card" id="diary-top-bars">${diaryModeSummaryHTML(day,dayType)}${barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal')}</div>
