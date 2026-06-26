@@ -1195,6 +1195,10 @@ async function loadCloudData(){
     snap.forEach(d=>{diaryEntries[d.id]=JSON.parse(d.data().value);});
     const petDoc=await getDoc(doc(db,'users',currentUser.uid,'petData','data'));
     if(petDoc.exists()){petData=JSON.parse(petDoc.data().value);migratePetData();}
+    const wkDoc=await getDoc(doc(db,'users',currentUser.uid,'workoutData','meta'));
+    if(wkDoc.exists()){const wd=wkDoc.data();exercises=wd.exercises||[];workoutPlans=wd.workoutPlans||[];}
+    const wlSnap=await getDocs(collection(db,'users',currentUser.uid,'workoutLogs'));
+    wlSnap.forEach(d=>{workoutLogs[d.id]=d.data();});
   }catch(e){console.error('cloud load',e);}
   updateMacroHints();clampDays();renderFoodLib();
   // cloud 資料覆蓋後重新套用模式（applyCalcSettings 已在上方呼叫）
@@ -1548,15 +1552,14 @@ let weightLogs = {}; // { 'YYYY-MM-DD': kg }
 
 async function saveWeightLogs(){
   try{localStorage.setItem('weightLogs',JSON.stringify(weightLogs));}catch(e){}
-  const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?.uid;
-  if(!uid)return;
-  try{await firebase.firestore().collection('users').doc(uid).collection('weightLogs').doc('data').set(weightLogs);}catch(e){}
+  if(!currentUser)return;
+  if(!currentUser)return;
+  try{await setDoc(doc(db,'users',currentUser.uid,'weightLogs','data'),weightLogs);}catch(e){}
 }
 async function loadWeightLogs(){
   try{const d=JSON.parse(localStorage.getItem('weightLogs')||'{}');weightLogs=d;}catch(e){}
-  const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?.uid;
-  if(!uid)return;
-  try{const snap=await firebase.firestore().collection('users').doc(uid).collection('weightLogs').doc('data').get();if(snap.exists)weightLogs=snap.data();}catch(e){}
+  if(!currentUser)return;
+  try{const snap=await getDoc(doc(db,'users',currentUser.uid,'weightLogs','data'));if(snap.exists())weightLogs=snap.data();}catch(e){}
 }
 
 window.renderWeightTab=function(){
@@ -4091,25 +4094,21 @@ if(!window.showToast){
 // -------- Firebase 同步 --------
 async function saveWorkoutData(){
   saveWorkoutLocal();
-  const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?firebase.auth().currentUser.uid:null;
-  if(!uid)return;
-  try{const db=firebase.firestore();await db.collection('users').doc(uid).collection('workoutData').doc('meta').set({exercises,workoutPlans,updatedAt:Date.now()});}catch(e){console.warn('workout save err',e);}
+  if(!currentUser)return;
+  try{await setDoc(doc(db,'users',currentUser.uid,'workoutData','meta'),{exercises,workoutPlans,updatedAt:Date.now()});}catch(e){console.warn('workout save err',e);}
 }
 async function saveWorkoutLog(dk){
-  const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?firebase.auth().currentUser.uid:null;
-  if(!uid)return;
-  try{const db=firebase.firestore();if(workoutLogs[dk])await db.collection('users').doc(uid).collection('workoutLogs').doc(dk).set(workoutLogs[dk]);}catch(e){console.warn('wlog save err',e);}
+  if(!currentUser)return;
+  try{if(workoutLogs[dk])await setDoc(doc(db,'users',currentUser.uid,'workoutLogs',dk),workoutLogs[dk]);}catch(e){console.warn('wlog save err',e);}
 }
 async function loadWorkoutData(){
-  const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?firebase.auth().currentUser.uid:null;
-  if(!uid){loadWorkoutLocal();return;}
-  try{const db=firebase.firestore();const snap=await db.collection('users').doc(uid).collection('workoutData').doc('meta').get();if(snap.exists){const d=snap.data();exercises=d.exercises||[];workoutPlans=d.workoutPlans||[];}}
+  if(!currentUser){loadWorkoutLocal();return;}
+  try{const snap=await getDoc(doc(db,'users',currentUser.uid,'workoutData','meta'));if(snap.exists()){const d=snap.data();exercises=d.exercises||[];workoutPlans=d.workoutPlans||[];}}
   catch(e){console.warn('workout load err',e);loadWorkoutLocal();}
 }
 async function loadWorkoutLog(dk){
-  const uid=typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser?firebase.auth().currentUser.uid:null;
-  if(!uid)return;
-  try{const db=firebase.firestore();const snap=await db.collection('users').doc(uid).collection('workoutLogs').doc(dk).get();if(snap.exists)workoutLogs[dk]=snap.data();}catch(e){console.warn('wlog load err',e);}
+  if(!currentUser)return;
+  try{const snap=await getDoc(doc(db,'users',currentUser.uid,'workoutLogs',dk));if(snap.exists())workoutLogs[dk]=snap.data();}catch(e){console.warn('wlog load err',e);}
 }
 function loadWorkoutLocal(){try{const d=JSON.parse(localStorage.getItem('workoutMeta')||'{}');exercises=d.exercises||[];workoutPlans=d.workoutPlans||[];}catch(e){}}
 function saveWorkoutLocal(){try{localStorage.setItem('workoutMeta',JSON.stringify({exercises,workoutPlans,logs:workoutLogs}));}catch(e){}}
