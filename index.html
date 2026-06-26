@@ -670,7 +670,8 @@
       <div class="settings-section-title">關於</div>
       <div class="settings-hint">
         減脂計算機 · 支援一般模式、碳水漸降、碳循環三種計算模式，搭配飲食日記記錄每日攝取。<br>
-        不登入也能用,資料存在這台裝置;登入 Google 可雲端同步。
+        不登入也能用,資料存在這台裝置;登入 Google 可雲端同步。<br>
+        <span style="color:#B58A78;font-weight:500;">版本 v1.12 · 2026/06/26</span>
       </div>
     </div>
 
@@ -3968,6 +3969,7 @@ const BUILTIN_EXERCISES=[
   {id:'c15',name:'滑輪夾胸（中繩索）',muscle:'胸',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'中胸內側',builtin:true},
   {id:'c16',name:'滑輪夾胸（低繩索）',muscle:'胸',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'上胸內側',builtin:true},
   {id:'c17',name:'立式滑輪交叉飛鳥',muscle:'胸',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'',builtin:true},
+  {id:'c18',name:'雙槓臂屈伸',muscle:'胸',equip:'自由重量',machineSettings:[],note:'下胸、三頭複合',builtin:true},
   // ── 背 ──────────────────────────────
   // 背・自由重量
   {id:'d01',name:'引體向上（自重）',muscle:'背',equip:'自由重量',machineSettings:[],note:'闊背主力動作',builtin:true},
@@ -3978,6 +3980,7 @@ const BUILTIN_EXERCISES=[
   {id:'d06',name:'羅馬尼亞硬舉',muscle:'背',equip:'自由重量',machineSettings:[],note:'下背、膕繩肌',builtin:true},
   {id:'d07',name:'羅馬椅挺身',muscle:'背',equip:'自由重量',machineSettings:[],note:'下背、豎脊肌',builtin:true},
   {id:'d08',name:'啞鈴直臂下拉',muscle:'背',equip:'自由重量',machineSettings:[],note:'闊背下束',builtin:true},
+  {id:'d08b',name:'山羊挺身',muscle:'背',equip:'自由重量',machineSettings:[],note:'下背、豎脊肌、臀',builtin:true},
   // 背・固定器械
   {id:'d09',name:'高位下拉機（寬握）',muscle:'背',equip:'固定器械',machineSettings:[{label:'握把',val:'寬握'}],note:'闊背上束',builtin:true},
   {id:'d10',name:'高位下拉機（窄握）',muscle:'背',equip:'固定器械',machineSettings:[{label:'握把',val:'窄握'}],note:'闊背下束',builtin:true},
@@ -3989,6 +3992,8 @@ const BUILTIN_EXERCISES=[
   {id:'d16',name:'反向蝴蝶機（後三角）',muscle:'背',equip:'固定器械',machineSettings:[{label:'座位高度',val:''}],note:'後三角、菱形肌',builtin:true},
   {id:'d17',name:'低滑輪直臂下拉',muscle:'背',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'闊背下束',builtin:true},
   {id:'d18',name:'器械背伸機',muscle:'背',equip:'固定器械',machineSettings:[],note:'下背、豎脊肌',builtin:true},
+  {id:'d19',name:'單手鋼線下拉',muscle:'背',equip:'固定器械',machineSettings:[{label:'把手',val:''},{label:'阻力',val:''}],note:'闊背單側訓練',builtin:true},
+  {id:'d20',name:'對握下拉',muscle:'背',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'闊背、中背',builtin:true},
   // ── 肩 ──────────────────────────────
   // 肩・自由重量
   {id:'s01',name:'站姿槓鈴肩推',muscle:'肩',equip:'自由重量',machineSettings:[],note:'前束為主',builtin:true},
@@ -4006,6 +4011,7 @@ const BUILTIN_EXERCISES=[
   {id:'s12',name:'滑輪側平舉',muscle:'肩',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'中束',builtin:true},
   {id:'s13',name:'滑輪後側平舉',muscle:'肩',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'後束',builtin:true},
   {id:'s14',name:'器械聳肩機',muscle:'肩',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'斜方肌上束',builtin:true},
+  {id:'s15',name:'Y字側平舉',muscle:'肩',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'後束、中束、旋轉肌群',builtin:true},
   // ── 手臂 ─────────────────────────────
   // 手臂・自由重量
   {id:'a01',name:'槓鈴彎舉',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'二頭，全範圍',builtin:true},
@@ -4026,6 +4032,7 @@ const BUILTIN_EXERCISES=[
   {id:'a15',name:'高位滑輪繩索下壓',muscle:'手臂',equip:'固定器械',machineSettings:[{label:'把手',val:''},{label:'阻力',val:''}],note:'三頭孤立',builtin:true},
   {id:'a16',name:'單臂滑輪三頭伸展',muscle:'手臂',equip:'固定器械',machineSettings:[{label:'把手',val:''},{label:'阻力',val:''}],note:'三頭孤立',builtin:true},
   {id:'a17',name:'器械三頭伸展機',muscle:'手臂',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'',builtin:true},
+  {id:'a18',name:'仰臥臂屈伸',muscle:'手臂',equip:'自由重量',machineSettings:[],note:'三頭長頭，Skull Crusher',builtin:true},
   // ── 腿 ──────────────────────────────
   // 腿・自由重量
   {id:'l01',name:'背蹲舉（槓鈴深蹲）',muscle:'腿',equip:'自由重量',machineSettings:[],note:'股四頭、臀、全腿複合',builtin:true},
@@ -4037,6 +4044,7 @@ const BUILTIN_EXERCISES=[
   {id:'l07',name:'啞鈴側弓步',muscle:'腿',equip:'自由重量',machineSettings:[],note:'臀中肌、大腿內側',builtin:true},
   {id:'l08',name:'站姿槓鈴提踵',muscle:'腿',equip:'自由重量',machineSettings:[],note:'小腿腓腸肌',builtin:true},
   {id:'l09',name:'坐姿啞鈴提踵',muscle:'腿',equip:'自由重量',machineSettings:[],note:'小腿比目魚肌',builtin:true},
+  {id:'l16',name:'頸前深蹲',muscle:'腿',equip:'自由重量',machineSettings:[],note:'股四頭為主，上背直立性要求高',builtin:true},
   // 腿・固定器械
   {id:'l10',name:'腿推機',muscle:'腿',equip:'固定器械',machineSettings:[{label:'腳掌位置',val:''},{label:'阻力',val:''}],note:'股四頭、臀，腳位決定重心',builtin:true},
   {id:'l11',name:'腿伸展機（坐姿）',muscle:'腿',equip:'固定器械',machineSettings:[{label:'阻力',val:''}],note:'股四頭孤立',builtin:true},
