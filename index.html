@@ -474,12 +474,29 @@
     .wplan-day-sets{display:flex;align-items:center;gap:6px;font-size:12px;color:#8B6F66;}
     .wplan-day-sets input{width:44px;text-align:center;padding:3px 4px;font-size:12px;}
     .wplan-checkbox-list{max-height:220px;overflow-y:auto;}
+    /* 排序標籤區 */
+    .wplan-tag-area{display:flex;flex-wrap:wrap;gap:6px;min-height:32px;padding:6px 8px;background:#EDE4DE;border-radius:8px;margin-bottom:8px;border:1.5px dashed transparent;transition:border-color 0.15s;}
+    .wplan-tag-area.drag-over{border-color:#B58A78;}
+    .wplan-tag{display:flex;align-items:center;gap:4px;background:#FFFAF5;border:0.5px solid #C8AFA0;border-radius:6px;padding:3px 8px;font-size:12px;color:#3A2A26;cursor:grab;user-select:none;transition:opacity 0.15s,box-shadow 0.15s;}
+    .wplan-tag:active{cursor:grabbing;}
+    .wplan-tag.dragging{opacity:0.4;box-shadow:none;}
+    .wplan-tag-x{font-size:11px;color:#B8A096;cursor:pointer;margin-left:2px;line-height:1;}
+    .wplan-tag-x:hover{color:#B85040;}
+    /* 計畫卡片動作標籤（純顯示） */
+    .wplan-ex-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;}
+    .wplan-ex-tag{font-size:11px;background:#EDE4DE;border-radius:5px;padding:2px 8px;color:#6B584A;}
     /* 主題：抹茶 */
     body.theme-matcha .wplan-editor{background:#FCFBF6;border-color:#C5CCAC;}
     body.theme-matcha .wplan-day-block{background:#EDEEE0;}
+    body.theme-matcha .wplan-tag-area{background:#E2E4D5;}
+    body.theme-matcha .wplan-tag{background:#FCFBF6;border-color:#C5CCAC;}
+    body.theme-matcha .wplan-ex-tag{background:#E2E4D5;color:#4A5040;}
     /* 主題：楓糖 */
     body.theme-maple .wplan-editor{background:#FFFCF5;border-color:#DDC9A0;}
     body.theme-maple .wplan-day-block{background:#F5ECD8;}
+    body.theme-maple .wplan-tag-area{background:#EAD9BB;}
+    body.theme-maple .wplan-tag{background:#FFFCF5;border-color:#DDC9A0;}
+    body.theme-maple .wplan-ex-tag{background:#EAD9BB;color:#5A4020;}
 
   </style>
 </head>
@@ -3964,21 +3981,22 @@ function renderPlanList(el){
     const tl={'week':'週計畫','cycle':'N日循環','list':'純清單'};
     h+='<div class="wplan-list">'+workoutPlans.map(p=>{
       let dr='';
-      if(p.type==='week'){[['mon','週一'],['tue','週二'],['wed','週三'],['thu','週四'],['fri','週五'],['sat','週六'],['sun','週日']].forEach(([k,lb])=>{const ids=p.days?p.days[k]||[]:[];const ns=ids.map(id=>{const e=findEx(id);return e?e.name:id;});const sv=p.daySets?p.daySets[k]||3:3;dr+=`<div class="wplan-day-row"><div class="wplan-day-label">${lb}</div><div class="wplan-day-exercises${!ns.length?' rest':''}">${ns.length?ns.join('、'):'休息'}</div>${ns.length?`<div style="font-size:11px;color:#B8A096;white-space:nowrap;">${sv}組</div>`:''}</div>`;});}
-      else if(p.type==='cycle'){const n=p.cycleN||4;Array.from({length:n},(_,i)=>'d'+(i+1)).forEach((k,i)=>{const ids=p.days?p.days[k]||[]:[];const ns=ids.map(id=>{const e=findEx(id);return e?e.name:id;});const sv=p.daySets?p.daySets[k]||3:3;dr+=`<div class="wplan-day-row"><div class="wplan-day-label">第${i+1}天</div><div class="wplan-day-exercises${!ns.length?' rest':''}">${ns.length?ns.join('、'):'休息'}</div>${ns.length?`<div style="font-size:11px;color:#B8A096;white-space:nowrap;">${sv}組</div>`:''}</div>`;});}
-      else{const ids=p.exercises||[];const ns=ids.map(id=>{const e=findEx(id);return e?e.name:id;});const sv=p.daySets?p.daySets['list']||3:3;dr=`<div class="wplan-day-row"><div class="wplan-day-exercises">${ns.length?ns.join('、'):'（尚未設定動作）'}</div>${ns.length?`<div style="font-size:11px;color:#B8A096;white-space:nowrap;">${sv}組</div>`:''}</div>`;}
+      if(p.type==='week'){[['mon','週一'],['tue','週二'],['wed','週三'],['thu','週四'],['fri','週五'],['sat','週六'],['sun','週日']].forEach(([k,lb])=>{const ids=p.days?p.days[k]||[]:[];const ns=ids.map(id=>{const e=findEx(id);return e?e.name:id;});const sv=p.daySets?p.daySets[k]||3:3;const tagHtml=ns.length?ns.map(n=>`<span class="wplan-ex-tag">${escH(n)}</span>`).join(''):'<span style="font-size:12px;color:#B8A096;font-style:italic;">休息</span>';dr+=`<div class="wplan-day-row" style="flex-direction:column;align-items:flex-start;gap:4px;"><div style="display:flex;align-items:center;justify-content:space-between;width:100%;"><div class="wplan-day-label">${lb}</div>${ns.length?`<div style="font-size:11px;color:#B8A096;">${sv}組</div>`:''}</div><div class="wplan-ex-tags">${tagHtml}</div></div>`;});}
+      else if(p.type==='cycle'){const n=p.cycleN||4;Array.from({length:n},(_,i)=>'d'+(i+1)).forEach((k,i)=>{const ids=p.days?p.days[k]||[]:[];const ns=ids.map(id=>{const e=findEx(id);return e?e.name:id;});const sv=p.daySets?p.daySets[k]||3:3;const tagHtml=ns.length?ns.map(n=>`<span class="wplan-ex-tag">${escH(n)}</span>`).join(''):'<span style="font-size:12px;color:#B8A096;font-style:italic;">休息</span>';dr+=`<div class="wplan-day-row" style="flex-direction:column;align-items:flex-start;gap:4px;"><div style="display:flex;align-items:center;justify-content:space-between;width:100%;"><div class="wplan-day-label">第${i+1}天</div>${ns.length?`<div style="font-size:11px;color:#B8A096;">${sv}組</div>`:''}</div><div class="wplan-ex-tags">${tagHtml}</div></div>`;});}
+      else{const ids=p.exercises||[];const ns=ids.map(id=>{const e=findEx(id);return e?e.name:id;});const sv=p.daySets?p.daySets['list']||3:3;const tagHtml=ns.length?ns.map(n=>`<span class="wplan-ex-tag">${escH(n)}</span>`).join(''):'<span style="font-size:12px;color:#B8A096;">（尚未設定動作）</span>';dr=`<div class="wplan-day-row" style="flex-direction:column;align-items:flex-start;gap:4px;"><div style="display:flex;align-items:center;justify-content:space-between;width:100%;"><div style="font-size:12px;color:#8B6F66;"></div>${ns.length?`<div style="font-size:11px;color:#B8A096;">${sv}組</div>`:''}</div><div class="wplan-ex-tags">${tagHtml}</div></div>`;}
       return `<div class="wplan-card"><div class="wplan-card-header"><div><div class="wplan-card-name">${escH(p.name)}</div><div class="wplan-card-meta">${tl[p.type]||p.type}</div></div><div class="wplan-card-actions"><button class="exlib-edit-btn" onclick="openPlanModal('${p.id}')">編輯</button><button class="exlib-del-btn" onclick="deletePlan('${p.id}')">刪除</button></div></div>${dr}</div>`;
     }).join('')+'</div>';
   }
   el.innerHTML=h;
 }
-window.openPlanModal=function(id){editPlanId=id||'__new__';planEditorMuscle='all';planEditorEquip='all';planEditorChecked={};planEditorSets={};renderWorkoutTab();};
+window.openPlanModal=function(id){editPlanId=id||'__new__';planEditorMuscle='all';planEditorEquip='all';planEditorChecked={};planEditorSets={};planEditorOrder={};renderWorkoutTab();};
 window.cancelEditPlan=function(){editPlanId=null;renderWorkoutTab();};
 window.closePlanModal=function(){editPlanId=null;renderWorkoutTab();};
 let planEditorMuscle='all';
 let planEditorEquip='all';
 let planEditorChecked={};
 let planEditorSets={};
+let planEditorOrder={};  // { containerId: [id, id, ...] } 記錄排序
 function _collectPlanChecked(){
   document.querySelectorAll('#plan-day-editor [id^="pd-"]').forEach(container=>{
     const k=container.id;
@@ -3987,6 +4005,14 @@ function _collectPlanChecked(){
       if(cb.checked)planEditorChecked[k].add(cb.value);
       else planEditorChecked[k].delete(cb.value);
     });
+  });
+  // 同步收集標籤區現有順序
+  document.querySelectorAll('#plan-day-editor .wplan-tag-area').forEach(area=>{
+    const tags=area.querySelectorAll('.wplan-tag[data-id]');
+    if(tags.length){
+      const cid=tags[0].dataset.container;
+      if(cid)planEditorOrder[cid]=Array.from(tags).map(t=>t.dataset.id);
+    }
   });
   document.querySelectorAll('#plan-day-editor [data-sets-key]').forEach(inp=>{
     planEditorSets[inp.dataset.setsKey]=parseInt(inp.value)||3;
@@ -4001,10 +4027,25 @@ window.renderPlanDayEditor=function(existPlan){
   const isNew=editPlanId==='__new__';
   const plan=typeof existPlan==='object'&&existPlan!==null?existPlan:(!isNew&&editPlanId?workoutPlans.find(p=>p.id===editPlanId):null);
   if(typeof existPlan==='object'){
-    planEditorChecked={};planEditorSets={};
-    if(plan?.type==='week'){['mon','tue','wed','thu','fri','sat','sun'].forEach(k=>{planEditorChecked['pd-'+k]=new Set(plan.days?plan.days[k]||[]:[]); planEditorSets['pd-'+k]=plan.daySets?plan.daySets[k]||3:3;});}
-    else if(plan?.type==='cycle'){const n=plan.cycleN||4;Array.from({length:n},(_,i)=>'d'+(i+1)).forEach(k=>{planEditorChecked['pd-'+k]=new Set(plan.days?plan.days[k]||[]:[]);planEditorSets['pd-'+k]=plan.daySets?plan.daySets[k]||3:3;});}
-    else{planEditorChecked['pd-list']=new Set(plan?.exercises||[]);planEditorSets['pd-list']=plan?.daySets?plan.daySets['list']||3:3;}
+    planEditorChecked={};planEditorSets={};planEditorOrder={};
+    if(plan?.type==='week'){['mon','tue','wed','thu','fri','sat','sun'].forEach(k=>{
+      const ids=plan.days?plan.days[k]||[]:[]; 
+      planEditorChecked['pd-'+k]=new Set(ids);
+      planEditorSets['pd-'+k]=plan.daySets?plan.daySets[k]||3:3;
+      planEditorOrder['pd-'+k]=[...ids]; // 保留原始順序
+    });}
+    else if(plan?.type==='cycle'){const n=plan.cycleN||4;Array.from({length:n},(_,i)=>'d'+(i+1)).forEach(k=>{
+      const ids=plan.days?plan.days[k]||[]:[]; 
+      planEditorChecked['pd-'+k]=new Set(ids);
+      planEditorSets['pd-'+k]=plan.daySets?plan.daySets[k]||3:3;
+      planEditorOrder['pd-'+k]=[...ids];
+    });}
+    else{
+      const ids=plan?.exercises||[];
+      planEditorChecked['pd-list']=new Set(ids);
+      planEditorSets['pd-list']=plan?.daySets?plan.daySets['list']||3:3;
+      planEditorOrder['pd-list']=[...ids];
+    }
   } else if(Object.keys(planEditorChecked).length===0){
     if(type==='week')['mon','tue','wed','thu','fri','sat','sun'].forEach(k=>{planEditorChecked['pd-'+k]=new Set();planEditorSets['pd-'+k]=3;});
     else if(type==='cycle'){const n=parseInt(document.getElementById('plan-cycle-n')?.value)||4;Array.from({length:n},(_,i)=>'d'+(i+1)).forEach(k=>{planEditorChecked['pd-'+k]=new Set();planEditorSets['pd-'+k]=3;});}
@@ -4013,20 +4054,110 @@ window.renderPlanDayEditor=function(existPlan){
   _renderPlanEditorFilters();
   const allEx=getAllExercises().filter(e=>(planEditorMuscle==='all'||e.muscle===planEditorMuscle)&&(planEditorEquip==='all'||e.equip===planEditorEquip));
   function dayBlock(containerId,label){
-    const cs=planEditorChecked[containerId]||new Set();const sv=planEditorSets[containerId]||3;const cc=cs.size;
-    let inner=`<div class="wplan-day-block"><div class="wplan-day-block-header"><div class="wplan-day-block-label">${label}${cc?` <span style="font-size:11px;font-weight:400;color:#9C7E76;">(${cc}個動作)</span>`:''}</div><div class="wplan-day-sets"><span>預設組數</span><input type="number" min="1" max="20" value="${sv}" data-sets-key="${containerId}" style="width:44px;text-align:center;padding:3px 4px;font-size:12px;" onchange="_collectPlanChecked()"/><span>組</span></div></div><div class="wplan-checkbox-list" id="${containerId}">`;
-    if(!allEx.length){inner+='<div style="font-size:12px;color:#9C7E76;padding:4px 0;">此篩選條件下沒有動作</div>';}
-    else{inner+=allEx.map(e=>`<label style="display:flex;align-items:center;gap:6px;font-size:13px;padding:3px 0;cursor:pointer;"><input type="checkbox" value="${e.id}" ${cs.has(e.id)?'checked':''} style="width:auto;" onchange="_onPlanCheckChange('${containerId}',this)"/>${escH(e.name)}<span style="font-size:11px;color:#9C7E76;">${e.muscle}・${e.equip}</span></label>`).join('');}
-    inner+='</div></div>';return inner;
+    const cs=planEditorChecked[containerId]||new Set();
+    if(!planEditorOrder[containerId])planEditorOrder[containerId]=[...cs];
+    planEditorOrder[containerId]=planEditorOrder[containerId].filter(id=>cs.has(id));
+    cs.forEach(id=>{if(!planEditorOrder[containerId].includes(id))planEditorOrder[containerId].push(id);});
+    const sv=planEditorSets[containerId]||3;
+    const cc=cs.size;
+    // 標籤區先空，渲染後由 _refreshTagArea 填入
+    return `<div class="wplan-day-block">
+      <div class="wplan-day-block-header">
+        <div class="wplan-day-block-label">${label}${cc?` <span style="font-size:11px;font-weight:400;color:#9C7E76;">(${cc}個動作)</span>`:''}</div>
+        <div class="wplan-day-sets"><span>預設組數</span><input type="number" min="1" max="20" value="${sv}" data-sets-key="${containerId}" style="width:44px;text-align:center;padding:3px 4px;font-size:12px;" onchange="_collectPlanChecked()"/><span>組</span></div>
+      </div>
+      <div class="wplan-tag-area" id="tarea-${containerId}"></div>
+      <div class="wplan-checkbox-list" id="${containerId}">${
+        allEx.length
+          ? allEx.map(e=>`<label style="display:flex;align-items:center;gap:6px;font-size:13px;padding:3px 0;cursor:pointer;"><input type="checkbox" value="${e.id}" ${cs.has(e.id)?'checked':''} style="width:auto;" onchange="_onPlanCheckChange('${containerId}',this)"/>${escH(e.name)}<span style="font-size:11px;color:#9C7E76;">${e.muscle}・${e.equip}</span></label>`).join('')
+          : '<div style="font-size:12px;color:#9C7E76;padding:4px 0;">此篩選條件下沒有動作</div>'
+      }</div>
+    </div>`;
   }
-  if(type==='week'){el.innerHTML=[['mon','週一'],['tue','週二'],['wed','週三'],['thu','週四'],['fri','週五'],['sat','週六'],['sun','週日']].map(([k,l])=>dayBlock('pd-'+k,l)).join('');}
-  else if(type==='cycle'){const n=parseInt(document.getElementById('plan-cycle-n')?.value)||4;el.innerHTML=Array.from({length:n},(_,i)=>dayBlock('pd-d'+(i+1),'第'+(i+1)+'天')).join('');}
-  else{el.innerHTML=dayBlock('pd-list','動作清單');}
+  if(type==='week'){
+    const days=[['mon','週一'],['tue','週二'],['wed','週三'],['thu','週四'],['fri','週五'],['sat','週六'],['sun','週日']];
+    el.innerHTML=days.map(([k,l])=>dayBlock('pd-'+k,l)).join('');
+    days.forEach(([k])=>_refreshTagArea('pd-'+k));
+  } else if(type==='cycle'){
+    const n=parseInt(document.getElementById('plan-cycle-n')?.value)||4;
+    el.innerHTML=Array.from({length:n},(_,i)=>dayBlock('pd-d'+(i+1),'第'+(i+1)+'天')).join('');
+    Array.from({length:n},(_,i)=>'d'+(i+1)).forEach(k=>_refreshTagArea('pd-'+k));
+  } else {
+    el.innerHTML=dayBlock('pd-list','動作清單');
+    _refreshTagArea('pd-list');
+  }
 };
 window._onPlanCheckChange=function(containerId,cb){
   if(!planEditorChecked[containerId])planEditorChecked[containerId]=new Set();
-  if(cb.checked)planEditorChecked[containerId].add(cb.value);else planEditorChecked[containerId].delete(cb.value);
+  if(!planEditorOrder[containerId])planEditorOrder[containerId]=[];
+  if(cb.checked){
+    planEditorChecked[containerId].add(cb.value);
+    if(!planEditorOrder[containerId].includes(cb.value))planEditorOrder[containerId].push(cb.value);
+  } else {
+    planEditorChecked[containerId].delete(cb.value);
+    planEditorOrder[containerId]=planEditorOrder[containerId].filter(id=>id!==cb.value);
+  }
+  _refreshTagArea(containerId);
 };
+window._removeTagFromPlan=function(containerId,exId){
+  if(planEditorChecked[containerId])planEditorChecked[containerId].delete(exId);
+  if(planEditorOrder[containerId])planEditorOrder[containerId]=planEditorOrder[containerId].filter(id=>id!==exId);
+  const cb=document.querySelector('#'+containerId+' input[value="'+exId+'"]');
+  if(cb)cb.checked=false;
+  _refreshTagArea(containerId);
+};
+function _refreshTagArea(containerId){
+  const area=document.getElementById('tarea-'+containerId);if(!area)return;
+  const order=planEditorOrder[containerId]||[];
+  area.innerHTML='';
+  if(!order.length){
+    const hint=document.createElement('span');
+    hint.style.cssText='font-size:12px;color:#B8A096;padding:2px 0;';
+    hint.textContent='勾選下方動作加入';
+    area.appendChild(hint);
+    return;
+  }
+  order.forEach(id=>{
+    const ex=findEx(id);
+    const tag=document.createElement('div');
+    tag.className='wplan-tag';tag.draggable=true;
+    tag.dataset.id=id;tag.dataset.container=containerId;
+    tag.textContent=ex?ex.name:id;
+    const x=document.createElement('span');
+    x.className='wplan-tag-x';x.textContent='✕';
+    x.addEventListener('click',()=>_removeTagFromPlan(containerId,id));
+    tag.appendChild(x);
+    area.appendChild(tag);
+  });
+  _bindTagDrag(area,containerId);
+  const block=area.closest('.wplan-day-block');
+  if(block){
+    const lbl=block.querySelector('.wplan-day-block-label');
+    if(lbl){
+      const bt=lbl.textContent.replace(/\s*\(\d+個動作\)/,'');
+      lbl.innerHTML=bt+(order.length?' <span style="font-size:11px;font-weight:400;color:#9C7E76;">('+order.length+'個動作)</span>':'');
+    }
+  }
+}
+function _bindTagDrag(area,containerId){
+  let dragSrc=null;
+  area.querySelectorAll('.wplan-tag').forEach(tag=>{
+    tag.addEventListener('dragstart',e=>{dragSrc=tag;tag.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    tag.addEventListener('dragend',()=>{
+      tag.classList.remove('dragging');area.classList.remove('drag-over');
+      planEditorOrder[containerId]=Array.from(area.querySelectorAll('.wplan-tag[data-id]')).map(t=>t.dataset.id);
+    });
+    tag.addEventListener('dragover',e=>{
+      e.preventDefault();e.dataTransfer.dropEffect='move';area.classList.add('drag-over');
+      if(tag===dragSrc)return;
+      const rect=tag.getBoundingClientRect();
+      area.insertBefore(dragSrc,e.clientX>rect.left+rect.width/2?tag.nextSibling:tag);
+    });
+  });
+  area.addEventListener('dragover',e=>{e.preventDefault();area.classList.add('drag-over');});
+  area.addEventListener('dragleave',()=>area.classList.remove('drag-over'));
+  area.addEventListener('drop',e=>{e.preventDefault();area.classList.remove('drag-over');});
+}
 function _renderPlanEditorFilters(){
   const muscles=['all','胸','背','肩','手臂','腿','臀','核心','有氧'];
   const equips=['all','自由重量','固定器械'];
@@ -4041,7 +4172,7 @@ window.savePlan=function(){
   _collectPlanChecked();
   const name=document.getElementById('plan-name').value.trim();if(!name){alert('請輸入計畫名稱');return;}
   const type=document.getElementById('plan-type').value;const cycleN=parseInt(document.getElementById('plan-cycle-n')?.value)||4;
-  function getIds(k){return Array.from(planEditorChecked[k]||new Set());}
+  function getIds(k){return planEditorOrder[k]||Array.from(planEditorChecked[k]||new Set());}
   function getSets(k){return planEditorSets[k]||3;}
   let days={};let exList=[];let daySets={};
   if(type==='week'){['mon','tue','wed','thu','fri','sat','sun'].forEach(k=>{days[k]=getIds('pd-'+k);daySets[k]=getSets('pd-'+k);});}
