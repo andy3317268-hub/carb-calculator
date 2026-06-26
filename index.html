@@ -1077,11 +1077,8 @@ function isInStandalone(){return window.matchMedia('(display-mode: standalone)')
 window.signInWithGoogle=async()=>{
   try{
     const provider=new GoogleAuthProvider();
-    if(isIOS()||isInStandalone()){
-      await signInWithRedirect(auth,provider);
-    } else {
-      await signInWithPopup(auth,provider);
-    }
+    // iOS PWA redirect 有已知 bug（getRedirectResult 抓不到），一律改用 popup
+    await signInWithPopup(auth,provider);
     closeLoginModal();
   }catch(e){console.error('signin error',e);alert('登入失敗:'+e.message);}
 };
