@@ -1669,7 +1669,14 @@ window.calc532AdjustInDiary=function(){
     }
     return null;
   }
-  const prevW=findPrevW();
+  const prevW=(()=>{
+    const found=findPrevW();
+    if(found!=null)return{val:found,fromCalc:false};
+    // 找不到上週紀錄 → 用計算機輸入的體重當基準
+    const calcW=parseFloat(document.getElementById('weight')?.value);
+    if(!isNaN(calcW)&&calcW>0)return{val:calcW,fromCalc:true};
+    return null;
+  })();
   const resultEl=document.getElementById('diary-c532-result');
 
   if(!resultEl)return;
@@ -1681,14 +1688,16 @@ window.calc532AdjustInDiary=function(){
     return;
   }
   if(!prevW){
-    resultEl.innerHTML='<div style="font-size:12px;color:#9C7E76;">找不到上週體重紀錄，請確認飲食日記有記錄上週體重</div>';
+    resultEl.innerHTML='<div style="font-size:12px;color:#9C7E76;">找不到上週體重，且計算機尚未輸入體重，無法比較。</div>';
     resultEl.style.display='block';
     window._c532AdjResult=resultEl.innerHTML;
     return;
   }
 
-  const lossKg=prevW-curW;
-  const lossPct=(lossKg/prevW)*100;
+  const prevWVal=prevW.val;
+  const prevWNote=prevW.fromCalc?' <span style="font-size:11px;color:#B8A096;">（以計算機初始體重 '+prevWVal+'kg 為基準）</span>':'';
+  const lossKg=prevWVal-curW;
+  const lossPct=(lossKg/prevWVal)*100;
   const baseCarb=window.c532BaseCarb||0;
   const bodyWeight=parseFloat(document.getElementById('weight')?.value)||curW;
   const minCarb=Math.round(bodyWeight*1.8);
@@ -1725,7 +1734,7 @@ window.calc532AdjustInDiary=function(){
   }
 
   const html=`<div style="background:${color};border-radius:8px;padding:8px 12px;font-size:12px;color:#3A2A26;line-height:1.7;">
-    <div style="font-weight:600;margin-bottom:2px;">${icon} ${title}</div>
+    <div style="font-weight:600;margin-bottom:2px;">${icon} ${title}${prevWNote}</div>
     <div>${body}</div>
     ${applyBtn}
   </div>`;
@@ -2729,7 +2738,13 @@ function renderDiaryContent(){
   }
   const prevWEntry=findPrevWeekWeight();
   const prevWVal=prevWEntry?prevWEntry.val:null;
-  const prevWLabel=prevWEntry?`上週體重 ${prevWEntry.val}kg`:'上週體重 ──';
+  // 找不到上週體重 → 用計算機輸入的體重當基準
+  const calcWeight=parseFloat(document.getElementById('weight')?.value)||null;
+  const prevWFallback=calcWeight?{val:calcWeight,fromCalc:true}:null;
+  const prevWFinal=prevWEntry||prevWFallback;
+  const prevWLabel=prevWFinal
+    ?(prevWFinal.fromCalc?`初始體重 ${prevWFinal.val}kg（計算機）`:`上週體重 ${prevWFinal.val}kg`)
+    :'上週體重 ──';
 
   // 碳水漸降模式才顯示完整調整列
   const isCarb532=calcMode==='carb532';
