@@ -4370,7 +4370,7 @@ updateMacroHints();clampDays();
 let workoutTab = 'log';
 let wlogDate = todayKey();
 let wlogMode = 'free';
-let wlogWeightUnit=localStorage.getItem('wlogWeightUnit')||'kg';
+// wlogWeightUnit 已改為 per-set unit
 let workoutLogs  = {};
 let exercises    = [];
 let workoutPlans = [];
@@ -4634,7 +4634,6 @@ function renderWorkoutLog(el){
       ${workoutPlans.map(p=>`<option value="${p.id}">${escH(p.name)}</option>`).join('')}
     </select>`;
   }
-  h+=`<button onclick="toggleWeightUnit()" style="font-size:11px;padding:4px 10px;border:1px solid var(--c-border);border-radius:6px;background:var(--c-bg-soft);cursor:pointer;color:var(--c-label);font-family:inherit;font-weight:500;">${wlogWeightUnit==='kg'?'kg ⇄ lb':'lb ⇄ kg'}</button>`;
     h+=`<button class="wlog-add-exercise-btn" style="margin:0;padding:6px 12px;font-size:12px;" onclick="openPickExModal()"><i class="ti ti-plus"></i> 新增動作</button>`;
   h+=`</div></div>`;
 
@@ -4646,9 +4645,9 @@ function renderWorkoutLog(el){
     exBlocks.forEach((eb,ei)=>{
       const exInfo=findEx(eb.exId)||{name:eb.name||'未知動作',muscle:'',equip:''};
       h+=`<div class="wlog-exercise-block"><div class="wlog-exercise-header"><div><div class="wlog-exercise-name">${escH(exInfo.name)}</div><div class="wlog-exercise-meta">${exInfo.muscle?'<span class="exlib-tag muscle">'+escH(exInfo.muscle)+'</span>':''} ${exInfo.equip?'<span class="exlib-tag equip">'+escH(exInfo.equip)+'</span>':''}</div></div><button class="exlib-del-btn" onclick="removeWlogExercise(${ei})"><i class="ti ti-trash"></i></button></div>`;
-      h+=`<div style="display:grid;grid-template-columns:28px 1fr 1fr 28px;gap:6px;margin-bottom:4px;"><div></div><div class="wlog-set-label">重量 (${wlogWeightUnit})</div><div class="wlog-set-label">次數</div><div></div></div>`;
+      h+=`<div style="display:grid;grid-template-columns:28px 1.3fr 0.7fr 28px;gap:6px;margin-bottom:4px;"><div></div><div class="wlog-set-label">重量</div><div class="wlog-set-label">次數</div><div></div></div>`;
       (eb.sets||[]).forEach((s,si)=>{
-        h+=`<div class="wlog-set-row" style="grid-template-columns:28px 1fr 1fr 28px;"><div class="wlog-set-num">${si+1}</div><div class="wlog-set-input-wrap"><input type="number" min="0" step="0.5" value="${s.weight||''}" placeholder="${wlogWeightUnit}" onchange="updateSet(${ei},${si},'weight',this.value)"/></div><div class="wlog-set-input-wrap"><input type="number" min="0" step="1" value="${s.reps||''}" placeholder="次" onchange="updateSet(${ei},${si},'reps',this.value)"/></div><button class="food-remove" onclick="removeSet(${ei},${si})"><i class="ti ti-x"></i></button></div>`;
+        h+=`<div class="wlog-set-row" style="grid-template-columns:28px 1.3fr 0.7fr 28px;"><div class="wlog-set-num">${si+1}</div><div style="display:flex;gap:4px;align-items:center;"><input type="number" min="0" step="0.5" value="${s.weight||''}" placeholder="重量" style="flex:1;text-align:center;padding:6px 4px;font-size:13px;" onchange="updateSet(${ei},${si},'weight',this.value)"/><button onclick="toggleSetUnit(${ei},${si})" style="font-size:10px;padding:2px 6px;border:1px solid var(--c-border);border-radius:4px;background:var(--c-bg-soft);cursor:pointer;color:var(--c-label);font-family:inherit;white-space:nowrap;min-width:28px;">${s.unit||'kg'}</button></div><div class="wlog-set-input-wrap"><input type="number" min="0" step="1" value="${s.reps||''}" placeholder="次" onchange="updateSet(${ei},${si},'reps',this.value)"/></div><button class="food-remove" onclick="removeSet(${ei},${si})"><i class="ti ti-x"></i></button></div>`;
       });
       h+=`<button class="wlog-add-set-btn" onclick="addSet(${ei})">＋ 新增一組</button><textarea class="wlog-note-input" rows="1" placeholder="動作備註（選填）" onchange="updateExNote(${ei},this.value)" style="margin-top:6px;">${escH(eb.note||'')}</textarea></div>`;
     });
@@ -4682,10 +4681,10 @@ window.wlogShiftDate=function(delta){
   renderWorkoutTab();
 };
 window.updateSet=function(ei,si,field,val){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei]||!log.exercises[ei].sets[si])return;log.exercises[ei].sets[si][field]=val;};
-window.addSet=function(ei){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei])return;log.exercises[ei].sets.push({weight:'',reps:''});renderWorkoutTab();};
+window.addSet=function(ei){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei])return;const lastUnit=(log.exercises[ei].sets.length>0?log.exercises[ei].sets[log.exercises[ei].sets.length-1].unit:null)||'kg';log.exercises[ei].sets.push({weight:'',reps:'',unit:lastUnit});renderWorkoutTab();};
 window.removeSet=function(ei,si){const log=workoutLogs[wlogDate];if(!log)return;log.exercises[ei].sets.splice(si,1);renderWorkoutTab();};
 window.updateExNote=function(ei,val){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei])return;log.exercises[ei].note=val;};
-window.toggleWeightUnit=function(){wlogWeightUnit=(wlogWeightUnit==='kg')?'lb':'kg';localStorage.setItem('wlogWeightUnit',wlogWeightUnit);renderWorkoutTab();};
+window.toggleSetUnit=function(ei,si){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei]||!log.exercises[ei].sets[si])return;const s=log.exercises[ei].sets[si];s.unit=(s.unit||'kg')==='kg'?'lb':'kg';renderWorkoutTab();};
 window.removeWlogExercise=function(ei){const log=workoutLogs[wlogDate];if(!log)return;log.exercises.splice(ei,1);renderWorkoutTab();};
 window.updateWlogNote=function(val){if(!workoutLogs[wlogDate])workoutLogs[wlogDate]={planId:null,exercises:[],note:''};workoutLogs[wlogDate].note=val;};
 window.saveWlogForDate=async function(){
