@@ -2285,20 +2285,48 @@ function bindFoodEvents(prefix,getMd,onUpdate,getTargets){
 
 // ── Templates ──────────────────────────────────────────
 window.openNewTplModal=()=>{document.getElementById('newTplName').value='';document.getElementById('newTplModal').classList.add('show');};
-window.closeNewTplModal=()=>document.getElementById('newTplModal').classList.remove('show');
+window.closeNewTplModal=()=>{document.getElementById('newTplModal').classList.remove('show');window._saveAsTplFromDiary=false;};
 window.createTemplate=()=>{
   const name=document.getElementById('newTplName').value.trim();
   if(!name)return alert('請輸入模板名稱');
   const type=document.getElementById('newTplType').value;
-  // 固定 3 個正餐（移除餐數選擇後統一預設 3）
-  const MEAL_COUNT=3;
-  const tpl={id:'tpl_'+Date.now(),name,type,meals:{},dayType:type};
-  for(let i=1;i<=MEAL_COUNT;i++)tpl.meals['m'+i]={carb:[],prot:[],fat:[]};
+  const fromDiary=window._saveAsTplFromDiary;
+  window._saveAsTplFromDiary=false;
+  const tpl={id:'tpl_'+Date.now(),name,type,meals:{},dayType:type,extras:[]};
+
+  if(fromDiary&&selDate&&diaryEntries[selDate]){
+    // 從當天日記複製內容到新模板
+    const entry=diaryEntries[selDate];
+    Object.keys(entry.meals||{}).forEach(mk=>{
+      if(!mk.startsWith('m'))return;
+      tpl.meals[mk]={carb:[],prot:[],fat:[]};
+      ['carb','prot','fat'].forEach(t=>{
+        (entry.meals[mk][t]||[]).forEach(item=>tpl.meals[mk][t].push(JSON.parse(JSON.stringify(item))));
+      });
+    });
+    // 確保至少有 m1~m3
+    for(let i=1;i<=3;i++)if(!tpl.meals['m'+i])tpl.meals['m'+i]={carb:[],prot:[],fat:[]};
+    // 複製 extras
+    (entry.extras||[]).forEach(ex=>{
+      tpl.extras.push({key:ex.key,label:ex.label,after:ex.after});
+      tpl.meals[ex.key]={carb:[],prot:[],fat:[]};
+      const md=entry.meals[ex.key]||{carb:[],prot:[],fat:[]};
+      ['carb','prot','fat'].forEach(t=>{
+        (md[t]||[]).forEach(item=>tpl.meals[ex.key][t].push(JSON.parse(JSON.stringify(item))));
+      });
+    });
+  } else {
+    // 固定 3 個正餐（移除餐數選擇後統一預設 3）
+    const MEAL_COUNT=3;
+    for(let i=1;i<=MEAL_COUNT;i++)tpl.meals['m'+i]={carb:[],prot:[],fat:[]};
+  }
+
   templates.push(tpl);
   scheduleSave('templates',templates);
   closeNewTplModal();
   curTplId=tpl.id;
   renderTemplateSection();
+  if(fromDiary)showToast?.('已將今天的飲食生成為模板「'+name+'」');
 };
 
 function tplTypeLabel(type){
@@ -2614,6 +2642,63 @@ window.openApplyModal=()=>{
   document.getElementById('applyTplModal').classList.add('show');
 }
 window.closeApplyModal=()=>document.getElementById('applyTplModal').classList.remove('show');
+window.copyYesterday=()=>{
+  if(!selDate)return;
+  const base=new Date(selDate+'T00:00:00');
+  base.setDate(base.getDate()-1);
+  const yk=base.getFullYear()+'-'+String(base.getMonth()+1).padStart(2,'0')+'-'+String(base.getDate()).padStart(2,'0');
+  const ySrc=diaryEntries[yk];
+  if(!ySrc||!ySrc.meals||!Object.values(ySrc.meals).some(md=>['carb','prot','fat'].some(t=>(md[t]||[]).length>0))){
+    alert('昨天（'+yk.replace(/-/g,'/')+'）沒有飲食紀錄可複製');
+    return;
+  }
+  const today=getDiaryEntry(selDate);
+  const hasExisting=Object.values(today.meals||{}).some(md=>['carb','prot','fat'].some(t=>(md[t]||[]).length>0))||(today.extras||[]).length>0;
+  if(hasExisting&&!confirm('今天已有飲食紀錄，複製昨天的內容將會疊加在現有紀錄之後，確定要繼續嗎？'))return;
+  // 深拷貝昨天的 meals
+  if(!today.meals)today.meals={};
+  Object.keys(ySrc.meals).forEach(mk=>{
+    if(!mk.startsWith('m'))return; // extras 另外處理
+    if(!today.meals[mk])today.meals[mk]={carb:[],prot:[],fat:[]};
+    ['carb','prot','fat'].forEach(type=>{
+      (ySrc.meals[mk][type]||[]).forEach(item=>today.meals[mk][type].push(JSON.parse(JSON.stringify(item))));
+    });
+  });
+  // 複製 extras（建立新 key，避免衝突）
+  if(!today.extras)today.extras=[];
+  (ySrc.extras||[]).forEach(yEx=>{
+    const newKey='extra_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    let label;
+    if((yEx.label||'').match(/^額外餐\s*\d+$/)){
+      label='額外餐 '+nextExtraNumber(today.extras);
+    } else {
+      label=yEx.label;
+    }
+    today.extras.push({key:newKey,label,after:yEx.after??1});
+    today.meals[newKey]={carb:[],prot:[],fat:[]};
+    const yMd=ySrc.meals[yEx.key]||{carb:[],prot:[],fat:[]};
+    ['carb','prot','fat'].forEach(type=>{
+      (yMd[type]||[]).forEach(item=>today.meals[newKey][type].push(JSON.parse(JSON.stringify(item))));
+    });
+  });
+  saveDiary(selDate);
+  renderDiaryContent();renderCalendar();
+  showToast?.('已複製昨天的飲食紀錄');
+};
+
+window.openSaveAsTplModal=()=>{
+  if(!selDate)return;
+  const entry=diaryEntries[selDate];
+  const hasData=entry&&entry.meals&&Object.values(entry.meals).some(md=>['carb','prot','fat'].some(t=>(md[t]||[]).length>0));
+  if(!hasData){alert('今天還沒有飲食紀錄，無法生成模板');return;}
+  const nameInput=document.getElementById('newTplName');
+  if(nameInput)nameInput.value=selDate.replace(/-/g,'/')+' 的飲食';
+  const typeSel=document.getElementById('newTplType');
+  if(typeSel)typeSel.value=calcMode==='cycle'?(dayType==='high'?'high':'low'):(calcMode==='carb532'?'carb532':'normal');
+  document.getElementById('newTplModal').classList.add('show');
+  window._saveAsTplFromDiary=true;
+};
+
 window.applyTemplate=id=>{
   const tpl=templates.find(t=>t.id===id);if(!tpl||!selDate)return;
   const entry=getDiaryEntry(selDate);
@@ -2900,9 +2985,13 @@ function renderDiaryContent(){
   }
 
   const md=getDiaryItems(selDate,slot?.key||'m1');
-  dc.innerHTML=weightCard+`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+  dc.innerHTML=weightCard+`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:6px;">
     <div style="font-size:14px;font-weight:500;">${selDate.replace(/-/g,'/')}${calcMode==='cycle'?'('+(dayType==='high'?'高碳日':'低碳日')+')':''}</div>
-    <button class="btn btn-outline" style="font-size:12px;padding:6px 12px;" onclick="openApplyModal()"><i class="ti ti-template" style="font-size:13px;margin-right:4px;"></i>套用模板</button>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn btn-outline" style="font-size:12px;padding:6px 12px;" onclick="copyYesterday()"><i class="ti ti-copy" style="font-size:13px;margin-right:4px;"></i>複製昨天</button>
+      <button class="btn btn-outline" style="font-size:12px;padding:6px 12px;" onclick="openSaveAsTplModal()"><i class="ti ti-device-floppy" style="font-size:13px;margin-right:4px;"></i>生成模板</button>
+      <button class="btn btn-outline" style="font-size:12px;padding:6px 12px;" onclick="openApplyModal()"><i class="ti ti-template" style="font-size:13px;margin-right:4px;"></i>套用模板</button>
+    </div>
   </div>
   <div class="card" id="diary-top-bars">${diaryModeSummaryHTML(day,dayType)}${barHTML(tC,day.carb,'bar-carb','碳水')+barHTML(tP,day.prot,'bar-prot','蛋白質')+barHTML(tF,day.fat,'bar-fat','脂肪')+barHTML(tK,day.kcal,'bar-kcal','熱量',' kcal')}</div>
   <div class="card"><div class="meal-tabs">${tabsHTML}</div>${extraPos}${renderFoodSectionHTML('carb','碳水來源','badge-carb',md,'diary')+renderFoodSectionHTML('prot','蛋白質來源','badge-prot',md,'diary')+renderFoodSectionHTML('fat','脂肪來源','badge-fat',md,'diary')}</div>`;
