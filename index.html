@@ -1841,6 +1841,8 @@ window.apply532CarbFromDiary=function(newCarb){
     const btn=document.getElementById('diary-c532-apply-btn');
     if(btn){btn.textContent='✓ 已套用（'+newCarb+'g）';btn.disabled=true;btn.style.opacity='0.6';}
   },50);
+  // 持久化到 Firestore/localStorage
+  scheduleSave('calcSettings',gatherCalcSettings());
   showToast('碳水目標已更新為 '+newCarb+'g（第 '+newCount+' 次調整）✓');
 };
 
