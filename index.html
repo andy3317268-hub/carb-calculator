@@ -1244,7 +1244,7 @@ function loadLocalData(){
   try{
     const calc=localStorage.getItem('local_calcSettings');if(calc)applyCalcSettings(JSON.parse(calc));
     const tpl=localStorage.getItem('local_templates');if(tpl)templates=JSON.parse(tpl);
-    const cfg=localStorage.getItem('local_diaryConfig');if(cfg){const d=JSON.parse(cfg);highDays=new Set(d.highDays||[0,3]);}
+    const cfg=localStorage.getItem('local_diaryConfig');if(cfg){const d=JSON.parse(cfg);highDays=new Set(d.highDays||[1,4]);}
     const cf=localStorage.getItem('local_customFoods');if(cf)customFoods=JSON.parse(cf);
     const de=localStorage.getItem('diaryEntries');if(de)diaryEntries=JSON.parse(de);
     const pd=localStorage.getItem('local_petData');if(pd){petData=JSON.parse(pd);migratePetData();}
@@ -1265,7 +1265,7 @@ async function loadCloudData(){
     const tplDoc=await getDoc(doc(db,'users',currentUser.uid,'templates','data'));
     if(tplDoc.exists())templates=JSON.parse(tplDoc.data().value);
     const cfgDoc=await getDoc(doc(db,'users',currentUser.uid,'diaryConfig','data'));
-    if(cfgDoc.exists()){const d=JSON.parse(cfgDoc.data().value);highDays=new Set(d.highDays||[0,3]);}
+    if(cfgDoc.exists()){const d=JSON.parse(cfgDoc.data().value);highDays=new Set(d.highDays||[1,4]);}
     const foodDoc=await getDoc(doc(db,'users',currentUser.uid,'customFoods','data'));
     if(foodDoc.exists())customFoods=JSON.parse(foodDoc.data().value);
     const snap=await getDocs(collection(db,'users',currentUser.uid,'diaryEntries'));
@@ -1410,7 +1410,7 @@ let selBmrTier=null;   // BMR 模式的活動等級（1–5）
 const bmrActivityCoeff={1:1.2,2:1.375,3:1.55,4:1.725,5:1.9};
 let templates=[];
 let curTplId=null;
-let highDays=new Set([0,3]);
+let highDays=new Set([1,4]);
 let curCalDate=new Date(),selDate=null;
 let diaryEntries={};
 let curDiaryMeal=null;
@@ -1745,14 +1745,26 @@ window.calc532AdjustInDiary=function(){
   const curW=parseFloat(document.getElementById('diary-weight-input')?.value);
   const wdk=selDate||todayKey();
 
-  // 找上週體重
+  // 找上週體重：從「本週」所在週的上一週（週日到週六）最新一筆
   function findPrevW(){
     const base=new Date(wdk+'T00:00:00');
-    for(let i=7;i<=14;i++){
-      const d=new Date(base);d.setDate(base.getDate()-i);
-      const dk=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-      if(weightLogs[dk]!=null)return weightLogs[dk];
-    }
+    const dow=base.getDay();
+    const thisSun=new Date(base);thisSun.setDate(base.getDate()-dow);thisSun.setHours(0,0,0,0);
+    const lastSun=new Date(thisSun);lastSun.setDate(thisSun.getDate()-7);
+    const lastSat=new Date(thisSun);lastSat.setDate(thisSun.getDate()-1);
+    const fromStr=lastSun.toISOString().slice(0,10);
+    const toStr=lastSat.toISOString().slice(0,10);
+    const entries=Object.entries(weightLogs||{})
+      .filter(([dk])=>dk>=fromStr&&dk<=toStr)
+      .sort((a,b)=>b[0].localeCompare(a[0]));
+    if(entries.length)return entries[0][1];
+    // 找不到再往前一週
+    const prevSun=new Date(lastSun);prevSun.setDate(lastSun.getDate()-7);
+    const prevStr=prevSun.toISOString().slice(0,10);
+    const entries2=Object.entries(weightLogs||{})
+      .filter(([dk])=>dk>=prevStr&&dk<fromStr)
+      .sort((a,b)=>b[0].localeCompare(a[0]));
+    if(entries2.length)return entries2[0][1];
     return null;
   }
   const prevW=(()=>{
@@ -1933,8 +1945,17 @@ window.calc532Adjust=function(){
         最低安全碳水：${minCarb}g（體重×1.8）`;
     }
   } else {
-    color='#FCE4EC';icon='📊';title='體重上升，請檢視飲食';
-    body=`本週體重上升 ${Math.abs(lossKg).toFixed(2)}kg，請確認飲食記錄是否準確，並排除水腫等因素。`;
+    // 體重上升：也建議降低碳水（跟「不到0.5%」一樣的處理）
+    const proposed=baseCarb-20;
+    newCarb=Math.max(minCarb,proposed);
+    if(proposed<=minCarb){
+      color='#FCE4EC';icon='📊';title='體重上升，已達碳水最低安全值';
+      body=`本週體重上升 ${Math.abs(lossKg).toFixed(2)}kg。建議降碳水，但已達最低安全值 <strong>${minCarb}g</strong>（體重×1.8）。<br>建議增加活動量或重新評估飲食內容。`;
+      newCarb=null;
+    } else {
+      color='#FCE4EC';icon='📊';title='體重上升，建議降低碳水 20g';
+      body=`本週體重上升 ${Math.abs(lossKg).toFixed(2)}kg，請確認飲食記錄是否準確，並排除水腫等因素。<br>碳水：<strong>${baseCarb}g → ${newCarb}g</strong>，蛋白質脂肪不變。<br>最低安全碳水：${minCarb}g（體重×1.8）`;
+    }
   }
 
   // 自動套用新碳水到日記目標
@@ -2546,7 +2567,7 @@ function renderDiary(){
 }
 function renderWeekdayGrid(){
   const g=document.getElementById('weekdayGrid');g.innerHTML='';
-  ['一','二','三','四','五','六','日'].forEach((n,i)=>{const b=document.createElement('button');b.className='weekday-btn'+(highDays.has(i)?' is-high':'');b.textContent='週'+n;b.onclick=()=>{if(highDays.has(i))highDays.delete(i);else highDays.add(i);scheduleSave('diaryConfig',{highDays:[...highDays]});renderDiary();};g.appendChild(b);});
+  ['日','一','二','三','四','五','六'].forEach((n,i)=>{const b=document.createElement('button');b.className='weekday-btn'+(highDays.has(i)?' is-high':'');b.textContent='週'+n;b.onclick=()=>{if(highDays.has(i))highDays.delete(i);else highDays.add(i);scheduleSave('diaryConfig',{highDays:[...highDays]});renderDiary();};g.appendChild(b);});
 }
 let calExpanded=false;
 window.toggleCalView=()=>{
@@ -2918,14 +2939,29 @@ function renderDiaryContent(){
   const wdk=selDate||todayKey();
   const wVal=weightLogs[wdk]||'';
 
-  // 找上週同天體重（往前7天最近一筆）
+  // 找上週體重：從「選定日期所在週」的上一週（週日到週六）最近一筆
   function findPrevWeekWeight(){
     const base=new Date((selDate||todayKey())+'T00:00:00');
-    for(let i=7;i<=14;i++){
-      const d=new Date(base);d.setDate(base.getDate()-i);
-      const dk=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-      if(weightLogs[dk]!=null)return{dk,val:weightLogs[dk]};
-    }
+    const dow=base.getDay(); // 0=日,1=一...6=六
+    // 本週週日（週起始）
+    const thisSun=new Date(base);thisSun.setDate(base.getDate()-dow);thisSun.setHours(0,0,0,0);
+    // 上週週日~週六
+    const lastSun=new Date(thisSun);lastSun.setDate(thisSun.getDate()-7);
+    const lastSat=new Date(thisSun);lastSat.setDate(thisSun.getDate()-1);
+    const fromStr=lastSun.toISOString().slice(0,10);
+    const toStr=lastSat.toISOString().slice(0,10);
+    // 找上週範圍內最新一筆
+    const entries=Object.entries(weightLogs||{})
+      .filter(([dk])=>dk>=fromStr&&dk<=toStr)
+      .sort((a,b)=>b[0].localeCompare(a[0]));
+    if(entries.length)return{dk:entries[0][0],val:entries[0][1]};
+    // 找不到就往前多找一週
+    const prevSun=new Date(lastSun);prevSun.setDate(lastSun.getDate()-7);
+    const prevStr=prevSun.toISOString().slice(0,10);
+    const entries2=Object.entries(weightLogs||{})
+      .filter(([dk])=>dk>=prevStr&&dk<fromStr)
+      .sort((a,b)=>b[0].localeCompare(a[0]));
+    if(entries2.length)return{dk:entries2[0][0],val:entries2[0][1]};
     return null;
   }
   const prevWEntry=findPrevWeekWeight();
