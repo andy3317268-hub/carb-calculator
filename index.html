@@ -1985,6 +1985,8 @@ function gatherCalcSettings(){
     customFat:document.getElementById('customFat').value,
     bmrTier:selBmrTier,
     bmrCoeff:document.getElementById('bmrCoeffInput')?document.getElementById('bmrCoeffInput').value:'',
+    bmrResult:window.bmrResult||null,
+    c532BaseCarb:window.c532BaseCarb||null,
   };
 }
 window.updateSliderBounds=function(){
@@ -2116,11 +2118,28 @@ function applyCalcSettings(d){
   // 6. 缺口
   if(d.deficit)selectDeficit(d.deficit);
   clampDays();
-  // 7. 滑桿和最終重算（等 DOM settle）
+  // 7. 恢復 bmrResult（碳水漸降的手動調整狀態）
+  if(d.bmrResult)window.bmrResult=d.bmrResult;
+  if(d.c532BaseCarb)window.c532BaseCarb=d.c532BaseCarb;
+  // 8. 滑桿和最終重算（等 DOM settle）
   setTimeout(()=>{
     if(d.carbSlider)document.getElementById('carbSlider').value=d.carbSlider;
     if(d.fatSlider)document.getElementById('fatSlider').value=d.fatSlider;
-    if(calcMode==='cycle')recalc(); else recalcBMR();
+    if(calcMode==='cycle')recalc();
+    else{
+      recalcBMR();
+      // 若有已儲存的 carb532 調整結果，重新渲染顯示（不覆蓋手動降低的值）
+      if(d.bmrResult&&d.bmrResult.carb532&&d.mode==='carb532'){
+        const r=d.bmrResult.carb532;
+        const dcEl=document.getElementById('c532-dc');
+        const dkEl=document.getElementById('c532-dk');
+        const adjEl=document.getElementById('c532-adjust-count');
+        if(dcEl)dcEl.textContent=r.carb+'g';
+        if(dkEl)dkEl.textContent=r.kcal+' kcal';
+        if(adjEl)adjEl.textContent=r.adjustCount>0?'已降低 '+r.adjustCount+' 次':'';
+        document.getElementById('carb532ResultCard').style.display='block';
+      }
+    }
   },80);
 }
 function resultSummaryHTML(){
@@ -4761,6 +4780,28 @@ const BUILTIN_EXERCISES=[
 function getAllExercises(){return [...BUILTIN_EXERCISES,...exercises];}
 function findEx(id){return getAllExercises().find(e=>e.id===id);}
 
+// 找某動作最近一次的 sets 紀錄（排除今天）
+function findRecentSets(exId){
+  const today=wlogDate;
+  // 把 workoutLogs 的日期排序（由近到遠）
+  const dates=Object.keys(workoutLogs).filter(dk=>dk!==today).sort().reverse();
+  for(const dk of dates){
+    const log=workoutLogs[dk];
+    if(!log||!log.exercises)continue;
+    const found=log.exercises.find(e=>e.exId===exId);
+    if(found&&found.sets&&found.sets.length>0){
+      // 深拷貝 sets 回來
+      return found.sets.map(s=>({
+        weight:s.weight||'',
+        reps:s.reps||'',
+        unit:s.unit||'kg',
+      }));
+    }
+  }
+  return null;
+}
+
+
 // -------- escH（若無）--------
 if(!window.escH){window.escH=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
@@ -4883,7 +4924,7 @@ function renderWorkoutLog(el){
   }
 
   h+=`<div class="card" style="margin-top:10px;"><label class="sec-label">訓練備註</label><textarea class="wlog-note-input" rows="2" placeholder="今天的感受、特殊事項…" onchange="updateWlogNote(this.value)">${escH(log.note||'')}</textarea></div>`;
-  h+=`<button class="btn wlog-save-btn" onclick="saveWlogForDate()"><i class="ti ti-device-floppy" style="vertical-align:-2px;margin-right:4px;"></i>儲存今日訓練</button>`;
+  // 自動儲存，不需要手動儲存按鈕
   el.innerHTML=h;
 }
 let wlogCalMon=null; // 目前日曆顯示的週一（Date 物件）
@@ -4909,17 +4950,26 @@ window.wlogShiftDate=function(delta){
   wlogCalMon=null; // 重算週一
   renderWorkoutTab();
 };
-window.updateSet=function(ei,si,field,val){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei]||!log.exercises[ei].sets[si])return;log.exercises[ei].sets[si][field]=val;};
-window.addSet=function(ei){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei])return;const lastUnit=(log.exercises[ei].sets.length>0?log.exercises[ei].sets[log.exercises[ei].sets.length-1].unit:null)||'kg';log.exercises[ei].sets.push({weight:'',reps:'',unit:lastUnit});renderWorkoutTab();};
-window.removeSet=function(ei,si){const log=workoutLogs[wlogDate];if(!log)return;log.exercises[ei].sets.splice(si,1);renderWorkoutTab();};
-window.updateExNote=function(ei,val){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei])return;log.exercises[ei].note=val;};
-window.toggleSetUnit=function(ei,si){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei]||!log.exercises[ei].sets[si])return;const s=log.exercises[ei].sets[si];s.unit=(s.unit||'kg')==='kg'?'lb':'kg';renderWorkoutTab();};
-window.removeWlogExercise=function(ei){const log=workoutLogs[wlogDate];if(!log)return;log.exercises.splice(ei,1);renderWorkoutTab();};
+window.updateSet=function(ei,si,field,val){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei]||!log.exercises[ei].sets[si])return;log.exercises[ei].sets[si][field]=val;autoSaveWlog();};
+window.addSet=function(ei){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei])return;const lastUnit=(log.exercises[ei].sets.length>0?log.exercises[ei].sets[log.exercises[ei].sets.length-1].unit:null)||'kg';log.exercises[ei].sets.push({weight:'',reps:'',unit:lastUnit});renderWorkoutTab();autoSaveWlog();};
+window.removeSet=function(ei,si){const log=workoutLogs[wlogDate];if(!log)return;log.exercises[ei].sets.splice(si,1);renderWorkoutTab();autoSaveWlog();};
+window.updateExNote=function(ei,val){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei])return;log.exercises[ei].note=val;autoSaveWlog();};
+window.toggleSetUnit=function(ei,si){const log=workoutLogs[wlogDate];if(!log||!log.exercises[ei]||!log.exercises[ei].sets[si])return;const s=log.exercises[ei].sets[si];s.unit=(s.unit||'kg')==='kg'?'lb':'kg';renderWorkoutTab();autoSaveWlog();};
+window.removeWlogExercise=function(ei){const log=workoutLogs[wlogDate];if(!log)return;log.exercises.splice(ei,1);renderWorkoutTab();autoSaveWlog();};
 window.updateWlogNote=function(val){if(!workoutLogs[wlogDate])workoutLogs[wlogDate]={planId:null,exercises:[],note:''};workoutLogs[wlogDate].note=val;};
 window.saveWlogForDate=async function(){
   if(!workoutLogs[wlogDate])workoutLogs[wlogDate]={planId:null,exercises:[],note:''};
   saveWorkoutLocal();await saveWorkoutLog(wlogDate);showToast('訓練紀錄已儲存 ✓');
 };
+let _autoSaveTimer=null;
+function autoSaveWlog(){
+  saveWorkoutLocal(); // localStorage 即時存
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer=setTimeout(async()=>{
+    if(!workoutLogs[wlogDate])return;
+    await saveWorkoutLog(wlogDate);
+  },1500); // 1.5秒後同步到雲端
+}
 
 // ======== 選動作 Modal ========
 window.openPickExModal=function(){
@@ -4977,21 +5027,27 @@ window.closeSetsModal=function(){
 };
 window.confirmSets=function(){
   const n=Math.max(1,Math.min(20,parseInt(document.getElementById('pickSetsInput').value)||3));
-  const makeSets=()=>Array.from({length:n},()=>({weight:'',reps:'',note:''}));
+  // 嘗試帶入最近紀錄；若沒有則建空組
+  const makeSets=(exId)=>{
+    const recent=findRecentSets(exId);
+    if(recent&&recent.length>0)return recent;
+    return Array.from({length:n},()=>({weight:'',reps:'',unit:'kg'}));
+  };
   if(!workoutLogs[wlogDate])workoutLogs[wlogDate]={planId:null,exercises:[],note:''};
   if(_pendingPlanExIds){
     // 批次：整批動作統一組數
     workoutLogs[wlogDate].exercises=_pendingPlanExIds.map(eid=>{
-      const ex=findEx(eid);return{exId:eid,name:ex?ex.name:eid,sets:makeSets()};
+      const ex=findEx(eid);return{exId:eid,name:ex?ex.name:eid,sets:makeSets(eid)};
     });
   } else if(_pendingExId){
     // 單動作
     const ex=findEx(_pendingExId);
-    workoutLogs[wlogDate].exercises.push({exId:_pendingExId,name:ex?ex.name:_pendingExId,sets:makeSets()});
+    workoutLogs[wlogDate].exercises.push({exId:_pendingExId,name:ex?ex.name:_pendingExId,sets:makeSets(_pendingExId)});
   }
   document.getElementById('pickSetsModal').classList.remove('show');
   _pendingExId=null;_pendingPlanExIds=null;
   renderWorkoutTab();
+  autoSaveWlog();
 };
 
 window.selectWlogPlan=function(planId){
