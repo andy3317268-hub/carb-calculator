@@ -2567,7 +2567,7 @@ function renderDiary(){
 }
 function renderWeekdayGrid(){
   const g=document.getElementById('weekdayGrid');g.innerHTML='';
-  ['日','一','二','三','四','五','六'].forEach((n,i)=>{const b=document.createElement('button');b.className='weekday-btn'+(highDays.has(i)?' is-high':'');b.textContent='週'+n;b.onclick=()=>{if(highDays.has(i))highDays.delete(i);else highDays.add(i);scheduleSave('diaryConfig',{highDays:[...highDays]});renderDiary();};g.appendChild(b);});
+  const wdOrder=[6,0,1,2,3,4,5];const wdLabel=['日','一','二','三','四','五','六'];wdOrder.forEach((idx,pos)=>{const b=document.createElement('button');b.className='weekday-btn'+(highDays.has(idx)?' is-high':'');b.textContent='週'+wdLabel[pos];b.onclick=()=>{if(highDays.has(idx))highDays.delete(idx);else highDays.add(idx);scheduleSave('diaryConfig',{highDays:[...highDays]});renderDiary();};g.appendChild(b);});
 }
 let calExpanded=false;
 window.toggleCalView=()=>{
@@ -2592,13 +2592,13 @@ function renderCalendar(){
   const grid=document.getElementById('calGrid');
   const labels=document.getElementById('calDayLabels');
   if(!grid)return;
-  labels.innerHTML=['一','二','三','四','五','六','日'].map(d=>'<div class="cal-day-label">'+d+'</div>').join('');
+  labels.innerHTML=['日','一','二','三','四','五','六'].map(d=>'<div class="cal-day-label">'+d+'</div>').join('');
   grid.innerHTML='';
   if(calExpanded){
     // 月視圖
     const y=curCalDate.getFullYear(),m=curCalDate.getMonth();
     document.getElementById('calTitle').textContent=y+'年 '+(m+1)+'月';
-    const first=new Date(y,m,1),startDow=dayOfWeek(first),days=new Date(y,m+1,0).getDate();
+    const first=new Date(y,m,1),startDow=first.getDay(),days=new Date(y,m+1,0).getDate(); // 0=日
     for(let i=0;i<startDow;i++){const el=document.createElement('div');el.className='cal-day empty';grid.appendChild(el);}
     for(let d=1;d<=days;d++){
       const date=new Date(y,m,d),dk=dateKey(date),isH=isHighDay(date);
@@ -2616,7 +2616,7 @@ function renderCalendar(){
   } else {
     // 週視圖：找當週週一
     const ref=new Date(curCalDate.getFullYear(),curCalDate.getMonth(),curCalDate.getDate());
-    const dow=dayOfWeek(ref); // 0=週一
+    const dow=ref.getDay(); // 0=週日
     const weekStart=new Date(ref.getFullYear(),ref.getMonth(),ref.getDate()-dow);
     const weekEnd=new Date(weekStart.getFullYear(),weekStart.getMonth(),weekStart.getDate()+6);
     // 標題：同月份只顯示一個月，跨月顯示兩個
@@ -4909,15 +4909,14 @@ function renderWorkoutLog(el){
   // ── 日曆區 ──────────────────────────────────────
   const today=todayKey();
   // 計算本週週一
-  function getWeekMon(dk){
+  function getWeekSun(dk){
     const d=new Date(dk+'T00:00:00');
     const dow=d.getDay();// 0=日
-    const diff=dow===0?-6:1-dow;
-    const m=new Date(d);m.setDate(d.getDate()+diff);
-    return m;
+    const sun=new Date(d);sun.setDate(d.getDate()-dow); // 往前到週日
+    return sun;
   }
-  const weekMon=wlogCalMon||(()=>{const m=getWeekMon(wlogDate);wlogCalMon=m;return m;})();
-  const dayLabels=['一','二','三','四','五','六','日'];
+  const weekMon=wlogCalMon||(()=>{const m=getWeekSun(wlogDate);wlogCalMon=m;return m;})();
+  const dayLabels=['日','一','二','三','四','五','六'];
   h+=`<div class="card" style="margin-bottom:1rem;padding:1rem;">`;
   // 日曆頭：週導航
   const monStr=weekMon.getFullYear()+'年 '+(weekMon.getMonth()+1)+'月';
