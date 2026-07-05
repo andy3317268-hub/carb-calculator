@@ -1583,23 +1583,32 @@ window.recalcBMR=function(){
     const dc=Math.round(target*0.50/4);
     const dp=Math.round(target*0.30/4);
     const df=Math.round(target*0.20/9);
-    const set=(id,v,u)=>{const el=document.getElementById(id);if(el)el.textContent=v+(u||'g');};
-    set('c532-dc',dc);set('c532-dp',dp);set('c532-df',df);set('c532-dk',target,' kcal');
-    document.getElementById('carb532ResultCard').style.display='block';
+    // ── 保留手動調整狀態：只有 adjustCount===0 時才重置碳水 ──
     window.bmrResult=window.bmrResult||{};
-    window.bmrResult.carb532={carb:dc,prot:dp,fat:df,kcal:target};
-    // 儲存初始碳水和蛋白質脂肪供調整用
-    window.c532BaseCarb=dc;
+    const prevCarb532=window.bmrResult.carb532||{};
+    const prevAdjCount=prevCarb532.adjustCount||0;
+    // 蛋白質脂肪始終用最新計算值；碳水若已手動調整則保留
+    const finalCarb=prevAdjCount>0?(prevCarb532.carb||dc):dc;
+    const finalKcal=prevAdjCount>0?Math.round(finalCarb*4+dp*4+df*9):target;
+    window.bmrResult.carb532={carb:finalCarb,prot:dp,fat:df,kcal:finalKcal,adjustCount:prevAdjCount};
+    // 只有沒調整過時才重置 c532BaseCarb
+    if(prevAdjCount===0){
+      window.c532BaseCarb=dc;
+    }
     window.c532Prot=dp;
     window.c532Fat=df;
     window.c532Kcal=target;
-    // 重置調整次數（重新設定基礎值時歸零）
-    window.bmrResult.carb532.adjustCount=0;
+    const set=(id,v,u)=>{const el=document.getElementById(id);if(el)el.textContent=v+(u||'g');};
+    set('c532-dc',finalCarb);set('c532-dp',dp);set('c532-df',df);set('c532-dk',finalKcal,' kcal');
+    document.getElementById('carb532ResultCard').style.display='block';
+    // 次數顯示
     const elN=document.getElementById('c532-adjust-count');
-    if(elN)elN.textContent='';
-    // 清除上次調整結果
-    const adjEl=document.getElementById('c532-adjust-result');
-    if(adjEl)adjEl.style.display='none';
+    if(elN)elN.textContent=prevAdjCount>0?'已降低 '+prevAdjCount+' 次':'';
+    // 清除上次調整結果提示（只在未調整時清）
+    if(prevAdjCount===0){
+      const adjEl=document.getElementById('c532-adjust-result');
+      if(adjEl)adjEl.style.display='none';
+    }
     // 自動更新體重顯示區（不觸發完整計算）
     setTimeout(()=>{
       if(typeof calc532Adjust==='function'){
