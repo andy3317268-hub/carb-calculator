@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8"/>
+  <meta name="referrer" content="no-referrer"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -6388,7 +6389,7 @@ function renderExLibList(q){
         ${!e.builtin?`<button class="exlib-edit-btn" onclick="openExModal('${e.id}')">編輯</button><button class="exlib-del-btn" onclick="deleteExercise('${e.id}')">刪除</button>`:''}
       </div>
     </div>
-    ${e.gifUrl?`<div class="exlib-gif-wrap" id="gif-${e.id}" style="display:none;"><img src="" alt="${escH(e.name)}" style="width:100%;max-width:320px;border-radius:6px;display:block;" loading="lazy"/><button onclick="closeExGif('${e.id}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:12px;">✕</button></div>`:''}
+    ${e.gifUrl?`<div class="exlib-gif-wrap" id="gif-${e.id}" style="display:none;"><img src="" alt="${escH(e.name)}" style="width:100%;max-width:320px;border-radius:6px;display:block;" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous"/><button onclick="closeExGif('${e.id}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:12px;">✕</button></div>`:''}
   </div>`).join('');
 }
 
