@@ -6389,7 +6389,7 @@ function renderExLibList(q){
         ${!e.builtin?`<button class="exlib-edit-btn" onclick="openExModal('${e.id}')">編輯</button><button class="exlib-del-btn" onclick="deleteExercise('${e.id}')">刪除</button>`:''}
       </div>
     </div>
-    ${e.gifUrl?`<div class="exlib-gif-wrap" id="gif-${e.id}" style="display:none;"><img src="" alt="${escH(e.name)}" style="width:100%;max-width:320px;border-radius:6px;display:block;" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous"/><button onclick="closeExGif('${e.id}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:12px;">✕</button></div>`:''}
+    ${e.gifUrl?`<div class="exlib-gif-wrap" id="gif-${e.id}" style="display:none;"><img src="" alt="${escH(e.name)}" style="width:100%;max-width:320px;border-radius:6px;display:block;" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/><div style="display:none;align-items:center;justify-content:center;height:80px;color:#999;font-size:12px;flex-direction:column;gap:4px;"><span>⚠️ 無法載入 GIF</span><a href="${ex2&&ex2.gifUrl||''}" target="_blank" style="color:var(--c-accent);font-size:11px;">在新分頁開啟 ↗</a></div><button onclick="closeExGif('${e.id}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:12px;">✕</button></div>`:''}
   </div>`).join('');
 }
 
