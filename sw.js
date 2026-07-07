@@ -1,83 +1,78 @@
-const CACHE = 'carb-v1';
-const CDN_CACHE = 'carb-cdn-v1';
+// 碳循環計算機 — Service Worker
+// 版本號:每次更新內容時改這個數字,使用者就會自動拿到新版
+const CACHE_NAME = 'carb-calc-v1';
 
-const PRECACHE = [
+// 要預先快取的核心檔案
+const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icons/icon.svg',
-  './icons/icon-maskable.svg',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
-// Firebase data/auth API hosts — bypass SW entirely so they always hit the network
-const BYPASS_HOSTS = [
-  'firestore.googleapis.com',
-  'identitytoolkit.googleapis.com',
-  'securetoken.googleapis.com',
-  'firebaseinstallations.googleapis.com',
-];
-
-// CDN static assets (versioned URLs, safe to cache-first)
-const CDN_HOSTS = [
-  'cdn.jsdelivr.net',
-  'www.gstatic.com',
-];
-
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE)));
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(k => k !== CACHE && k !== CDN_CACHE).map(k => caches.delete(k))
-      )
-    )
+// 安裝:預快取核心檔案
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(CORE_ASSETS))
+      .then(() => self.skipWaiting())
+      .catch((err) => console.warn('SW install cache failed:', err))
   );
-  self.clients.claim();
 });
 
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-
-  const url = new URL(e.request.url);
-
-  // Bypass Firebase API calls
-  if (BYPASS_HOSTS.includes(url.hostname)) return;
-
-  // CDN resources: cache-first (URL contains version, content never changes)
-  if (CDN_HOSTS.includes(url.hostname)) {
-    e.respondWith(
-      caches.open(CDN_CACHE).then(c =>
-        c.match(e.request).then(cached => {
-          if (cached) return cached;
-          return fetch(e.request).then(res => {
-            if (res.ok) c.put(e.request, res.clone());
-            return res;
-          });
-        })
+// 啟用:清掉舊版快取
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
       )
-    );
-    return;
+    ).then(() => self.clients.claim())
+  );
+});
+
+// 抓取策略:
+// - 對 Firebase / Google / 第三方 API:一律走網路(不快取,避免登入和資料同步出問題)
+// - 對自己的靜態檔案:network-first,失敗才用快取(確保拿到最新版,離線時可用)
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+
+  // 只處理 GET
+  if (req.method !== 'GET') return;
+
+  const url = new URL(req.url);
+
+  // 第三方網域(Firebase、Google、CDN 等)直接走網路,不攔截
+  const isThirdParty = url.origin !== self.location.origin;
+  if (isThirdParty) {
+    return; // 讓瀏覽器正常處理,不快取
   }
 
-  // App navigation: network-first, fallback to cached index.html
-  if (e.request.mode === 'navigate') {
-    e.respondWith(
-      fetch(e.request)
-        .then(res => {
-          caches.open(CACHE).then(c => c.put(e.request, res.clone()));
-          return res;
-        })
-        .catch(() => caches.match('./index.html'))
-    );
-    return;
-  }
-
-  // Other same-origin assets: cache-first
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+  // 自家檔案:network-first
+  event.respondWith(
+    fetch(req)
+      .then((networkRes) => {
+        // 成功:複製一份存快取(複製動作要在 body 被讀取前做)
+        const resClone = networkRes.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(req, resClone).catch(() => {});
+        });
+        return networkRes;
+      })
+      .catch(() => {
+        // 網路失敗(離線):回快取
+        return caches.match(req).then((cached) => {
+          if (cached) return cached;
+          // 連快取都沒有,且是頁面請求 → 回首頁
+          if (req.mode === 'navigate') {
+            return caches.match('./index.html');
+          }
+          return new Response('離線中,且此資源未被快取。', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+          });
+        });
+      })
   );
 });
