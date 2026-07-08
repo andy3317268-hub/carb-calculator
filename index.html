@@ -6317,11 +6317,9 @@ window.selectWlogPlan=function(planId){
 // ======== 動作庫 ========
 function renderExLib(el){
   const muscles=['all','胸','背','肩','手臂','腿','臀','核心','有氧'];
-  const equips=['all','自由重量','固定器械'];
   let h='';
   h+=`<div class="exlib-search food-lib-search"><input type="search" id="exlibQ" placeholder="搜尋動作…" oninput="filterExLib(this.value)"/></div>`;
   h+=`<div class="exlib-filter" id="exlib-filter-muscle" style="margin-bottom:4px;">${muscles.map(m=>`<button class="exlib-filter-btn${exFilterMuscle===m?' active':''}" data-val="${m}" onclick="setExFilter('${m}')">${m==='all'?'全部部位':m}</button>`).join('')}</div>`;
-  h+=`<div class="exlib-filter" id="exlib-filter-equip">${equips.map(e=>`<button class="exlib-filter-btn${exFilterEquip===e?' active':''}" data-val="${e}" onclick="setExEquip('${e}')">${e==='all'?'全部器材':e}</button>`).join('')}</div>`;
   h+=`<button class="wlog-add-exercise-btn" onclick="openExModal(null)"><i class="ti ti-plus"></i> 新增自訂動作</button>`;
   h+=`<div id="exlib-list"></div>`;
   el.innerHTML=h;
@@ -6366,7 +6364,6 @@ window.setExFilter=function(m){
 function renderExLibList(q){
   const el=document.getElementById('exlib-list');if(!el)return;
   const all=getAllExercises().filter(e=>
-    (exFilterEquip==='all'||e.equip===exFilterEquip)&&
     (exFilterMuscle==='all'||e.muscle===exFilterMuscle)&&
     (!q||e.name.toLowerCase().includes(q.toLowerCase())||((e.enName||'').toLowerCase().includes(q.toLowerCase())))
   );
@@ -6429,7 +6426,7 @@ function renderPlanList(el){
   if(editPlanId!==null){
     const isNew=editPlanId==='__new__';
     const plan=isNew?null:workoutPlans.find(p=>p.id===editPlanId);
-    h+=`<div class="wplan-editor"><div class="wplan-editor-header"><div class="wplan-editor-title">${isNew?'新增訓練計畫':'編輯訓練計畫'}</div><div style="display:flex;gap:6px;"><button class="btn btn-outline" style="font-size:13px;padding:6px 12px;" onclick="cancelEditPlan()">取消</button><button class="btn btn-green" style="font-size:13px;padding:6px 12px;" onclick="savePlan()">儲存</button></div></div><div class="custom-food-field"><label>計畫名稱</label><input type="text" id="plan-name" placeholder="例如：增肌三分化" value="${escH(plan?plan.name:'')}"/></div><div class="custom-food-field" style="margin-top:8px;"><label>計畫類型</label><select id="plan-type" onchange="renderPlanDayEditor()"><option value="week"${(plan?.type||'week')==='week'?' selected':''}>週計畫（週一～週日）</option><option value="cycle"${plan?.type==='cycle'?' selected':''}>N 日循環（不綁定星期）</option><option value="list"${plan?.type==='list'?' selected':''}>純清單（無排程）</option></select></div><div id="plan-cycle-n-row" style="display:${plan?.type==='cycle'?'block':'none'};margin-top:8px;" class="custom-food-field"><label>循環天數</label><div class="input-row"><input type="number" id="plan-cycle-n" value="${plan?.cycleN||4}" min="2" max="14" oninput="renderPlanDayEditor()"/><span class="unit">天</span></div></div><div style="margin-top:12px;" class="custom-food-field"><label style="margin-bottom:6px;display:block;">課表內容</label><div id="plan-editor-filter-muscle" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px;"></div><div id="plan-editor-filter-equip" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;"></div><div id="plan-day-editor"></div></div></div>`;
+    h+=`<div class="wplan-editor"><div class="wplan-editor-header"><div class="wplan-editor-title">${isNew?'新增訓練計畫':'編輯訓練計畫'}</div><div style="display:flex;gap:6px;"><button class="btn btn-outline" style="font-size:13px;padding:6px 12px;" onclick="cancelEditPlan()">取消</button><button class="btn btn-green" style="font-size:13px;padding:6px 12px;" onclick="savePlan()">儲存</button></div></div><div class="custom-food-field"><label>計畫名稱</label><input type="text" id="plan-name" placeholder="例如：增肌三分化" value="${escH(plan?plan.name:'')}"/></div><div class="custom-food-field" style="margin-top:8px;"><label>計畫類型</label><select id="plan-type" onchange="renderPlanDayEditor()"><option value="week"${(plan?.type||'week')==='week'?' selected':''}>週計畫（週一～週日）</option><option value="cycle"${plan?.type==='cycle'?' selected':''}>N 日循環（不綁定星期）</option><option value="list"${plan?.type==='list'?' selected':''}>純清單（無排程）</option></select></div><div id="plan-cycle-n-row" style="display:${plan?.type==='cycle'?'block':'none'};margin-top:8px;" class="custom-food-field"><label>循環天數</label><div class="input-row"><input type="number" id="plan-cycle-n" value="${plan?.cycleN||4}" min="2" max="14" oninput="renderPlanDayEditor()"/><span class="unit">天</span></div></div><div style="margin-top:12px;" class="custom-food-field"><label style="margin-bottom:6px;display:block;">課表內容</label><div class="exlib-search food-lib-search" style="margin-bottom:6px;"><input type="search" id="plan-editor-search" placeholder="搜尋動作…" oninput="_onPlanEditorSearch(this.value)"/></div><div id="plan-editor-filter-muscle" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;"></div><div id="plan-day-editor"></div></div></div>`;
     el.innerHTML=h;
     renderPlanDayEditor(plan||null);
     return;
@@ -6511,7 +6508,8 @@ window.renderPlanDayEditor=function(existPlan){
     else{planEditorChecked['pd-list']=new Set();planEditorSets['pd-list']=3;}
   }
   _renderPlanEditorFilters();
-  const allEx=getAllExercises().filter(e=>(planEditorMuscle==='all'||e.muscle===planEditorMuscle)&&(planEditorEquip==='all'||e.equip===planEditorEquip));
+  const planQ=(document.getElementById('plan-editor-search')?.value||'').toLowerCase();
+  const allEx=getAllExercises().filter(e=>(planEditorMuscle==='all'||e.muscle===planEditorMuscle)&&(!planQ||e.name.toLowerCase().includes(planQ)||((e.enName||'').toLowerCase().includes(planQ))));
   function dayBlock(containerId,label){
     const cs=planEditorChecked[containerId]||new Set();
     if(!planEditorOrder[containerId])planEditorOrder[containerId]=[...cs];
@@ -6619,14 +6617,11 @@ function _bindTagDrag(area,containerId){
 }
 function _renderPlanEditorFilters(){
   const muscles=['all','胸','背','肩','手臂','腿','臀','核心','有氧'];
-  const equips=['all','自由重量','固定器械'];
   const mEl=document.getElementById('plan-editor-filter-muscle');
-  const eEl=document.getElementById('plan-editor-filter-equip');
   if(mEl)mEl.innerHTML=muscles.map(m=>`<button class="exlib-filter-btn${planEditorMuscle===m?' active':''}" style="padding:3px 10px;font-size:12px;margin-bottom:2px;" data-val="${m}" onclick="setPlanEditorMuscle('${m}')">${m==='all'?'全部部位':m}</button>`).join('');
-  if(eEl)eEl.innerHTML=equips.map(e=>`<button class="exlib-filter-btn${planEditorEquip===e?' active':''}" style="padding:3px 10px;font-size:12px;margin-bottom:2px;" data-val="${e}" onclick="setPlanEditorEquip('${e}')">${e==='all'?'全部器材':e}</button>`).join('');
 }
 window.setPlanEditorMuscle=function(m){_collectPlanChecked();planEditorMuscle=m;document.querySelectorAll('#plan-editor-filter-muscle .exlib-filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===m));renderPlanDayEditor();};
-window.setPlanEditorEquip=function(e){_collectPlanChecked();planEditorEquip=e;document.querySelectorAll('#plan-editor-filter-equip .exlib-filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===e));renderPlanDayEditor();};
+window._onPlanEditorSearch=function(){_collectPlanChecked();renderPlanDayEditor();};
 window.savePlan=function(){
   _collectPlanChecked();
   const name=document.getElementById('plan-name').value.trim();if(!name){alert('請輸入計畫名稱');return;}
